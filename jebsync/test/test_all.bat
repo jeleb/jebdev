@@ -1,7 +1,7 @@
 echo off
 set E=..\bin\Release\FRA\jebsync.exe
 
-set local_test_path={LAMOUETTE}\DEV\jebsync\test
+set local_test_path={LAMOUETTE}\devGit\jebsync\test
 set ftp_test_host=ftpperso.free.fr
 set ftp_test_dir=/jebsync_test
 set ftp_test_user=jeanedmond.bulle
