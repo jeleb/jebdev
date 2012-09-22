@@ -1,0 +1,3 @@
+open jeanedmond.bulle:soleil@ftpperso.free.fr 
+mirror -x CVS /jebsync_test/current_test/destination current_test/destination  
+mirror -x CVS /jebsync_test/current_test/backup current_test/backup 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="jebsync-0.0.2">
+</Property><Property Name="Fichier solution" Value="C:\DEV\jebsync\jebsync-0.0.2.sln">
+</Property><Property Name="Fichier d'options utilisateur" Value="C:\DEV\jebsync\jebsync-0.0.2.suo">
+</Property><Property Name="Date" Value="mercredi 18 août 2010">
+</Property><Property Name="Time" Value="20:48">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="jebsync-0.0.2.sln" Description="Fichier correctement sauvegardé en tant que C:\DEV\jebsync\jebsync-0.0.2.sln.old">
+</Event><Event ErrorLevel="0" Project="" Source="jebsync-0.0.2.suo" Description="Fichier correctement sauvegardé en tant que C:\DEV\jebsync\jebsync-0.0.2.suo.old">
+</Event><Event ErrorLevel="0" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="Converting project file 'C:\DEV\jebsync\jebsync-0.0.2\jebsync-0.0.2.vcproj'.">
+</Event><Event ErrorLevel="1" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="This application has been updated to include settings related to the User Account Control (UAC) feature of Windows Vista. By default, when run on Windows Vista with UAC enabled, this application is marked to run with the same privileges as the process that launched it. This marking also disables the application from running with virtualization. You can change UAC related settings from the Property Pages of the project.">
+</Event><Event ErrorLevel="1" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="VCConvertEngine could not convert attribute CompileAsManaged =  under Tool VCNMakeTool.">
+</Event><Event ErrorLevel="1" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="VCConvertEngine could not convert attribute CompileAsManaged =  under Tool VCNMakeTool.">
+</Event><Event ErrorLevel="0" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="Done converting to new project file 'C:\DEV\jebsync\jebsync-0.0.2\jebsync-0.0.2.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="jebsync-0.0.2" Source="jebsync-0.0.2\jebsync-0.0.2.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="jebsync-0.0.2.sln" Description="Solution correctement convertie">
+</Event><Event ErrorLevel="3" Project="" Source="jebsync-0.0.2.sln" Description="Converted">
+</Event></UpgradeLog>

@@ -1,0 +1,6 @@
+open jeanedmond.bulle:soleil@ftpperso.free.fr
+mkdir /jebsync_test/current_test
+rm -r -f /jebsync_test/current_test
+mkdir /jebsync_test/current_test
+mirror -R -x CVS initial/destination /jebsync_test/current_test/destination
+mirror -R -x CVS initial/backup /jebsync_test/current_test/backup

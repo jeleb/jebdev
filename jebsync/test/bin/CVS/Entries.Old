@@ -1,0 +1,5 @@
+/diffdir.bat/0/dummy timestamp//
+/diffdir.bat~/0/dummy timestamp//
+/lftp.exe/0/dummy timestamp/-kb/
+/sfk.exe/0/dummy timestamp/-kb/
+D

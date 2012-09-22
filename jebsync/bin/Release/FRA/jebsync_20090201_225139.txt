@@ -1,0 +1,35 @@
+====================
+[premier traitement]
+Repertoire source      'C:\Users\Invité\tmp\lasource'
+Repertoire destination 'C:\Users\Invité\tmp\ladestination'
+Repertoire backup      'C:\Users\Invité\tmp\lebackup'
+Purge des backups apres 365 jours
+====================
+B C:\Users\Invité\tmp\lebackup\abc\ghi\jkl\mno.txt.JSYNC-20090201-225139
++ C:\Users\Invité\tmp\ladestination\abc\ghi\jkl\mno.txt
+X mno.txt.JSYNC-20070123-233723
+ERR000001: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20070123-233723' code=2
+
+X mno.txt.JSYNC-20090201-224016
+ERR000002: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-224016' code=2
+
+X mno.txt.JSYNC-20090201-224141
+ERR000003: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-224141' code=2
+
+X mno.txt.JSYNC-20090201-224356
+ERR000004: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-224356' code=2
+
+X mno.txt.JSYNC-20090201-224508
+ERR000005: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-224508' code=2
+
+X mno.txt.JSYNC-20090201-224905
+ERR000006: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-224905' code=2
+
+X mno.txt.JSYNC-20090201-225139
+ERR000007: Erreur lors de la suppresion du fichier 'mno.txt.JSYNC-20090201-225139' code=2
+
+
+fichiers de backup purges : 0
+
+Nombre d'erreurs rencontrées : 7
+

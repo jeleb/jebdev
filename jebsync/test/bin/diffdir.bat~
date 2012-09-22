@@ -1,0 +1,16 @@
+@echo off
+bin\sfk list -sincedir %1 -dir %2
+bin\sfk list -sincedir %2 -dir %1
+
+FOR /F "usebackq delims==" %%P IN (`bin\sfk list -sincedir %1 -dir %2`) DO ( 
+	echo tutu : %%P
+	EXIT /B 1
+)
+
+FOR /F "usebackq delims==" %%P IN (`bin\sfk list -sincedir %2 -dir %1`) DO (
+	echo toto : %%P
+	EXIT /B 1
+)
+
+echo OK
+exit /b 0

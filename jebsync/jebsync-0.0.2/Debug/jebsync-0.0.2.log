@@ -1,0 +1,35 @@
+﻿La génération a démarré 21/08/2010 10:56:50.
+     1>Projet "C:\DEV\jebsync\jebsync-0.0.2\jebsync-0.0.2.vcxproj" sur le nœud 2 (rebuild cible(s)).
+     1>CoreClean:
+         cd .. && nmake clean DEBUG=1
+         
+         Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
+         Copyright (C) Microsoft Corporation. Tous droits rÚservÚs.
+         
+         	del /q obj\Debug\FRA 2>nul
+         	del /q bin\Debug\FRA\jebsync.exe 2>nul
+         	del /q bin\Debug\FRA\jebsync.pdb 2>nul
+       Rebuild:
+         cd .. && nmake clean DEBUG=1 && nmake DEBUG=1
+         
+         Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
+         Copyright (C) Microsoft Corporation. Tous droits rÚservÚs.
+         
+         	del /q obj\Debug\FRA 2>nul
+         	del /q bin\Debug\FRA\jebsync.exe 2>nul
+         	del /q bin\Debug\FRA\jebsync.pdb 2>nul
+         
+         Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
+         Copyright (C) Microsoft Corporation. Tous droits rÚservÚs.
+         
+         	set include="C:\Program Files\Microsoft SDKs\Windows\v7.1\include";"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include";"libcurl-7.19.3\include"
+         	"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\cl.exe" /c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /I"C:\Program Files\Microsoft SDKs\Windows\v7.1\include" /I"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"libcurl-7.19.3\include" /Fdbin\Debug\FRA /Foobj\Debug\FRA\ /Od /RTC1 /D"WIN32" /D"_WINDOWS" /D"WINVER=0x0600" /D"_WIN32_WINNT=0x0501" main.cpp
+         main.cpp
+         	set lib=C:\Program Files\Microsoft SDKs\Windows\v7.1\lib;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib;libcurl-7.19.3\lib
+         	"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe" /debug /incremental:no /machine:IX86 /nologo /opt:ref /out:bin\Debug\FRA\jebsync.exe /pdb:bin\Debug\FRA\jebsync.pdb /subsystem:CONSOLE obj\Debug\FRA\main.obj kernel32.lib curllib.lib Ws2_32.lib Wldap32.lib
+            CrÚation de la bibliothÞque bin\Debug\FRA\jebsync.lib et de l'objet bin\Debug\FRA\jebsync.exp
+     1>Génération du projet "C:\DEV\jebsync\jebsync-0.0.2\jebsync-0.0.2.vcxproj" terminée (rebuild cible(s)).
+
+La génération a réussi.
+
+Temps écoulé 00:00:01.55

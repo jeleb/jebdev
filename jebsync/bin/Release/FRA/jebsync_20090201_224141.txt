@@ -1,0 +1,14 @@
+====================
+[premier traitement]
+Repertoire source      'C:\Users\Invité\tmp\lasource'
+Repertoire destination 'C:\Users\Invité\tmp\ladestination'
+Repertoire backup      'C:\Users\Invité\tmp\lebackup'
+Purge des backups apres 365 jours
+====================
+B C:\Users\Invité\tmp\lebackup\abc\ghi\jkl\mno.txt.JSYNC-20090201-224141
++ C:\Users\Invité\tmp\ladestination\abc\ghi\jkl\mno.txt
+
+fichiers de backup purges : 0
+
+Nombre d'erreurs rencontrées : 0
+

@@ -1,0 +1,6 @@
+f	heure d'été.txt	20090412-211936
+f	modifie 1.odt	20090324-012321
+f	modifie 2.odt	20090324-012314
+f	pas modifie 1.odt	20090324-012125
+f	pas modifie 2.odt	20090324-012211
+d	sourep

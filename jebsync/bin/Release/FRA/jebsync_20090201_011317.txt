@@ -1,0 +1,11 @@
+====================
+[premier traitement]
+Repertoire source      'C:\Users\Invité\tmp\lasource'
+Repertoire destination 'C:\Users\Invité\tmp\ladestination'
+Repertoire backup      'C:\Users\Invité\tmp\lebackup'
+Purge des backups apres -1 jours
+====================
++ C:\Users\Invité\tmp\ladestination\def\Nouveau document texte.txt
+
+Nombre d'erreurs rencontrées : 0
+

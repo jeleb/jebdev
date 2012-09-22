@@ -1,0 +1,3 @@
+JEBSYNC VERSION 0.0.2
+INI FILE : C:\DEV\jebsync\jebsync-0.0.2\bin\release\FRA\jebsync.ini
+FATAL: Erreur de syntaxe dans le fichier de configuration, ligne 1 : caractère '=' manquant pour définir un parametre
