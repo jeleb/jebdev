@@ -17,7 +17,7 @@ dir: $(BINDIR) $(OBJDIR) $(RESDIR)
 #------------------------------------------------------------------------------
 main.cpp: 
 
-	
+
 #------------------------------------------------------------------------------
 #                              Objets à générer
 #------------------------------------------------------------------------------
@@ -50,7 +50,6 @@ WINLIBS=kernel32.lib user32.lib advapi32.lib\
 #                                    Link
 #------------------------------------------------------------------------------
 $(EXEFILE): makefile makefile.inc $(OBJ)
-	git_describe.bat
 	set lib=$(PSDKLIB);$(VCLIB)
 	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(WINLIBS)
 #	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(RESDIR)\resource.res $(WINLIBS)
