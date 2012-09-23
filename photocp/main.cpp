@@ -23,7 +23,8 @@ wchar_t * argv0 = NULL;
 ///////////////////////////////////////////////////////////////////////////////
 // configuration globale
 static wchar_t * cfg_source_dir = NULL;
-static wchar_t * cfg_destination_dir = NULL;
+static wchar_t * cfg_jpeg_destination_dir = NULL;
+static wchar_t * cfg_raw_destination_dir = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // gestion encapsulant une chaine de caracteres pour la gestion des path
@@ -537,10 +538,11 @@ int move_file(wchar_t * source_name, wchar_t * dest_name, bool create_dir_if_not
 
 
 void list_dir(wchar_t * source_dir,
-		wchar_t * destination_dir,
+		wchar_t * jpeg_destination_dir,
+		wchar_t * raw_destination_dir,
 		wchar_t * subdir,
 		bool recursive,
-		void (*callback)(wchar_t * source_dir, wchar_t * destination_dir,  wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date)) {
+		void (*callback)(wchar_t * source_dir, wchar_t * jpeg_destination_dir, wchar_t * raw_destination_dir,  wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date)) {
 
 	vector<wchar_t*> subdir_list;
 	path find_str(source_dir, (subdir==NULL?0:wcslen(subdir))+3);
@@ -572,7 +574,8 @@ void list_dir(wchar_t * source_dir,
 		time_t last_write_time = convert_file_time(FindFileData.ftLastWriteTime);
 		
 		callback(source_dir,
-			destination_dir,
+			jpeg_destination_dir,
+			raw_destination_dir,
 			subdir,
 		       	FindFileData.cFileName,
 			FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? true : false,
@@ -595,7 +598,7 @@ void list_dir(wchar_t * source_dir,
 	
 	if(recursive) {
 		for(vector<wchar_t*>::iterator it=subdir_list.begin(); it!=subdir_list.end(); it++) {
-			list_dir(source_dir, destination_dir, (*it), recursive, callback);
+			list_dir(source_dir, jpeg_destination_dir, raw_destination_dir, (*it), recursive, callback);
 		}
 		subdir_list.empty();
 	}
@@ -750,20 +753,31 @@ int get_tiff_orientation(wchar_t * file_name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // main
-void list_dir_callback(wchar_t * source_dir, wchar_t * destination_dir, wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date) {
+void list_dir_callback(wchar_t * source_dir, wchar_t * jpeg_destination_dir, wchar_t * raw_destination_dir, wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date) {
+	bool is_raw = false;
+
 	if(is_dir) {
 		return;
 	}
 
 	size_t file_name_len = wcslen(file_name);
-	if((file_name_len < 4 ||
-	    _wcsicmp(file_name+file_name_len-4, L".JPG")!=0) && 
-	   (file_name_len < 5 ||
-	    _wcsicmp(file_name+file_name_len-4, L".JPEG")!=0)
-	  )	{ 
+	if(file_name_len < 4) {
 		return;
 	}
+	if(_wcsicmp(file_name+file_name_len-4, L".CR2")!=0) {
+		if((_wcsicmp(file_name+file_name_len-4, L".JPG")!=0) && 
+			(file_name_len < 5 || _wcsicmp(file_name+file_name_len-4, L".JPEG")!=0)
+		)	{ 
+			return;
+		}
+		is_raw = false;
+	}
+	else {
+		is_raw = true;
+	}
 
+	wchar_t* destination_dir = (is_raw==true?raw_destination_dir:jpeg_destination_dir);
+	
 	path from_path(source_dir, 1+(subdir==NULL?0:wcslen(subdir)+1)+wcslen(file_name));
 	if(subdir != NULL) {
 		from_path.add_trailing_backslash_if_necessary();
@@ -782,7 +796,10 @@ void list_dir_callback(wchar_t * source_dir, wchar_t * destination_dir, wchar_t 
 
 	log_msg(L"   %s", from_path.get());
 		
-	int orientation = get_tiff_orientation(from_path.get());
+	int orientation = 1;
+	if(is_raw == false) {
+		orientation = get_tiff_orientation(from_path.get());
+	}
 
 	// if null, no nconvert necessary
 	wchar_t * nconvert_command = NULL;
@@ -880,46 +897,60 @@ void list_dir_callback(wchar_t * source_dir, wchar_t * destination_dir, wchar_t 
 }
 
 void usage(void) {
-	printf("photocp <repertoire source> <repertoire destination>\n");
+	printf("photocp <repertoire source> <repertoire destination> [repertoire raw]\n");
 	printf("\n");
 }
 
 int wmain(int argc, wchar_t * argv[]) {
-	if(argc!=3) {
+	if(argc!=3 && argc!=4) {
 		usage();
 		exit(-1);
 	}
 
 	argv0 = argv[0];
 	cfg_source_dir = _wcsdup(argv[1]);
-	cfg_destination_dir = _wcsdup(argv[2]);
+	cfg_jpeg_destination_dir = _wcsdup(argv[2]);
+	if(argc==4) {
+		cfg_raw_destination_dir = _wcsdup(argv[3]);
+	}
 
 	//log_file_init(argv[0]);
 	log_msg(L"PHOTOCP VERSION 0.0.1");
 	log_msg(L"REVISION CVS $Id: main.cpp,v 1.7 2009/02/26 21:39:28 jeb Exp $");
 	drives_names_init();
 	resolve_drive_name_in_path(&cfg_source_dir);
-	resolve_drive_name_in_path(&cfg_destination_dir);
+	resolve_drive_name_in_path(&cfg_jpeg_destination_dir);
+	if(cfg_raw_destination_dir!=NULL) {
+		resolve_drive_name_in_path(&cfg_raw_destination_dir);
+	}
 	wchar_t * p = cfg_source_dir + wcslen(cfg_source_dir) - 1;
 	if( (*p) == L'\\') {
 		*p = L'\0';
 	}
-	p = cfg_destination_dir + wcslen(cfg_source_dir) - 1;
+	p = cfg_jpeg_destination_dir + wcslen(cfg_source_dir) - 1;
+	if( (*p) == L'\\') {
+		*p = L'\0';
+	}
+	p = cfg_raw_destination_dir + wcslen(cfg_source_dir) - 1;
 	if( (*p) == L'\\') {
 		*p = L'\0';
 	}
 	if(!check_dir(cfg_source_dir)) {
 		fatal_error(L"le repertoire '%s' n'existe pas", cfg_source_dir);
 	}
-	if(!check_dir(cfg_destination_dir)) {
-		fatal_error(L"le repertoire '%s' n'existe pas", cfg_destination_dir);
+	if(!check_dir(cfg_jpeg_destination_dir)) {
+		fatal_error(L"le repertoire '%s' n'existe pas", cfg_jpeg_destination_dir);
+	}
+	if(cfg_raw_destination_dir!=NULL && !check_dir(cfg_raw_destination_dir)) {
+		fatal_error(L"le repertoire '%s' n'existe pas", cfg_raw_destination_dir);
 	}
 
 
    	log_msg(L"Repertoire source      '%s'", cfg_source_dir);
-   	log_msg(L"Repertoire destination '%s'", cfg_destination_dir);
+   	log_msg(L"Repertoire destination '%s'", cfg_jpeg_destination_dir);
+   	log_msg(L"Repertoire destination '%s'", (cfg_raw_destination_dir==NULL?L"(aucun)":cfg_raw_destination_dir));
 	log_msg(L"");
-	list_dir(cfg_source_dir, cfg_destination_dir, NULL, true, list_dir_callback);
+	list_dir(cfg_source_dir, cfg_jpeg_destination_dir, cfg_raw_destination_dir, NULL, true, list_dir_callback);
 	log_msg(L"");
 	log_msg(L"Nombre d'erreurs rencontrées : %d", get_error_count());
 	log_msg(L"");
