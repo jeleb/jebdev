@@ -55,6 +55,7 @@ $(EXEFILE): makefile makefile.inc $(OBJ)
 	set lib=$(PSDKLIB);$(VCLIB)
 	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(WINLIBS)
 #	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(RESDIR)\resource.res $(WINLIBS)
+	del git_describe.h
 
 #------------------------------------------------------------------------------
 #                                    Clean
