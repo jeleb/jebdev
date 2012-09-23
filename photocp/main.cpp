@@ -14,8 +14,6 @@
 #include <direct.h>
 #include <stdarg.h>
 
-static char *cvs_id="@(#) $Id: main.cpp,v 1.7 2009/02/26 21:39:28 jeb Exp $";
-
 using namespace std;
 
 wchar_t * argv0 = NULL;
@@ -915,8 +913,7 @@ int wmain(int argc, wchar_t * argv[]) {
 	}
 
 	//log_file_init(argv[0]);
-	log_msg(L"PHOTOCP VERSION 0.0.1");
-	log_msg(L"REVISION CVS $Id: main.cpp,v 1.7 2009/02/26 21:39:28 jeb Exp $");
+	log_msg(L"PHOTOCP VERSION 1.0.0");
 	drives_names_init();
 	resolve_drive_name_in_path(&cfg_source_dir);
 	resolve_drive_name_in_path(&cfg_jpeg_destination_dir);
