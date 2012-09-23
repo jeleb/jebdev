@@ -1,7 +1,7 @@
 
 
-VCROOT=C:\Program Files\Microsoft Visual Studio 8\VC
-PSDKROOT=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
+VCROOT=C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC
+PSDKROOT=C:\Program Files\Microsoft SDKs\Windows\v7.1
 
 VCBIN=$(VCROOT)\bin
 VCINCLUDE=$(VCROOT)\include
@@ -55,7 +55,8 @@ $(BINDIR):
 #------------------------------------------------------------------------------
 #                            Options des lignes de commande
 #------------------------------------------------------------------------------
-CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /Fd$(BINDIR) /Fo$(OBJDIR)^\
+#CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /Fd$(BINDIR) /Fo$(OBJDIR)^\
+CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /I"$(PSDKINCLUDE)" /I"$(VCINCLUDE)" /I"$(LIBCURLINCLUDE)" /Fd$(BINDIR) /Fo$(OBJDIR)^\
 CLDEF=	/D"WIN32" /D"_WINDOWS" /D"WINVER=0x0600" /D"_WIN32_WINNT=0x0501"
 
 !IFDEF DEBUG
