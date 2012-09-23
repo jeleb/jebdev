@@ -14,6 +14,8 @@
 #include <direct.h>
 #include <stdarg.h>
 
+#include "git_describe.h"
+
 using namespace std;
 
 wchar_t * argv0 = NULL;
@@ -900,6 +902,8 @@ void usage(void) {
 }
 
 int wmain(int argc, wchar_t * argv[]) {
+	log_msg(L"PHOTOCP version : %S", git_describe);
+
 	if(argc!=3 && argc!=4) {
 		usage();
 		exit(-1);
@@ -913,7 +917,6 @@ int wmain(int argc, wchar_t * argv[]) {
 	}
 
 	//log_file_init(argv[0]);
-	log_msg(L"PHOTOCP VERSION 1.0.0");
 	drives_names_init();
 	resolve_drive_name_in_path(&cfg_source_dir);
 	resolve_drive_name_in_path(&cfg_jpeg_destination_dir);
