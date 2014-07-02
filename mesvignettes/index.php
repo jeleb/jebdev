@@ -157,8 +157,6 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 	closedir($dossier);
 	$nb = sizeof($images);
 	
-	//echo "tutu:"+$nb;
-
 	if($start==''){
 		$start=0;
 	}
@@ -262,159 +260,41 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 	</table><?
 }
 
-/* function affichimgs($hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-	if (isset($_REQUEST['start'])){
-		$start = $_REQUEST['start'];
-	}
-	if(is_null($start)){
-		$start = 0;
-	}
+function displayDir($urlmemo, $dirTab, $numDirName) {
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns;
 
-	if($url!=''){
-		$urlt=$url.'/';
-		$dossier = opendir($urlt);
-	}
-	else{
-		$dossier = opendir('.');
-	}
+	$i = 0;
+	$nb = sizeof($dirTab);
+	for($j=0; $j < $nb; $j++) {
+		$theDir = $dirTab[$nb-$j-1];
 
-
-	$images = array();
-	while($fichier = readdir($dossier)){
-
-
-		// ### Enregistrement de la liste du noms des images dans la table $images ### 
-		$extent=substr($fichier,strrpos($fichier,"."));
-		$extensaj=strtoupper($extent);
-		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
-			array_push($images, $fichier);
-		}
-		$extensaj='';
-	}
-	closedir($dossier);
-	$nb = sizeof($images);
-	
-	if($start==''){
-		$start=0;
-	}
-	$i=$start;
-	$k=0;
-	$stopboucle='no';
-
-
-	// ### Affichage de la table ### 
-	?><table border="0" cellpadding="0" cellspacing="0" bgcolor="#<? echo $coulcadretable; ?>">
-	<tr>
-	<td bgcolor="#<? echo $coulcadretable; ?>" colspan="2"><table border="0" cellpadding="4" cellspacing="<? echo $epaiscadretable; ?>" width="100%"><?
-
-
-	// ### Début de boucle ### 
-	while($stopboucle=='no'){
-
-
-		// ### Extraction de l'extension ### 
-		$imagesource=$urlt.$images[$i];
-		$extent=substr($imagesource,strrpos($imagesource,"."));
-		$extensaj=strtoupper($extent);
-
-
-		// ### Arret de la boucle si plus rien ### 
-		if($extensaj==''){
-			$stopboucle='ok';
+		if($numDirName == is_numeric(substr($theDir, 0, 1))) {
+			continue;
 		}
 
-		if($i >= $nb){
-			$stopboucle='ok';
+		$urlmemot = $urlmemo;
+		if($urlmemo != "") {
+			$urlmemot = $urlmemo.'/';
 		}
-
-		?><tr><?
-
-		// ### Nouveau test pour vérifier que seules les images seront affichées ### 
-		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
-
-
-			// ### Arret de la boucle si nb images = nb défini pour une page ### 
-
-
-			// ### Extraction des dimensions de l'image ### 
-			$sizeimgo=getimagesize($imagesource);
-			$imglargo=$sizeimgo[0];
-			$imghauto=$sizeimgo[1];
-
-
-			// ### Recalcul des dimensions MAX des vignettes ### 
-			if ($imglargo>$larimage){
-				$imghautoz=$imghauto*$larimage/$imglargo;
-				$imghautoz=round($imghautoz);
-				$imglargoz=$larimage;
-			}
-			else{
-				$imglargoz=$imglargo;
-				$imghautoz=$imghauto;
-			}
-			if ($imghautoz>$hautimage){
-				$imglargoz=$imglargoz*$hautimage/$imghautoz;
-				$imglargoz=round($imglargoz);
-				$imghautoz=$hautimage;
-			}
-
-			// ### Poids de l'image ### 
-			$taille=filesize($imagesource);
-			$taille=$taille/1024;
-			$taille=round ($taille);
-
-
-			// ### Affichage de l'image ### 
-			?><td bgcolor="#FFFFFF" valign="middle" align="center"><a href="#" onclick="javascript:window.open('index.php?imglargo=<? echo $imglargo; ?>&imghauto=<? echo $imghauto; ?>&sourceimg=<? echo $imagesource; ?>','ZOOM<? echo $k; ?>','toolbar=0,location=0,directories=0,status=0,resizable=1,copyhistory=0,scrollbars=0,menuBar=0,width=<? echo $imglargo+5; ?>,height=<? echo $imghauto+5; ?>');" title="Cliquez pour agrandir l\'image"><?
-
-
-			// ### Redimension à la volée ### 
-			if ($redimvoz=='1'){
-				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0"><?
-			}
-			else{
-				?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
-			}
-
-
-			// ### Affichage des infos sur l'image ### 
-			?></a><br>
-			<font face="arial" size="1">L=<? 
-			echo $imglargo; 
-			?> X H=<? 
-			echo $imghauto; 
-			?> <?
-			echo $taille;
-			?>Ko.<br><?
-			echo $imagesource;
-			?></font></td><?
-
-
-			// ### Fermeture de la ligne ### 
-			$k++;
-
+		
+		if($i == 0) {
+			echo("<tr>");
 		}
-
+		
+		?>
+		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2"><a href="#" onclick="gotourl('<? echo $urlmemo; ?>','<?echo $urlmemot.$theDir; ?>')"><?
+		?>
+		<img src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
+		</a></font></td>
+		<?
+		
 		$i++;
-		?></tr><?
+		if($i == $nb_dir_columns) {
+			echo("</tr>");
+			$i = 0;
+		}
 	}
-	?></table></td>
-	</tr>
-	<tr>
-	<td align="left" bgcolor="#FFFFFF"><?
-	if($start >= $numligne){
-		?><font face="arial" size="2"><a href="?urlancien=<? $urlmemo; ?>&url=<? echo $url; ?>&start=<? echo ($start - $numligne); ?>">page précédente</a></font><?
-	}
-	?></td>
-	<td align="right" bgcolor="#FFFFFF"><?
-	if(($nb > $numligne) && ($i < $nb)){
-		?><font face="arial" size="2"><a href="?urlancien=<? $urlmemo; ?>&url=<? echo $url; ?>&start=<? echo $i++; ?>">page suivante</a></font><?
-	}
-	?></td>
-	</tr>
-	</table><?
-} */
-
+}
 
 /* ### Récupération des variables ### */
 $hautscreen=$_GET[hautscreen];
@@ -477,39 +357,21 @@ else{
 
 	/* ### Affichage des dossiers ### */
 	if ($handle = opendir($url.'/')) {
-		$i = 0;
-
+		
+		$dirTab = array();
+		
 	    while (false !== ($file = readdir($handle))) {
 			//echo $file;
 			
 	        if ((is_dir($url.'/'.$file)) && $file != "." && $file != "..") {
-			/*<td bgcolor="#FFFF9C"><font face="arial" size="2"><a href="index.php?urlancien=<? echo $urlmemo; ?>&url=<?*/
-					$urlmemot = $urlmemo;
-					if($urlmemo != "") {
-						$urlmemot = $urlmemo.'/';
-					}
-					
-					if($i == 0) {
-						echo("<tr>");
-					}
-					
-					?>
-					<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2"><a href="#" onclick="gotourl('<? echo $urlmemo; ?>','<?echo $urlmemot.$file; ?>')"><?
-					/* echo $file; */
-					?>
-					<img src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$file; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
-					</a></font></td>
-					<?
-					
-					$i++;
-					if($i == $nb_dir_columns) {
-						echo("</tr>");
-						$i = 0;
-					}
-
+				array_push($dirTab, $file);
 	        }
 	    }
 	    closedir($handle);
+		
+		displayDir($urlmemo, $dirTab, 0);
+		displayDir($urlmemo, $dirTab, 1);
+
 	}
 	?></table></td>
 	</tr>
