@@ -188,7 +188,7 @@ global $noimg;
 
 			/* Affichage de l'image ### */
 			$noimg = "0";
-			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');" title="Cliquez pour agrandir l\'image"><?
+			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="Cliquez pour agrandir l\'image"><?
 
 
 			/* ### Redimensionnement à la volée ### */
@@ -231,7 +231,7 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 		}
 		
 		?>
-		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2"><a href="#" onclick="gotourl('<? echo $urlmemo; ?>','<?echo $urlmemot.$theDir; ?>')"><?
+		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2"><a href="#" onclick="gotourl('<? echo $urlmemo; ?>','<?echo $urlmemot.$theDir; ?>');"><?
 		?>
 		<img src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
 		</a></font></td>
@@ -341,8 +341,11 @@ else{
 	}
 	if($noimg=="0") {
 	?>
-	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;">>></a></b><br/>
-	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><<</a></b><br/>
+	
+	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><<</a></b>
+	&nbsp;&nbsp;&nbsp;
+	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;">>></a></b>
+	<br/>
 	<?
 	}
 	?>
