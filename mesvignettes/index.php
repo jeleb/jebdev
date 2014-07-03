@@ -28,6 +28,20 @@ $vignette_rep_max_largeur='300';
 $nb_dir_columns='3';
 
 
+/* Récupération des variables */
+$hautscreen=$_GET[hautscreen];
+$imglargoz=$_GET[imglargo];
+$imghautoz=$_GET[imghauto];
+$sourceimg=$_GET[sourceimg];
+$url=$_GET[url];
+$urlancien=$_GET[urlancien];
+if($hautscreen != '') {
+	$hautimage = $hautscreen-70;
+}
+
+
+$noimg = "1";
+
 ?><!DOCTYPE html>
 <html>
 <head>
@@ -81,10 +95,12 @@ document.onkeydown = function(evt) {
 </script>
 </head>
 <body text="#000000" link="#000000" alink="#000000" vlink="#000000" bgcolor="#000000" leftmargin="10" marginwidth="5" topmargin="10" marginheight="5">
+
 <div align="center"><?
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
+global $noimg;
 
 	if (isset($_REQUEST['start'])){
 		$start = $_REQUEST['start'];
@@ -171,6 +187,7 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 			}
 
 			/* Affichage de l'image ### */
+			$noimg = "0";
 			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');" title="Cliquez pour agrandir l\'image"><?
 
 
@@ -228,16 +245,6 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 	}
 }
 
-/* Récupération des variables */
-$hautscreen=$_GET[hautscreen];
-$imglargoz=$_GET[imglargo];
-$imghautoz=$_GET[imghauto];
-$sourceimg=$_GET[sourceimg];
-$url=$_GET[url];
-$urlancien=$_GET[urlancien];
-if($hautscreen != '') {
-	$hautimage = $hautscreen-70;
-}
 
 /* Si on clique sur une image alors affichage en taille réelle */
 if($sourceimg!=''){
@@ -261,13 +268,13 @@ else{
 
 	
 	/* Mise en place d'un arret pour empècher de redescendre plus bas que de raison ;) */
-	if($url!=''){
+	/*if($url!=''){
 		?><tr>
 		<td bgcolor="#000000"><b><a href="index.php?url=<?
 		echo $urlancien;
 		?>" style="color:white;font-family:arial;size:4;"><-&nbsp;retour</a></b></td>
 		</tr><?
-	}
+	}*/
 	
 
 	/* Initialisation des variables dossiers */
@@ -282,8 +289,6 @@ else{
 	}
 	$AllFiles = array();
 	$AllDir = array();
-
-	//echo $url;
 
 	/* Affichage des vignette de dossier */
 	if ($handle = opendir($url.'/')) {
@@ -322,7 +327,29 @@ else{
 	</tr><?
 
 	?>
-	</table><?
+	</table>
+	
+	<div style="position:fixed;top:10px;left:10px">
+	<?
+	// ici en haut à gauche, le menu qui reste meme quand on scroll
+	if($url != '' && $url != '.'){
+		?>
+		<b><a href="index.php?url=<?
+		echo $urlancien;
+		?>" style="color:white;font-family:arial;size:4;"><-&nbsp;retour</a></b><br/>
+		<?
+	}
+	if($noimg=="0") {
+	?>
+	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;">>></a></b><br/>
+	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><<</a></b><br/>
+	<?
+	}
+	?>
+
+	</div>
+
+	<?
 
 }
 
