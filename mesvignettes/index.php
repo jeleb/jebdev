@@ -1,78 +1,30 @@
 <?
-/*
-###############################################
-Album photos express V 1.2
-Philippe HALICKI
-philippe@exconcept.com
-www.exconcept.com
-Script écrit le 17/09/2004
 
-Supporte les formats JPG, GIF et PNG.
-
-Cet album photos permet de lister toutes les images de répertoires, de remonter et de descendre à volonté dans l'arborescence jusqu'au point d'arret corrspondant à l'emplacement du script.
-Voici la liste des éléments que vous pouvez définir :
-
-- Nombre de lignes et de colonnes par page
-- Largeur MAX des vignettes
-- Hauteur MAX des vignettes
-- Affichage d'un cadre autour des vignettes ou non
-- Redimensionnement à la volée ou non
-- Epaisseur du cadre du tableau d'affichage des vignettes 
-- Couleur du cadre du tableau d'affichage des vignettes 
-
-
-Installation : Placez les fichiers index.php et vignettes.php dans le répertoire racine contenant les images. C'est tout !
-
-L'appel se fait par index.php
-###############################################
-*/
-
-
-/* ############################# */
-/* ### Variables utilisateur ### */
-/* ############################# */
-
-
-/* ### $nbimages = nombre de lignes à afficher ### */
-//$nblignes='5';
-
-
-/* ### $nbcols = nombre de colonnes à afficher ### */
-//$nbcols='5';
-
-
-/* ### $larimage = largeur MAX des miniatures ### */
+/* largeur MAX des miniatures  */
 $larimage='2000';
 
-
-/* ### $larimage = hauteur MAX des miniatures ### */
+/* hauteur MAX des miniatures */
 $hautimage='500';
 
-
-/* ### $epaiscadretable = Epaisseur du cadre du tableau d'affichage des vignettes ### */
+/* Epaisseur du cadre du tableau d'affichage des vignettes */
 $epaiscadretable='2';
 
-
-/* ### $epaiscadretable = Couleur du cadre du tableau d'affichage des vignettes (valeur héxa) ### */
-//$coulcadretable='FADF72';
+/* Couleur du cadre du tableau d'affichage des vignettes (valeur héxa) */
 $coulcadretable='000000';
 
-
-/* ### $cadrak = Affichage d'un cadre autour des vignettes ou non, 1 pour oui, 0 pour non ### */
+/* Affichage d'un cadre autour des vignettes ou non, 1 pour oui, 0 pour non */
 $cadrak='0';
 
-
-/* ### $redimvoz = Redimension à la volée (nécesite GD2), 1 pour oui, 0 pour non ### */
-/* ### Le redimensionnement à la volée nécesite beaucoup de resources serveur mais permet de considérablement accélerer l'affichage des vignettes ### */
+/* $redimvoz = Redimension à la volée (nécesite GD2), 1 pour oui, 0 pour non */
+/* Le redimensionnement à la volée nécesite beaucoup de resources serveur mais permet de considérablement accélerer l'affichage des vignettes */
 $redimvoz='1';
 
-/* ### dimensions des vignettes des repertoires */
-/* ### */
+/* dimensions des vignettes des repertoires */
+/* */
 $vignette_rep_max_hauteur='300';
 $vignette_rep_max_largeur='300';
 
-/* ### nombre de colonnes pour les vignettes de répertoire */
-/* ### */
+/* nombre de colonnes pour les vignettes de répertoire */
 $nb_dir_columns='3';
 
 
@@ -89,23 +41,14 @@ $nb_dir_columns='3';
 
 <script language="javascript">
 function getWindwHeight() {
-  //var myWidth = 0, myHeight = 0;
   var myHeight = 0;
   if( typeof( window.innerWidth ) == 'number' ) {
-    //Non-IE
-    //myWidth = window.innerWidth;
     myHeight = window.innerHeight;
   } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-    //IE 6+ in 'standards compliant mode'
-    //myWidth = document.documentElement.clientWidth;
     myHeight = document.documentElement.clientHeight;
   } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-    //IE 4 compatible
-    //myWidth = document.body.clientWidth;
     myHeight = document.body.clientHeight;
   }
-  // window.alert( 'Width = ' + myWidth );
-  // window.alert( 'Height = ' + myHeight );
   return myHeight;
 }
 
@@ -119,6 +62,9 @@ function gotourl(myurlmemo, myurl) {
 	window.location = str+"index.php?urlancien="+myurlmemo+"&url="+myurl+"&hautscreen="+ getWindwHeight(); //screen.height;
 }
 
+// raccourcis :
+// b : va 'loin' à gauche
+// g : va 'loin' à droite
 document.onkeydown = function(evt) {
     evt = evt || window.event;
 
@@ -137,7 +83,7 @@ document.onkeydown = function(evt) {
 <body text="#000000" link="#000000" alink="#000000" vlink="#000000" bgcolor="#000000" leftmargin="10" marginwidth="5" topmargin="10" marginheight="5">
 <div align="center"><?
 
-/* ### Fonction d'affichage de l'album ### */
+/* Fonction d'affichage des photos miniatures */
 function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
 
 	if (isset($_REQUEST['start'])){
@@ -158,9 +104,6 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 
 	$images = array();
 	while($fichier = readdir($dossier)){
-
-
-		/* ### Enregistrement de la liste du noms des images dans la table $images ### */
 		$extent=substr($fichier,strrpos($fichier,"."));
 		$extensaj=strtoupper($extent);
 		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
@@ -178,12 +121,10 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 	$k=0;
 	$stopboucle='no';
 
-	/* ### Affichage de la table ### */
 	?><table border="0" cellpadding="0" cellspacing="0" bgcolor="#<? echo $coulcadretable; ?>">
 	<tr>
 	<td bgcolor="#<? echo $coulcadretable; ?>" colspan="2"><table border="0" cellpadding="4" cellspacing="<? echo $epaiscadretable; ?>" width="100%"><?
 
-	/* ### Début de boucle ### */
 	while($stopboucle=='no'){
 
 		/* ### Extraction de l'extension ### */
@@ -229,20 +170,11 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 				$imghautoz=$hautimage;
 			}
 
-
-			/* ### Poids de l'image ### */
-			$taille=filesize($imagesource);
-			$taille=$taille/1024;
-			$taille=round ($taille);
-
-
-			/* ### Affichage de l'image ### */
-			/*?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('index.php?imglargo=<? echo $imglargo; ?>&imghauto=<? echo $imghauto; ?>&sourceimg=<? echo $imagesource; ?>','ZOOM<? echo $k; ?>','toolbar=0,location=0,directories=0,status=0,resizable=1,copyhistory=0,scrollbars=0,menuBar=0,width=<? echo $imglargo+5; ?>,height=<? echo $imghauto+5; ?>');" title="Cliquez pour agrandir l\'image"><?
-			*/
+			/* Affichage de l'image ### */
 			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');" title="Cliquez pour agrandir l\'image"><?
 
 
-			/* ### Redimension à la volée ### */
+			/* ### Redimensionnement à la volée ### */
 			if ($redimvoz=='1'){
 				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0"><?
 			}
@@ -250,21 +182,6 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 				?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
 			}
 
-
-			/* ### Affichage des infos sur l'image ### */
-			/*?></a><br>
-			<font face="arial" size="1">L=<? 
-			echo $imglargo; 
-			?> X H=<? 
-			echo $imghauto; 
-			?> <?
-			echo $taille;
-			?>Ko.<br><?
-			echo $imagesource;
-			?></font></td><?*/
-
-
-			/* ### Fermeture de la ligne ### */
 			$k++;
 		}
 		$i++;
@@ -274,6 +191,7 @@ function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redi
 	</table><?
 }
 
+// fonction d'affichage des vignettes de répertoire
 function displayDir($urlmemo, $dirTab, $numDirName) {
 	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns;
 
@@ -310,7 +228,7 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 	}
 }
 
-/* ### Récupération des variables ### */
+/* Récupération des variables */
 $hautscreen=$_GET[hautscreen];
 $imglargoz=$_GET[imglargo];
 $imghautoz=$_GET[imghauto];
@@ -321,7 +239,7 @@ if($hautscreen != '') {
 	$hautimage = $hautscreen-70;
 }
 
-/* ### Si on clique sur une image alors affichage en taille réelle ### */
+/* Si on clique sur une image alors affichage en taille réelle */
 if($sourceimg!=''){
 	?><table border="0" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" width="100%">
 	<tr>
@@ -335,16 +253,14 @@ else{
 	<td valign="top" align="left"><?
 
 
-	/* ### Affichage du menu de navigation des dossiers ### */
+	/* Affichage du menu de navigation des dossiers */
 	?><table border="0" cellpadding="0" cellspacing="0" bgcolor="#000000">
 	<tr>
 	<td bgcolor="#000000"><table border="0" cellpadding="4" cellspacing="1">
-	<!--tr>
-	<td bgcolor="#CB9900"><font face="arial" size="2" color="#FFFFFF"><b>Dossiers :</b></font></td>
-	</tr--><?
+	<?
 
 	
-	/* ### Mise en place d'un arret pour empècher de redescendre plus bas que de raison ;) ### */
+	/* Mise en place d'un arret pour empècher de redescendre plus bas que de raison ;) */
 	if($url!=''){
 		?><tr>
 		<td bgcolor="#000000"><b><a href="index.php?url=<?
@@ -354,7 +270,7 @@ else{
 	}
 	
 
-	/* ### Initialisation des variables dossiers ### */
+	/* Initialisation des variables dossiers */
 	if($url!=''){
 		$url=$url;
 		$urlmemo=$url;
@@ -369,7 +285,7 @@ else{
 
 	//echo $url;
 
-	/* ### Affichage des dossiers ### */
+	/* Affichage des vignette de dossier */
 	if ($handle = opendir($url.'/')) {
 		
 		$dirTab = array();
@@ -383,28 +299,28 @@ else{
 	    }
 	    closedir($handle);
 		
+		// affichage en premier des repertoires commencant par un chiffre
 		displayDir($urlmemo, $dirTab, 0);
+		// ensuite on affichage les autres répertoires
 		displayDir($urlmemo, $dirTab, 1);
 
 	}
 	?></table></td>
 	</tr>
 	</table><br><?
-	/* ### Fin d'affichage du menu de navigation des dossiers ### */
+	/* Fin d'affichage du menu de navigation des dossiers */
 
 
 	?></td>
 	<td valign="top" align="center"><?
 
 
-	/* ### Appel de la fonction pour l'affichage des images ### */
+	/* Appel de la fonction pour l'affichage des images */
 	affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable);
 
 	?></td>
 	</tr><?
-	
 
-	/* ### Affichage des crédits ### */
 	?>
 	</table><?
 
