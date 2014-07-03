@@ -118,6 +118,20 @@ function gotourl(myurlmemo, myurl) {
 	
 	window.location = str+"index.php?urlancien="+myurlmemo+"&url="+myurl+"&hautscreen="+ getWindwHeight(); //screen.height;
 }
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+
+	var c = String.fromCharCode(evt.keyCode).toLowerCase();
+	if(c == 'b') {
+		window.scrollBy(-3000,0);
+	}
+	else if(c == 'g') {
+		window.scrollBy(3000,0);
+	}
+
+};
+
 </script>
 </head>
 <body text="#000000" link="#000000" alink="#000000" vlink="#000000" bgcolor="#000000" leftmargin="10" marginwidth="5" topmargin="10" marginheight="5">
