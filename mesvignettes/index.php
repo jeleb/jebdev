@@ -42,7 +42,7 @@ if($hautscreen != '') {
 }
 
 
-$noimg = "1";
+$nbImg = 0;
 
 ?><!DOCTYPE html>
 <html>
@@ -56,6 +56,18 @@ $noimg = "1";
 <!--meta name="viewport" content="height=device-height" / -->
 
 <script language="javascript">
+
+function oneMoreImageLoaded() {
+	var nbSpan = document.getElementById("spanNbImg");
+	var nbTotalSpan = document.getElementById("spanNbTotalImg");
+	nbSpan.innerHTML = "" + (parseInt(nbSpan.innerHTML)+1);
+	if(nbSpan.innerHTML == nbTotalSpan.innerHTML) {
+		nbSpan.innerHTML = "";
+		nbTotalSpan.innerHTML = "";
+		document.getElementById("spanNbImgSep").innerHTML = "";
+	}
+}
+
 function getWindwHeight() {
   var myHeight = 0;
   if( typeof( window.innerWidth ) == 'number' ) {
@@ -102,7 +114,7 @@ document.onkeydown = function(evt) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $noimg, $dont_show_image_prefix;
+global $nbImg, $dont_show_image_prefix;
 
 	if (isset($_REQUEST['start'])){
 		$start = $_REQUEST['start'];
@@ -192,13 +204,13 @@ global $noimg, $dont_show_image_prefix;
 			}
 
 			/* Affichage de l'image ### */
-			$noimg = "0";
+			$nbImg ++;
 			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="Cliquez pour agrandir l\'image"><?
 
 
 			/* ### Redimensionnement à la volée ### */
 			if ($redimvoz=='1'){
-				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0"><?
+				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
 			}
 			else{
 				?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
@@ -336,7 +348,11 @@ else{
 	
 	<div style="position:fixed;top:10px;left:10px">
 	<?
-	// ici en haut à gauche, le menu qui reste meme quand on scroll
+	//ici en haut à gauche, le menu qui reste meme quand on scroll
+	if($nbImg > 0) {
+		echo "<span id=\"spanNbImg\">0</span><span id=\"spanNbImgSep\"> / </span><span id=\"spanNbTotalImg\">" . $nbImg . "</span><br/>";
+	}
+
 	if($url != '' && $url != '.'){
 		?>
 		<b><a href="index.php?url=<?
@@ -344,7 +360,7 @@ else{
 		?>" style="color:white;font-family:arial;size:4;"><img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b><br/>
 		<?
 	}
-	if($noimg=="0") {
+	if($nbImg > 0) {
 	?>
 	
 	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.4;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b>
@@ -353,8 +369,9 @@ else{
 	<br/>
 	<?
 	}
-	?>
 
+	?>
+	
 	</div>
 
 	<?
