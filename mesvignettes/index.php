@@ -125,7 +125,7 @@ global $noimg, $dont_show_image_prefix;
 		$extent=substr($fichier,strrpos($fichier,"."));
 		$extensaj=strtoupper($extent);
 		
-		if(substr($fichier, strlen($dont_show_image_prefix) != $dont_show_image_prefix )) {
+		if(substr($fichier, 0, strlen($dont_show_image_prefix)) != $dont_show_image_prefix ) {
 			if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
 				array_push($images, $fichier);
 			}
@@ -341,7 +341,7 @@ else{
 		?>
 		<b><a href="index.php?url=<?
 		echo $urlancien;
-		?>" style="color:white;font-family:arial;size:4;"><img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY:-1;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b><br/>
+		?>" style="color:white;font-family:arial;size:4;"><img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b><br/>
 		<?
 	}
 	if($noimg=="0") {
