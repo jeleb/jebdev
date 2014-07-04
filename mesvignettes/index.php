@@ -27,6 +27,8 @@ $vignette_rep_max_largeur='300';
 /* nombre de colonnes pour les vignettes de répertoire */
 $nb_dir_columns='3';
 
+/* prefixes des images qu'il ne faut pas afficher (celles de mesvignettes principalement) */
+$dont_show_image_prefix = "mesvignettes_";
 
 /* Récupération des variables */
 $hautscreen=$_GET[hautscreen];
@@ -100,7 +102,7 @@ document.onkeydown = function(evt) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $noimg;
+global $noimg, $dont_show_image_prefix;
 
 	if (isset($_REQUEST['start'])){
 		$start = $_REQUEST['start'];
@@ -122,8 +124,11 @@ global $noimg;
 	while($fichier = readdir($dossier)){
 		$extent=substr($fichier,strrpos($fichier,"."));
 		$extensaj=strtoupper($extent);
-		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
-			array_push($images, $fichier);
+		
+		if(substr($fichier, strlen($dont_show_image_prefix) != $dont_show_image_prefix )) {
+			if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
+				array_push($images, $fichier);
+			}
 		}
 		$extensaj='';
 	}
@@ -336,15 +341,15 @@ else{
 		?>
 		<b><a href="index.php?url=<?
 		echo $urlancien;
-		?>" style="color:white;font-family:arial;size:4;"><-&nbsp;retour</a></b><br/>
+		?>" style="color:white;font-family:arial;size:4;"><img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY:-1;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b><br/>
 		<?
 	}
 	if($noimg=="0") {
 	?>
 	
-	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><<</a></b>
-	&nbsp;&nbsp;&nbsp;
-	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;">>></a></b>
+	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.4;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b>
+	&nbsp;
+	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.4;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b>
 	<br/>
 	<?
 	}
