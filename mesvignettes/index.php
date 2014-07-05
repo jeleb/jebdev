@@ -205,7 +205,7 @@ global $nbImg, $dont_show_image_prefix;
 
 			/* Affichage de l'image ### */
 			$nbImg ++;
-			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="Cliquez pour agrandir l\'image"><?
+			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="Cliquez pour agrandir l\'image"><?
 
 
 			/* ### Redimensionnement à la volée ### */
