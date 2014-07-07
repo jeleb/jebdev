@@ -13,6 +13,7 @@
 #include <string>
 #include <direct.h>
 #include <stdarg.h>
+#include <boost\regex.hpp>
 
 #include "git_describe.h"
 
@@ -332,19 +333,20 @@ void drives_names_init(void) {
 	
 }
 
-void resolve_drive_name_in_path(wchar_t** path) {
+void resolve_drive_name_in_path(wchar_t** path, bool use_regex) {
 	if((*path)[0] != L'{') {
 		return;
 	}
 
 	wchar_t * p = NULL;
-	for(p=*path; *p!=L'\0'; p++) {
+	//for(p=*path; *p!=L'\0'; p++) {
+	for(p=*path+wcslen(*path)-1; p > *path; p--) {
 		if(*p == L'}') {
 			break;
 		}
 	}
 
-	if(*p==L'\0') {
+	if(*p==L'\0' || p==*path) {
 		return;
 	}
 	if(p[1] != L'\\') {
@@ -357,17 +359,36 @@ void resolve_drive_name_in_path(wchar_t** path) {
 		return;
 	}
 
+	wstring drv;
 	wchar_t drv_name[JEBSYNC_MAX_DRV_NAME+1];
 	memcpy(drv_name, (*path)+1, drv_name_length*sizeof(wchar_t));
 	drv_name[drv_name_length] = L'\0';
-	
-	map<wstring, wstring>::iterator it = drives_names.find(drv_name);
 
-	if(it == drives_names.end()) {
-		return;
+	if(use_regex) {
+		bool found = false;
+		for(map<wstring, wstring>::iterator it = drives_names.begin(); it != drives_names.end(); it++) {
+			boost::wregex ma_regex(drv_name);
+			if(boost::regex_match(it->first.c_str(), ma_regex)) {
+				drv = it->second;
+				found = true;
+				break;
+			}
+		}
+		
+		if(!found) {
+			printf("not found\n");
+			return;
+		}
 	}
+	else {
+		map<wstring, wstring>::iterator it = drives_names.find(drv_name);
 
-	wstring drv = it->second;
+		if(it == drives_names.end()) {
+			return;
+		}
+		
+		drv = it->second;
+	}
 
 	p++;
 	int new_path_length = drv.length() + wcslen(p);
@@ -918,10 +939,10 @@ int wmain(int argc, wchar_t * argv[]) {
 
 	//log_file_init(argv[0]);
 	drives_names_init();
-	resolve_drive_name_in_path(&cfg_source_dir);
-	resolve_drive_name_in_path(&cfg_jpeg_destination_dir);
+	resolve_drive_name_in_path(&cfg_source_dir, true);
+	resolve_drive_name_in_path(&cfg_jpeg_destination_dir, true);
 	if(cfg_raw_destination_dir!=NULL) {
-		resolve_drive_name_in_path(&cfg_raw_destination_dir);
+		resolve_drive_name_in_path(&cfg_raw_destination_dir, true);
 	}
 	wchar_t * p = cfg_source_dir + wcslen(cfg_source_dir) - 1;
 	if( (*p) == L'\\') {
