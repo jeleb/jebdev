@@ -50,7 +50,7 @@ WINLIBS=kernel32.lib user32.lib advapi32.lib\
 #                                    Link
 #------------------------------------------------------------------------------
 $(EXEFILE): makefile makefile.inc $(OBJ)
-	set lib=$(PSDKLIB);$(VCLIB)
+	set lib=$(PSDKLIB);$(VCLIB);$(BOOSTLIB)
 	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(WINLIBS)
 #	"$(LINK)" $(LINKOPT) /heap:0x800000,0x40000 $(OBJ) $(RESDIR)\resource.res $(WINLIBS)
 
