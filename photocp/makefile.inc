@@ -2,6 +2,7 @@
 
 VCROOT=C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC
 PSDKROOT=C:\Program Files\Microsoft SDKs\Windows\v7.1
+BOOSTROOT=C:\devGit\photocp\boost_1_55_0
 
 VCBIN=$(VCROOT)\bin
 VCINCLUDE=$(VCROOT)\include
@@ -10,6 +11,9 @@ VCLIB=$(VCROOT)\lib
 PSDKBIN=$(PSDKROOT)\bin
 PSDKINCLUDE=$(PSDKROOT)\include
 PSDKLIB=$(PSDKROOT)\lib
+
+BOOSTINCLUDE=$(BOOSTROOT)
+BOOSTLIB=C:\devGit\photocp\boost_1_55_0_bin_unzip\lib32-msvc-10.0
 
 CL=$(VCBIN)\cl.exe       # Visual C++ 
 LINK=$(VCBIN)\link.exe     # Visual C++
@@ -56,21 +60,12 @@ $(BINDIR):
 #                            Options des lignes de commande
 #------------------------------------------------------------------------------
 #CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /Fd$(BINDIR) /Fo$(OBJDIR)^\
-CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /I"$(PSDKINCLUDE)" /I"$(VCINCLUDE)" /I"$(LIBCURLINCLUDE)" /Fd$(BINDIR) /Fo$(OBJDIR)^\
+#CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /I"$(PSDKINCLUDE)" /I"$(VCINCLUDE)" /I"$(LIBCURLINCLUDE)" /I"$(BOOSTINCLUDE)" /Fd$(BINDIR) /Fo$(OBJDIR)^\
+CLOPT=	/c /GF /Gy /W4 /WX /EHsc /Z7 /nologo /I"$(PSDKINCLUDE)" /I"$(VCINCLUDE)" /I"$(BOOSTINCLUDE)" /Fd$(BINDIR) /Fo$(OBJDIR)^\
 CLDEF=	/D"WIN32" /D"_WINDOWS" /D"WINVER=0x0600" /D"_WIN32_WINNT=0x0501"
 
 !IFDEF DEBUG
-#LINKOPT=/debug\
-#		/implib:$(BINDIR)\gpsget.lib\
-#		/incremental:no\
-#		/machine:IX86\
-#		/map:$(OBJDIR)\gpsget.map\
-#		/nodefaultlib\
-#		/nologo\
-#		/opt:ref\
-#		/out:$(BINDIR)\gpsget.exe\
-#		/pdb:$(BINDIR)\gpsget.pdb\
-#		/subsystem:WINDOWS
+
 
 LINKOPT=/debug\
 		/incremental:no\
@@ -84,16 +79,6 @@ LINKOPT=/debug\
 		#/NODEFAULTLIB:libcmt.lib
 
 !ELSE
-#LINKOPT=/implib:$(BINDIR)\gpsget.lib\
-#		/incremental:no\
-#		/machine:IX86\
-#		/map:$(OBJDIR)\gpsget.map\
-#		/nodefaultlib\
-#		/nologo\
-#		/opt:ref\
-#		/out:$(BINDIR)\gpsdump.exe\
-#		/pdb:$(BINDIR)\gpsdump.pdb\
-#		/subsystem:WINDOWS
 
 LINKOPT=	/incremental:no\
 		/machine:IX86\
