@@ -1,11 +1,11 @@
 <?
-$sourceimg=strtoupper($_GET[sourceimg]);
-$largeur=strtoupper($_GET[largeur]);
-$hauteur=strtoupper($_GET[hauteur]);
-$extensaj=strtoupper($_GET[extensaj]);
-$largeuro=strtoupper($_GET[largeuro]);
-$hauteuro=strtoupper($_GET[hauteuro]);
-$cadrak=strtoupper($_GET[cadrak]);
+$sourceimg=strtoupper($_GET["sourceimg"]);
+$largeur=strtoupper($_GET["largeur"]);
+$hauteur=strtoupper($_GET["hauteur"]);
+$extensaj=strtoupper($_GET["extensaj"]);
+$largeuro=strtoupper($_GET["largeuro"]);
+$hauteuro=strtoupper($_GET["hauteuro"]);
+$cadrak=strtoupper($_GET["cadrak"]);
 
 // Set the content-type
 header('Content-Type: image/jpeg');
