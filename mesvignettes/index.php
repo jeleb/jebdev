@@ -30,6 +30,9 @@ $nb_dir_columns='3';
 /* prefixes des images qu'il ne faut pas afficher (celles de mesvignettes principalement) */
 $dont_show_image_prefix = "mesvignettes_";
 
+/* prefix de l'id des div qui contiennent les exifs complets */
+$exif_id_prefix = "image_exif_all_";
+
 /* Récupération des variables */
 $hautscreen=$_GET[hautscreen];
 $imglargoz=$_GET[imglargo];
@@ -56,6 +59,23 @@ $nbImg = 0;
 <!--meta name="viewport" content="height=device-height" / -->
 
 <script language="javascript">
+
+function toggleExifAll() {
+	var divArray = document.getElementsByTagName("DIV");
+	var prefix = "<? echo $exif_id_prefix; ?>";
+	var toggleState = -1;
+	for(var i=0; i!=divArray.length; i++) { 
+		var mondiv = divArray[i];
+		if(mondiv.id.substr(0, prefix.length) == prefix) {
+			if(toggleState == -1) {
+				toggleState = (mondiv.style.display == "none" ? 0 : 1);
+			}
+			
+			mondiv.style.display = (toggleState==0 ? "block" : "none");
+		}
+	} 
+
+}
 
 function oneMoreImageLoaded() {
 	var nbSpan = document.getElementById("spanNbImg");
@@ -112,9 +132,78 @@ document.onkeydown = function(evt) {
 
 <div align="center"><?
 
+/* construction du title pour les images à partir des données d'exif */
+function computeExifTitle($exif, $eol) {
+	$model = "";
+	$focalLength = "";
+	$aperture = "";
+	$expoTime = "";
+	$isoSpeed = "";
+	$userComment = "";
+	$keyWords = "";
+
+	if(isset($exif["IFD0"])) {
+		if(isset($exif["IFD0"]["Comments"])) {
+			$userComment = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"]));
+		}
+		if(isset($exif["IFD0"]["Model"])) {
+			$model = $exif["IFD0"]["Model"];
+		}
+		if(isset($exif["IFD0"]["Keywords"])) {
+			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
+		}
+	}
+	
+	if(isset($exif["COMPUTED"])) {
+		if(isset($exif["COMPUTED"]["ApertureFNumber"])) {
+			$aperture = $exif["COMPUTED"]["ApertureFNumber"];
+		}
+	}
+	
+	if($exif["EXIF"]) {
+		if(isset($exif["EXIF"]["FocalLength"])) {
+			$focalLength = $exif["EXIF"]["FocalLength"];
+			$diviserInstr = strpos($focalLength, "/");
+			if ($diviserInstr !== false) {
+				$d = substr($focalLength, 0, $diviserInstr);
+				$D = substr($focalLength, $diviserInstr+1);
+				$focalLength = floor((intval($d)/intval($D))*100)/100;
+			}
+			
+			$focalLength = $focalLength . "mm";
+		}
+		if(isset($exif["EXIF"]["ExposureTime"])) {
+			$expoTime = $exif["EXIF"]["ExposureTime"] . "s";
+		}
+		if(isset($exif["EXIF"]["ISOSpeedRatings"])) {
+			$isoSpeed = $exif["EXIF"]["ISOSpeedRatings"] . "ISO";
+		}
+	}
+	
+	$title = $model . "\n" . 
+			$aperture . " " . $expoTime . " " . $isoSpeed . $eol .
+			$focalLength . "\n" .
+			$userComment . "\n" .
+			$keyWords;
+			
+	return $title;
+}
+
+function computeExifAll($exif, $eol) {
+	$str = "";
+	
+	foreach ($exif as $key => $section) {
+		foreach ($section as $name => $val) {
+			$str = $str . $key . "." . $name . ":" . $val . $eol;
+		}
+	}
+	
+	return $str;
+}
+
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix;
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
 
 	if (isset($_REQUEST['start'])){
 		$start = $_REQUEST['start'];
@@ -186,7 +275,6 @@ global $nbImg, $dont_show_image_prefix;
 			$imglargo=$sizeimgo[0];
 			$imghauto=$sizeimgo[1];
 
-
 			/* ### Recalcul des dimensions MAX des vignettes ### */
 			if ($imglargo>$larimage){
 				$imghautoz=$imghauto*$larimage/$imglargo;
@@ -202,13 +290,24 @@ global $nbImg, $dont_show_image_prefix;
 				$imglargoz=round($imglargoz);
 				$imghautoz=$hautimage;
 			}
+			
+			/* Exif */
+			$exif_title = "no Exif tag found";
+			$exif = exif_read_data($imagesource, 0, true);
+			if( ! ($exif === false)) {
+				$exif_title = computeExifTitle($exif, "\n");
+			}
 
-			/* Affichage de l'image ### */
+
+			/* Affichage de l'image */
 			$nbImg ++;
-			?><td bgcolor="#000000" valign="middle" align="center"><a href="#" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="Cliquez pour agrandir l\'image"><?
+			?>
+			<td bgcolor="#000000" valign="middle" align="center">
+			<div style="position:relative" onmousedown="return false">
+			<a href="<? echo $imagesource; ?>" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="<? echo $exif_title ?>">
+			<?
 
-
-			/* ### Redimensionnement à la volée ### */
+			/* Redimensionnement à la volée */
 			if ($redimvoz=='1'){
 				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
 			}
@@ -216,6 +315,17 @@ global $nbImg, $dont_show_image_prefix;
 				?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
 			}
 
+			?>
+			<div id="<? echo $exif_id_prefix; ?><? echo $k; ?>" style="display:none;height:<? echo $imghautoz - 20 ?>px;overflow-y:scroll;z-index:10;position:absolute;left:10px;top:10px;font-size:12px;font:Arial;">
+			<?
+				echo computeExifAll($exif, "<br/>");
+			?>
+			</div>
+			</a>
+			</td>
+			</td>
+			<?
+			
 			$k++;
 		}
 		$i++;
@@ -346,7 +456,7 @@ else{
 	?>
 	</table>
 	
-	<div style="position:fixed;top:10px;left:10px">
+	<div style="position:fixed;top:10px;left:10px;z-index:100;">
 	<?
 	//ici en haut à gauche, le menu qui reste meme quand on scroll
 	if($nbImg > 0) {
@@ -363,9 +473,13 @@ else{
 	if($nbImg > 0) {
 	?>
 	
-	<b><a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.4;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b>
+	<a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.3;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
 	&nbsp;
-	<b><a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.4;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b>
+	<a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.3;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+	<br/>
+	<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
+	<br/>
+	<input type="text" style="width:100px;font-size:12px;background-color:transparent;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/>
 	<br/>
 	<?
 	}
