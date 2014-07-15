@@ -34,12 +34,12 @@ $dont_show_image_prefix = "mesvignettes_";
 $exif_id_prefix = "image_exif_all_";
 
 /* Récupération des variables */
-$hautscreen=$_GET[hautscreen];
-$imglargoz=$_GET[imglargo];
-$imghautoz=$_GET[imghauto];
-$sourceimg=$_GET[sourceimg];
-$url=$_GET[url];
-$urlancien=$_GET[urlancien];
+$hautscreen=$_GET["hautscreen"];
+$imglargoz=$_GET["imglargo"];
+$imghautoz=$_GET["imghauto"];
+$sourceimg=$_GET["sourceimg"];
+$url=$_GET["url"];
+$urlancien=$_GET["urlancien"];
 if($hautscreen != '') {
 	$hautimage = $hautscreen-70;
 }
@@ -202,8 +202,9 @@ function computeExifAll($exif, $eol) {
 }
 
 /* Fonction d'affichage des photos miniatures */
-function affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
+function affichimgs($larimage,$hautimage,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
 global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
+	$start = 0;
 
 	if (isset($_REQUEST['start'])){
 		$start = $_REQUEST['start'];
@@ -448,7 +449,7 @@ else{
 
 
 	/* Appel de la fonction pour l'affichage des images */
-	affichimgs($nblignes,$larimage,$hautimage,$nbcols,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable);
+	affichimgs($larimage,$hautimage,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable);
 
 	?></td>
 	</tr><?
