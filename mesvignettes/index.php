@@ -222,6 +222,13 @@ function exifMatch($filtre, $exif) {
 				return true;
 			}
 		}
+		if(isset($exif["IFD0"]["Model"])) {
+			$model = $exif["IFD0"]["Model"];
+
+			if(strpos($model, $filtre) !== false) {
+				return true;
+			}
+		}
 		if(isset($exif["IFD0"]["Keywords"])) {
 			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
 			
@@ -391,8 +398,42 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 	</table><?
 }
 
+// regarde si un sous-repertoire contient des sous-sous-répertoire ou des images avec des exif qui matchent le filtre
+function dirHasMatchingExifImage($theDir, $filtre) {
+	$ret = false;
+	
+	if ($handle = opendir($theDir)) {
+		while (false !== ($file = readdir($handle))) {
+			if($file == "." || $file == "..") {
+				continue;
+			}
+		
+			$fileName = $theDir.$file;
+
+			if (is_dir($fileName)) {
+				$ret = true;
+				break;
+			}
+			
+			$exif = exif_read_data($fileName, 0, true);
+			if( ! ($exif === false)) {
+				if(exifMatch($filtre, $exif)) {
+					$ret = true;
+					break;
+				}
+			}
+
+			
+		}
+		
+		closedir($handle);
+	}
+
+	return $ret;
+}
+
 // fonction d'affichage des vignettes de répertoire
-function displayDir($urlmemo, $dirTab, $numDirName) {
+function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
 	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre;
 
 	$i = 0;
@@ -401,6 +442,10 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 		$theDir = $dirTab[$nb-$j-1];
 
 		if($numDirName == is_numeric(substr($theDir, 0, 1))) {
+			continue;
+		}
+		
+		if($filtre != null && $filtre != "" && !dirHasMatchingExifImage($currentDirName.$theDir."/", $filtre)) {
 			continue;
 		}
 
@@ -489,9 +534,9 @@ else{
 	    closedir($handle);
 		
 		// affichage en premier des repertoires commencant par un chiffre
-		displayDir($urlmemo, $dirTab, 0);
+		displayDir($urlmemo, $dirTab, $url.'/', 0);
 		// ensuite on affichage les autres répertoires
-		displayDir($urlmemo, $dirTab, 1);
+		displayDir($urlmemo, $dirTab, $url.'/', 1);
 
 	}
 	?></table></td>
