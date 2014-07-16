@@ -39,9 +39,10 @@ $imglargoz=$_GET["imglargo"];
 $imghautoz=$_GET["imghauto"];
 $sourceimg=$_GET["sourceimg"];
 $url=$_GET["url"];
-$urlancien=$_GET["urlancien"];
+//$urlancien=$_GET["urlancien"];
+$filtre=$_GET["filtre"];
 if($hautscreen != '') {
-	$hautimage = $hautscreen-70;
+	$hautimage = $hautscreen-40;
 }
 
 
@@ -59,6 +60,23 @@ $nbImg = 0;
 <!--meta name="viewport" content="height=device-height" / -->
 
 <script language="javascript">
+
+function backUrl(theurl) {
+	var i = theurl.lastIndexOf("/");
+	if(i > 0) {
+		return theurl.substr(0, i);
+	}
+	else {
+		return "";
+	}
+}
+
+function onFilterKeyPress(evt) {
+	if(evt.keyCode == 13) {
+		var myfilter = document.getElementById("filtreInput").value;
+		gotourl('<?echo $url; ?>', myfilter);
+	}
+}
 
 function toggleExifAll() {
 	var divArray = document.getElementsByTagName("DIV");
@@ -100,14 +118,19 @@ function getWindwHeight() {
   return myHeight;
 }
 
-function gotourl(myurlmemo, myurl) {
+function gotourl(myurl, myfiltre) {
 	var str = ""+window.location;
 	var i = str.lastIndexOf('?');
 	str = str.substring(0, i);
 	i = str.lastIndexOf('/');
 	str = str.substring(0, i+1);
+	if(myfiltre != null && myfiltre=="") {
+		myfiltre = null
+	}
 	
-	window.location = str+"index.php?urlancien="+myurlmemo+"&url="+myurl+"&hautscreen="+ getWindwHeight(); //screen.height;
+	window.location = str+"index.php?url="+myurl+
+		(myfiltre!=null ? "&filtre="+myfiltre : "") +
+		"&hautscreen="+ getWindwHeight(); //screen.height;
 }
 
 // raccourcis :
@@ -189,6 +212,29 @@ function computeExifTitle($exif, $eol) {
 	return $title;
 }
 
+function exifMatch($filtre, $exif) {
+
+	if(isset($exif["IFD0"])) {
+		if(isset($exif["IFD0"]["Comments"])) {
+			$userComment = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"]));
+			
+			if(strpos($userComment, $filtre) !== false) {
+				return true;
+			}
+		}
+		if(isset($exif["IFD0"]["Keywords"])) {
+			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
+			
+			if(strpos($keyWords, $filtre) !== false) {
+				return true;
+			}
+		}
+	}
+
+	
+	return false;
+}
+
 function computeExifAll($exif, $eol) {
 	$str = "";
 	
@@ -202,8 +248,8 @@ function computeExifAll($exif, $eol) {
 }
 
 /* Fonction d'affichage des photos miniatures */
-function affichimgs($larimage,$hautimage,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
+function affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 	$start = 0;
 
 	if (isset($_REQUEST['start'])){
@@ -226,6 +272,7 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
 	while($fichier = readdir($dossier)){
 		$extent=substr($fichier,strrpos($fichier,"."));
 		$extensaj=strtoupper($extent);
+		$showimg = true;
 		
 		if(substr($fichier, 0, strlen($dont_show_image_prefix)) != $dont_show_image_prefix ) {
 			if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
@@ -299,35 +346,43 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
 				$exif_title = computeExifTitle($exif, "\n");
 			}
 
-
-			/* Affichage de l'image */
-			$nbImg ++;
-			?>
-			<td bgcolor="#000000" valign="middle" align="center">
-			<div style="position:relative" onmousedown="return false">
-			<a href="<? echo $imagesource; ?>" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="<? echo $exif_title ?>">
-			<?
-
-			/* Redimensionnement à la volée */
-			if ($redimvoz=='1'){
-				?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
+			$hideImg = false;
+			if($filtre != null && $filtre != "") {
+				if(! exifMatch($filtre, $exif)) {
+					$hideImg = true;
+				}
 			}
-			else{
-				?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
-			}
-
-			?>
-			<div id="<? echo $exif_id_prefix; ?><? echo $k; ?>" style="display:none;height:<? echo $imghautoz - 20 ?>px;overflow-y:scroll;z-index:10;position:absolute;left:10px;top:10px;font-size:12px;font:Arial;">
-			<?
-				echo computeExifAll($exif, "<br/>");
-			?>
-			</div>
-			</a>
-			</td>
-			</td>
-			<?
 			
-			$k++;
+			if($hideImg == false) {
+				/* Affichage de l'image */
+				$nbImg ++;
+				?>
+				<td bgcolor="#000000" valign="middle" align="center">
+				<div style="position:relative" onmousedown="return false">
+				<a href="<? echo $imagesource; ?>" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="<? echo $exif_title ?>">
+				<?
+
+				/* Redimensionnement à la volée */
+				if ($redimvoz=='1'){
+					?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
+				}
+				else{
+					?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
+				}
+
+				?>
+				<div id="<? echo $exif_id_prefix; ?><? echo $k; ?>" style="display:none;height:<? echo $imghautoz - 20 ?>px;overflow-y:scroll;z-index:10;position:absolute;left:10px;top:10px;font-size:12px;font:Arial;">
+				<?
+					echo computeExifAll($exif, "<br/>");
+				?>
+				</div>
+				</a>
+				</td>
+				<!-- /td -->
+				<?
+				
+				$k++;
+			}
 		}
 		$i++;
 	}
@@ -338,7 +393,7 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix;
 
 // fonction d'affichage des vignettes de répertoire
 function displayDir($urlmemo, $dirTab, $numDirName) {
-	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns;
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre;
 
 	$i = 0;
 	$nb = sizeof($dirTab);
@@ -359,7 +414,8 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 		}
 		
 		?>
-		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2"><a href="#" onclick="gotourl('<? echo $urlmemo; ?>','<?echo $urlmemot.$theDir; ?>');"><?
+		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2">
+		<a href="#" onclick="gotourl('<?echo $urlmemot.$theDir; ?>', '<? echo $filtre; ?>');return false;"><?
 		?>
 		<img src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
 		</a></font></td>
@@ -449,7 +505,7 @@ else{
 
 
 	/* Appel de la fonction pour l'affichage des images */
-	affichimgs($larimage,$hautimage,$url,$urlancien,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable);
+	affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable);
 
 	?></td>
 	</tr><?
@@ -466,9 +522,12 @@ else{
 
 	if($url != '' && $url != '.'){
 		?>
-		<b><a href="index.php?url=<?
-		echo $urlancien;
-		?>" style="color:white;font-family:arial;size:4;"><img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/></a></b><br/>
+		<b>
+		<? /* <a href="index.php?url=<? echo $urlancien; ?>" style="color:white;font-family:arial;size:4;"> */
+		?>
+		<a href="" style="color:white;font-family:arial;size:4;" onclick="gotourl(backUrl('<? echo $url; ?>'), '<? echo $filtre; ?>');return false;">
+		<img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/>
+		</a></b><br/>
 		<?
 	}
 	if($nbImg > 0) {
@@ -480,13 +539,13 @@ else{
 	<br/>
 	<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
 	<br/>
-	<input type="text" style="width:100px;font-size:12px;background-color:transparent;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/>
-	<br/>
 	<?
 	}
 
 	?>
-	
+	<input id="filtreInput" type="text" style="width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
+	<br/>
+
 	</div>
 
 	<?
