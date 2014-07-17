@@ -41,6 +41,10 @@ $sourceimg=$_GET["sourceimg"];
 $url=$_GET["url"];
 //$urlancien=$_GET["urlancien"];
 $filtre=$_GET["filtre"];
+$filtreLC = "";
+if($filtre != null) {
+	$filtreLC = strtolower($filtre);
+}
 if($hautscreen != '') {
 	$hautimage = $hautscreen-40;
 }
@@ -216,21 +220,21 @@ function exifMatch($filtre, $exif) {
 
 	if(isset($exif["IFD0"])) {
 		if(isset($exif["IFD0"]["Comments"])) {
-			$userComment = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"]));
+			$userComment = strtolower(utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"])));
 			
 			if(strpos($userComment, $filtre) !== false) {
 				return true;
 			}
 		}
 		if(isset($exif["IFD0"]["Model"])) {
-			$model = $exif["IFD0"]["Model"];
+			$model = strtolower($exif["IFD0"]["Model"]);
 
 			if(strpos($model, $filtre) !== false) {
 				return true;
 			}
 		}
 		if(isset($exif["IFD0"]["Keywords"])) {
-			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
+			$keyWords = strtolower(utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"])));
 			
 			if(strpos($keyWords, $filtre) !== false) {
 				return true;
@@ -256,7 +260,7 @@ function computeExifAll($exif, $eol) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC;
 	$start = 0;
 
 	if (isset($_REQUEST['start'])){
@@ -355,7 +359,7 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 
 			$hideImg = false;
 			if($filtre != null && $filtre != "") {
-				if(! exifMatch($filtre, $exif)) {
+				if(! exifMatch($filtreLC, $exif)) {
 					$hideImg = true;
 				}
 			}
@@ -434,7 +438,7 @@ function dirHasMatchingExifImage($theDir, $filtre) {
 
 // fonction d'affichage des vignettes de répertoire
 function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
-	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre;
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC;
 
 	$i = 0;
 	$nb = sizeof($dirTab);
@@ -445,7 +449,7 @@ function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
 			continue;
 		}
 		
-		if($filtre != null && $filtre != "" && !dirHasMatchingExifImage($currentDirName.$theDir."/", $filtre)) {
+		if($filtre != null && $filtre != "" && !dirHasMatchingExifImage($currentDirName.$theDir."/", $filtreLC)) {
 			continue;
 		}
 
