@@ -33,6 +33,9 @@ $dont_show_image_prefix = "mesvignettes_";
 /* prefix de l'id des div qui contiennent les exifs complets */
 $exif_id_prefix = "image_exif_all_";
 
+/* nom des fichiers de description */
+$descriptionFileName = "_description.txt";
+
 /* Récupération des variables */
 $hautscreen=$_GET["hautscreen"];
 $imglargoz=$_GET["imglargo"];
@@ -41,8 +44,17 @@ $sourceimg=$_GET["sourceimg"];
 $url=$_GET["url"];
 //$urlancien=$_GET["urlancien"];
 $filtre=$_GET["filtre"];
+$filtreLC = "";
+if($filtre != null) {
+	$filtreLC = strtolower($filtre);
+}
+$filtreDescription=$_GET["filtreDescr"];
+$filtreDescriptionLC = "";
+if($filtreDescription != null) {
+	$filtreDescriptionLC = strtolower($filtreDescription);
+}
 if($hautscreen != '') {
-	$hautimage = $hautscreen-40;
+	$hautimage = $hautscreen-70;
 }
 
 
@@ -74,7 +86,8 @@ function backUrl(theurl) {
 function onFilterKeyPress(evt) {
 	if(evt.keyCode == 13) {
 		var myfilter = document.getElementById("filtreInput").value;
-		gotourl('<?echo $url; ?>', myfilter);
+		var myfilterDescription = document.getElementById("filtreDescriptionInput").value;
+		gotourl('<?echo $url; ?>', myfilter, myfilterDescription);
 	}
 }
 
@@ -118,7 +131,7 @@ function getWindwHeight() {
   return myHeight;
 }
 
-function gotourl(myurl, myfiltre) {
+function gotourl(myurl, myfiltre, myfiltredescription) {
 	var str = ""+window.location;
 	var i = str.lastIndexOf('?');
 	str = str.substring(0, i);
@@ -127,9 +140,13 @@ function gotourl(myurl, myfiltre) {
 	if(myfiltre != null && myfiltre=="") {
 		myfiltre = null
 	}
+	if(myfiltredescription != null && myfiltredescription=="") {
+		myfiltredescription = null
+	}
 	
 	window.location = str+"index.php?url="+myurl+
 		(myfiltre!=null ? "&filtre="+myfiltre : "") +
+		(myfiltredescription!=null ? "&filtreDescr="+myfiltredescription : "") +
 		"&hautscreen="+ getWindwHeight(); //screen.height;
 }
 
@@ -216,14 +233,21 @@ function exifMatch($filtre, $exif) {
 
 	if(isset($exif["IFD0"])) {
 		if(isset($exif["IFD0"]["Comments"])) {
-			$userComment = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"]));
+			$userComment = strtolower(utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"])));
 			
 			if(strpos($userComment, $filtre) !== false) {
 				return true;
 			}
 		}
+		if(isset($exif["IFD0"]["Model"])) {
+			$model = strtolower($exif["IFD0"]["Model"]);
+
+			if(strpos($model, $filtre) !== false) {
+				return true;
+			}
+		}
 		if(isset($exif["IFD0"]["Keywords"])) {
-			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
+			$keyWords = strtolower(utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"])));
 			
 			if(strpos($keyWords, $filtre) !== false) {
 				return true;
@@ -249,7 +273,7 @@ function computeExifAll($exif, $eol) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC;
 	$start = 0;
 
 	if (isset($_REQUEST['start'])){
@@ -267,6 +291,10 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 		$dossier = opendir('.');
 	}
 
+	$dirDescr = new dirDescription($url);
+	if($dirDescr->exists()) {
+		$dirDescr->read();
+	}
 
 	$images = array();
 	while($fichier = readdir($dossier)){
@@ -298,7 +326,8 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 	while($stopboucle=='no'){
 
 		/* ### Extraction de l'extension ### */
-		$imagesource=$urlt.$images[$i];
+		$imageBaseFileName = $images[$i];
+		$imagesource=$urlt.$imageBaseFileName;
 		$extent=substr($imagesource,strrpos($imagesource,"."));
 		$extensaj=strtoupper($extent);
 
@@ -339,16 +368,23 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 				$imghautoz=$hautimage;
 			}
 			
-			/* Exif */
+			/* filtre par description */
+			$hideImg = false;
+			if($filtreDescription != null && $filtreDescription != "") {
+				if($dirDescr->containsForImg($imageBaseFileName, $filtreDescriptionLC)==FALSE) {
+					$hideImg = true;
+				}
+			}
+			
+			/* fitlre par Exif */
 			$exif_title = "no Exif tag found";
 			$exif = exif_read_data($imagesource, 0, true);
 			if( ! ($exif === false)) {
 				$exif_title = computeExifTitle($exif, "\n");
 			}
 
-			$hideImg = false;
-			if($filtre != null && $filtre != "") {
-				if(! exifMatch($filtre, $exif)) {
+			if($hideImg == false && $filtre != null && $filtre != "") {
+				if(! exifMatch($filtreLC, $exif)) {
 					$hideImg = true;
 				}
 			}
@@ -391,9 +427,157 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre;
 	</table><?
 }
 
+// regarde si un sous-repertoire contient des sous-sous-répertoire ou des images avec des exif qui matchent le filtre
+function dirHasMatchingExifImage($theDir, $filtre) {
+	$ret = false;
+	
+	if ($handle = opendir($theDir)) {
+		while (false !== ($file = readdir($handle))) {
+			if($file == "." || $file == "..") {
+				continue;
+			}
+		
+			$fileName = $theDir.$file;
+
+			if (is_dir($fileName)) {
+				$ret = true;
+				break;
+			}
+			
+			$exif = exif_read_data($fileName, 0, true);
+			if( ! ($exif === false)) {
+				if(exifMatch($filtre, $exif)) {
+					$ret = true;
+					break;
+				}
+			}
+
+			
+		}
+		
+		closedir($handle);
+	}
+
+	return $ret;
+}
+
+// classe pour gérer les descriptions par image
+class DirDescriptionPerImage {
+	var $firstImage;
+	var $lastImage;
+	var $description;
+	
+	function DirDescriptionPerimage($aFirstImage, $aLastImage) {
+		$this->description = "";
+		$this->firstImage = $aFirstImage;
+		$this->lastImage = $aLastImage;
+	}
+	
+	function addDescription($line) {
+		$this->description = $this->description.$line;
+	}
+	
+}
+
+// classe pour gérer les fichiers de description
+class DirDescription {
+	var $fileName;
+	var $globalDescription;
+	var $perImageDescriptionArray;
+	
+	function DirDescription($dir) {
+		global $descriptionFileName;
+		$this->fileName = $dir."/".$descriptionFileName;
+		$this->perImageDescriptionArray = array();
+		$this->globalDescription = "";
+	}
+	
+	function exists() {
+		return file_exists($this->fileName);
+	}
+	
+	function read() {
+		// $this->globalDescription = file_get_contents($this->fileName);
+		$perImageCurrent = null;
+		$h = fopen($this->fileName,"r");
+
+		while(! feof($h))  {
+			$line = trim(fgets($h));
+			
+			if(substr($line, 0, 1) == "*") {
+				$separatorPos = strpos($line, ":", 1);
+				$first = null;
+				$last  = null;
+				if($separatorPos === FALSE) {
+					$first = substr($line, 1);
+					$last  = $first;
+				}
+				else {
+					$first = substr($line, 1, $separatorPos-1);
+					$last  = substr($line, $separatorPos+1);
+				}
+				$perImageCurrent = new DirDescriptionPerImage($first, $last);
+				array_push($this->perImageDescriptionArray, $perImageCurrent);
+			}
+			else {
+				if($perImageCurrent != null) {
+					$perImageCurrent->addDescription($line . "\n");
+				}
+				else {
+						$this->globalDescription = $this->globalDescription . $line . "\n";
+				}
+			}
+		}
+
+		fclose($h);
+	}
+	
+	function contains($text) {
+		if(strpos(strtolower($this->globalDescription), $text) !== FALSE) {
+			return TRUE;
+		}
+		
+		foreach($this->perImageDescriptionArray as $descr) {
+			if(strpos(strtolower($descr->description), $text) !== FALSE) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	function containsForImg($img, $text) {
+		if(strpos(strtolower($this->globalDescription), $text) !== FALSE ) {
+			return TRUE;
+		}
+	
+		$imgLC = strtolower($img);
+		foreach($this->perImageDescriptionArray as $descr) {
+			if( strcmp($imgLC, strtolower($descr->firstImage)) >= 0 && 
+				strcmp($imgLC, strtolower($descr->lastImage)) <= 0 &&
+				strpos(strtolower($descr->description), $text) !== FALSE ) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	function getDescription() {
+		$str = $this->globalDescription . "\n";
+		
+		foreach($this->perImageDescriptionArray as $descr) {
+			$str = $str . $descr->firstImage . "->" . $descr->lastImage . ":\n";
+			$str = $str . $descr->description . "\n";
+		}
+		
+		return $str;
+	}
+}
+
 // fonction d'affichage des vignettes de répertoire
-function displayDir($urlmemo, $dirTab, $numDirName) {
-	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre;
+function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC;
 
 	$i = 0;
 	$nb = sizeof($dirTab);
@@ -403,7 +587,24 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 		if($numDirName == is_numeric(substr($theDir, 0, 1))) {
 			continue;
 		}
+		
+		if($filtre != null && $filtre != "" && !dirHasMatchingExifImage($currentDirName.$theDir."/", $filtreLC)) {
+			continue;
+		}
+		
+		$title = $theDir;
+		$dirDescr = new DirDescription($currentDirName.$theDir);
+		if($dirDescr->exists()) {
+			$dirDescr->read();
+			
+			$title = $dirDescr->getDescription();
+		}
 
+		if($filtreDescription != null && $filtreDescription != "" && $dirDescr->contains($filtreDescriptionLC)==FALSE) {
+			continue;
+		}
+
+		
 		$urlmemot = $urlmemo;
 		if($urlmemo != "") {
 			$urlmemot = $urlmemo.'/';
@@ -415,9 +616,9 @@ function displayDir($urlmemo, $dirTab, $numDirName) {
 		
 		?>
 		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2">
-		<a href="#" onclick="gotourl('<?echo $urlmemot.$theDir; ?>', '<? echo $filtre; ?>');return false;"><?
+		<a href="#" onclick="gotourl('<?echo $urlmemot.$theDir; ?>', '<? echo $filtre; ?>', '<? echo $filtreDescription; ?>');return false;"><?
 		?>
-		<img src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
+		<img title="<? echo $title; ?>" src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
 		</a></font></td>
 		<?
 		
@@ -489,9 +690,9 @@ else{
 	    closedir($handle);
 		
 		// affichage en premier des repertoires commencant par un chiffre
-		displayDir($urlmemo, $dirTab, 0);
+		displayDir($urlmemo, $dirTab, $url.'/', 0);
 		// ensuite on affichage les autres répertoires
-		displayDir($urlmemo, $dirTab, 1);
+		displayDir($urlmemo, $dirTab, $url.'/', 1);
 
 	}
 	?></table></td>
@@ -525,7 +726,7 @@ else{
 		<b>
 		<? /* <a href="index.php?url=<? echo $urlancien; ?>" style="color:white;font-family:arial;size:4;"> */
 		?>
-		<a href="" style="color:white;font-family:arial;size:4;" onclick="gotourl(backUrl('<? echo $url; ?>'), '<? echo $filtre; ?>');return false;">
+		<a href="" style="color:white;font-family:arial;size:4;" onclick="gotourl(backUrl('<? echo $url; ?>'), '<? echo $filtre; ?>', '<? echo $filtreDescription; ?>');return false;">
 		<img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/>
 		</a></b><br/>
 		<?
@@ -543,7 +744,11 @@ else{
 	}
 
 	?>
-	<input id="filtreInput" type="text" style="width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
+	<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
+	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
+	<br/>
+	<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtreDescription; ?>" />
+	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
 	<br/>
 
 	</div>
