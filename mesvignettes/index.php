@@ -36,6 +36,9 @@ $exif_id_prefix = "image_exif_all_";
 /* nom des fichiers de description */
 $descriptionFileName = "_description.txt";
 
+/* description à afficher pour le répertoire courant */
+$descriptionTitle = "";
+
 /* Récupération des variables */
 $hautscreen=$_GET["hautscreen"];
 $imglargoz=$_GET["imglargo"];
@@ -273,7 +276,7 @@ function computeExifAll($exif, $eol) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC;
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC, $descriptionTitle;
 	$start = 0;
 
 	if (isset($_REQUEST['start'])){
@@ -294,6 +297,8 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $fi
 	$dirDescr = new dirDescription($url);
 	if($dirDescr->exists()) {
 		$dirDescr->read();
+		$descriptionTitle = $dirDescr->getDescription();
+		error_log($descriptionTitle);
 	}
 
 	$images = array();
@@ -747,6 +752,7 @@ else{
 	<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
 	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
 	<br/>
+	<div style="font:Arial;color:grey;font-size:8px;" title="<? echo $descriptionTitle; ?>">DESCR.</div>
 	<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtreDescription; ?>" />
 	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
 	<br/>
