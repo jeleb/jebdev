@@ -1,5 +1,5 @@
 <?
-// fucking useless comment again
+// fucking useless comment again - more useless thant is impossible
 /* largeur MAX des miniatures  */
 $larimage='2000';
 
