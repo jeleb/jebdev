@@ -53,6 +53,10 @@ echo ============
 echo   TESTS LOCAL OK
 echo ============
 
+echo TEST FTP skipped 
+echo (edit test_all.bat to re establish ftp tests)
+goto :end
+
 FOR /F "usebackq delims==" %%P IN (`dir /AD /B ftp_*.test`) DO ( 
 	echo === TEST %%P ===
 	del %%P\jebsync.exe
@@ -121,5 +125,6 @@ echo ============
 
 echo tous les test sont OK
 
+:end
 set E=
 set test_path=

@@ -1270,15 +1270,60 @@ void resolve_drive_name_in_path(wchar_t** path) {
 // ces fonctions seront parametrables pour fonctionner aussi bien en local qu'en ftp
 // et de façon transparente
 
-time_t convert_file_time(FILETIME ft) {
+time_t convert_file_time_to_time_t(FILETIME ft) {
 	unsigned long long ull = ft.dwLowDateTime;
 	ull +=ft.dwHighDateTime * 0x100000000;
 
-	//printf("ull=%llu\n", ull);
-	//printf("(1970-1601)*(365.25)*24*60*60)=%llu\n", (1970-1601)*(365.25)*24*60*60);
-	//time_t last_write_time = (time_t) (ull/10000000 - (1970-1601)*(365.25)*24*60*60);
 	time_t last_write_time = (time_t) (ull/10000000 - ((1970-1601)*(365)+89.0)*24*60*60);
 	return last_write_time;
+}
+
+FILETIME convert_time_t_to_file_time_t(time_t tt) {
+	FILETIME ft;
+	ft.dwLowDateTime  = 0;
+	ft.dwHighDateTime = 0;
+
+    LONGLONG ll = Int32x32To64(tt, 10000000) + 116444736000000000;
+    ft.dwLowDateTime = (DWORD) ll;
+    ft.dwHighDateTime = ll >>32;
+	
+	return ft;
+}
+
+void set_file_time_fs(wchar_t * file_name, time_t tt) {
+
+	HANDLE h = NULL;
+	FILETIME last_write_time = convert_time_t_to_file_time_t(tt);
+
+	h = CreateFileW(file_name,
+			GENERIC_READ|FILE_WRITE_ATTRIBUTES,
+			FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+			NULL,
+			OPEN_EXISTING,
+			0,
+			NULL);
+	if(h==INVALID_HANDLE_VALUE || h==NULL) {
+		DWORD err = GetLastError();
+		simple_error(L"Ouverture du fichier '%s' impossible code=%lu", file_name, err);
+		goto end;
+	}
+
+	if(SetFileTime(
+		  h,
+		  NULL,
+		  NULL,
+		  &last_write_time
+		) == 0 ) {
+		DWORD err = GetLastError();
+		simple_error(L"SetFileTime de '%s' impossible code=%lu", file_name, err);
+		tt = (time_t) -1;
+	}
+
+end:
+	if(h == NULL ||
+		h == INVALID_HANDLE_VALUE) {
+		CloseHandle(h);
+	}
 }
 
 time_t get_file_time_fs(wchar_t * file_name) {
@@ -1330,7 +1375,7 @@ time_t get_file_time_fs(wchar_t * file_name) {
 		tt = (time_t) -1;
 	}
 
-	tt = convert_file_time(last_write_time);
+	tt = convert_file_time_to_time_t(last_write_time);
 
 	CloseHandle(h);
 
@@ -1421,6 +1466,93 @@ int move_file_fs(wchar_t * source_name, wchar_t * dest_name, bool create_dir_if_
 	return 0;
 }
 
+bool file_identifical(wchar_t * src, wchar_t * dst) {
+	bool identical = false;
+	HANDLE h_src = NULL;
+	HANDLE h_dst = NULL;
+	
+	static int buff_size = 8192;
+	char* buff_src = (char*) malloc(buff_size); 
+	char* buff_dst = (char*) malloc(buff_size); 
+	DWORD read_len_src = 0;
+	DWORD read_len_dst = 0;
+
+	h_src = CreateFileW(src,
+			GENERIC_READ,
+			FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+			NULL,
+			OPEN_EXISTING,
+			0,
+			NULL);
+	if(h_src==INVALID_HANDLE_VALUE || h_src==NULL) {
+		DWORD err = GetLastError();
+		simple_error(L"Ouverture du fichier '%s' impossible code=%lu", src, err);
+		goto end;
+	}
+	
+	h_dst = CreateFileW(dst,
+			GENERIC_READ,
+			FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+			NULL,
+			OPEN_EXISTING,
+			0,
+			NULL);
+	if(h_dst==INVALID_HANDLE_VALUE || h_dst==NULL) {
+		DWORD err = GetLastError();
+		simple_error(L"Ouverture du fichier '%s' impossible code=%lu", dst, err);
+		goto end;
+	}
+	
+	do {
+		if(!ReadFile(h_src,
+				buff_src,
+				buff_size,
+				&read_len_src,
+				NULL)) {
+			DWORD err = GetLastError();
+			simple_error(L"Lecture du fichier '%s' impossible code=%lu",src, err);
+			goto end;
+		}
+		
+		if(!ReadFile(h_dst,
+				buff_dst,
+				buff_size,
+				&read_len_dst,
+				NULL)) {
+			DWORD err = GetLastError();
+			simple_error(L"Lecture du fichier '%s' impossible code=%lu",dst, err);
+			goto end;
+		}
+
+		if(read_len_src != read_len_dst) {
+			goto end;
+		}
+		
+		if(memcmp(buff_src, buff_dst, read_len_src) != 0) {
+			goto end;
+		}
+	} while(read_len_src != 0);
+	
+	
+	identical = true;
+	
+end:
+	if(h_dst != NULL) {
+		CloseHandle(h_dst);
+	}
+	if(h_dst != NULL) {
+		CloseHandle(h_src);
+	}
+	if(buff_src != NULL) {
+		free(buff_src);
+	}
+	if(buff_dst != NULL) {
+		free(buff_dst);
+	}
+
+	return identical;
+}
+
 int delete_file_fs(wchar_t * file_name) {
 	if(DeleteFileW(file_name) == 0) {
 		DWORD err = GetLastError();
@@ -1468,7 +1600,7 @@ void list_dir_fs(wchar_t * source_dir,
 			continue;
 		}
 
-		time_t last_write_time = convert_file_time(FindFileData.ftLastWriteTime);
+		time_t last_write_time = convert_file_time_to_time_t(FindFileData.ftLastWriteTime);
 		
 		bool f_dir_excluded = false;
 
@@ -1684,6 +1816,16 @@ time_t get_file_time(wchar_t * file_name) {
 	}
 	else {
 		return get_file_time_fs(file_name);
+	}
+}
+
+void set_file_time(wchar_t * file_name, time_t tt) {
+	if(is_ftp_prefix(file_name)) {
+		simple_error(L"erreur interne : fonction set_file_time() appelee avec une source ftp");
+		//set_file_time_ftp(file_name, tt);
+	}
+	else {
+		set_file_time_fs(file_name, tt);
 	}
 }
 
@@ -2377,59 +2519,77 @@ void list_dir_callback(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_
 			int minutes = (int) (tt/60);
 			tt -= minutes*60;
 			int secondes = (int) tt;*/
+			
+			if(file_identifical(source_file_name.get(), dest_file_name.get())) {
+				struct tm * pt;
+				pt = localtime(&source_last_modified_date);
 
-			if(backup_dir == NULL) {
-				log_msg(L"X %s", dest_file_name);
+				log_msg(L"t[%4.4d%2.2d%2.2d-%2.2d%2.2d%2.2d] %s", 
+						pt->tm_year+1900, pt->tm_mon+1, pt->tm_mday,
+						pt->tm_hour, pt->tm_min, pt->tm_sec,
+						dest_file_name);
 				if(!globalOptionTestOnly) {
-					if(delete_file(dest_file_name.get()) != 0) {
-						// nothing : on essaie de continuer quand meme, au cas ou
-						// normalement on doit avoir un deuxieme message d'erreur au moment de la copie
-						// qui ne peut pas ecraser des fichiers existant
-					}
+					set_file_time(dest_file_name.get(), source_last_modified_date);
 				}
+				
 			}
 			else {
-				/*time_t current_tt = 0;
-				struct tm current_tm;
-				memset(&current_tm, sizeof(current_tm), 0);
-				_time64(&current_tt);
-				_localtime64_s(&current_tm, &current_tt);*/
-
-				path backup_file_name(backup_dir, (subdir==NULL?0:wcslen(subdir)+1) + wcslen(file_name)+1+7+15);
-				if(subdir != NULL) {
-					backup_file_name.add_trailing_backslash_if_necessary();
-					backup_file_name.cat(subdir);
-				}
-				backup_file_name.add_trailing_backslash_if_necessary();
-				backup_file_name.cat(file_name);
-				backup_file_name.cat(L".JSYNC-");
-				//the timestamp used is the last modified datetime of the file
-				//backup_file_name.cat_timestamp(reference_time);
-				backup_file_name.cat_timestamp(source_last_modified_date);
-
-				log_msg(L"B %s", backup_file_name);
-				if(!globalOptionTestOnly) {
-					if(move_file(dest_file_name.get(), backup_file_name.get(), true, backup_dir)) {
-						// nothing : si on a une erreur on continue quand meme, au cas ou
-						// on aura donc certainement une seconde erreur lors de la copie qui ne peut pas
-						// ecraser
+				if(backup_dir == NULL) {
+					log_msg(L"X %s", dest_file_name);
+					if(!globalOptionTestOnly) {
+						if(delete_file(dest_file_name.get()) != 0) {
+							// nothing : on essaie de continuer quand meme, au cas ou
+							// normalement on doit avoir un deuxieme message d'erreur au moment de la copie
+							// qui ne peut pas ecraser des fichiers existant
+						}
 					}
 				}
+				else {
+					/*time_t current_tt = 0;
+					struct tm current_tm;
+					memset(&current_tm, sizeof(current_tm), 0);
+					_time64(&current_tt);
+					_localtime64_s(&current_tm, &current_tt);*/
 
-				// au passage on regarde s'il ne faut pas purger d'autres sauvegarde
-				// les fichiers ne sont pas purges tout de suite mais a la fin
-				// du traitement de la section
-				if(purge_if_older > 0) {
-					check_backup_for_purge(backup_dir, subdir, file_name, purge_if_older);
+					path backup_file_name(backup_dir, (subdir==NULL?0:wcslen(subdir)+1) + wcslen(file_name)+1+7+15);
+					if(subdir != NULL) {
+						backup_file_name.add_trailing_backslash_if_necessary();
+						backup_file_name.cat(subdir);
+					}
+					backup_file_name.add_trailing_backslash_if_necessary();
+					backup_file_name.cat(file_name);
+					backup_file_name.cat(L".JSYNC-");
+					//the timestamp used is the last modified datetime of the file
+					//backup_file_name.cat_timestamp(reference_time);
+					backup_file_name.cat_timestamp(source_last_modified_date);
+
+					log_msg(L"B %s", backup_file_name);
+					if(!globalOptionTestOnly) {
+						if(move_file(dest_file_name.get(), backup_file_name.get(), true, backup_dir)) {
+							// nothing : si on a une erreur on continue quand meme, au cas ou
+							// on aura donc certainement une seconde erreur lors de la copie qui ne peut pas
+							// ecraser
+						}
+					}
+
+					// au passage on regarde s'il ne faut pas purger d'autres sauvegarde
+					// les fichiers ne sont pas purges tout de suite mais a la fin
+					// du traitement de la section
+					if(purge_if_older > 0) {
+						check_backup_for_purge(backup_dir, subdir, file_name, purge_if_older);
+					}
+				}
+				log_msg(L"+ %s", dest_file_name.get());
+				if(!globalOptionTestOnly) {
+					if(copy_file(source_file_name.get(), dest_file_name.get())) {
+						// nothing : on ne fait rien : l'erreur est deja loguee
+						// et il faut continuer a traiter les autres fichier malgre l'erreur
+					}
 				}
 			}
-			log_msg(L"+ %s", dest_file_name.get());
-			if(!globalOptionTestOnly) {
-				if(copy_file(source_file_name.get(), dest_file_name.get())) {
-					// nothing : on ne fait rien : l'erreur est deja loguee
-					// et il faut continuer a traiter les autres fichier malgre l'erreur
-				}
-			}
+		}
+		else if(dest_last_write_time > source_last_modified_date) {
+			simple_error(L"destination plus récente que la source : '%s'", source_file_name.get());
 		}
 	}
 }
