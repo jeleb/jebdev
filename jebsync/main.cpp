@@ -1466,7 +1466,7 @@ int move_file_fs(wchar_t * source_name, wchar_t * dest_name, bool create_dir_if_
 	return 0;
 }
 
-bool file_identifical(wchar_t * src, wchar_t * dst) {
+bool file_identifical_fs(wchar_t * src, wchar_t * dst) {
 	bool identical = false;
 	HANDLE h_src = NULL;
 	HANDLE h_dst = NULL;
@@ -1819,6 +1819,16 @@ time_t get_file_time(wchar_t * file_name) {
 	}
 }
 
+bool file_identifical(wchar_t * src, wchar_t * dst) {
+	if(is_ftp_prefix(src) || is_ftp_prefix(dst)) {
+		simple_error(L"erreur interne : fonction file_identifical() appelee avec une source ftp");
+		// on retourne false comme si les deux fichiers étaient forcément différents
+		return false;
+	}
+	else {
+		return file_identifical_fs(src, dst);
+	}
+}
 void set_file_time(wchar_t * file_name, time_t tt) {
 	if(is_ftp_prefix(file_name)) {
 		simple_error(L"erreur interne : fonction set_file_time() appelee avec une source ftp");
