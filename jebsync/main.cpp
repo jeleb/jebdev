@@ -1466,7 +1466,9 @@ int move_file_fs(wchar_t * source_name, wchar_t * dest_name, bool create_dir_if_
 	return 0;
 }
 
-bool file_identifical_fs(wchar_t * src, wchar_t * dst) {
+bool file_identical_fs(wchar_t * src, 
+						ULONGLONG source_file_size, // si 0, pas de test sur la taille de fichier
+						wchar_t * dst) {
 	bool identical = false;
 	HANDLE h_src = NULL;
 	HANDLE h_dst = NULL;
@@ -1501,6 +1503,21 @@ bool file_identifical_fs(wchar_t * src, wchar_t * dst) {
 		DWORD err = GetLastError();
 		simple_error(L"Ouverture du fichier '%s' impossible code=%lu", dst, err);
 		goto end;
+	}
+	
+	if(source_file_size > 0) {
+		LARGE_INTEGER dest_file_size;
+		dest_file_size.QuadPart = 0;
+		
+		if(!GetFileSizeEx(h_dst, &dest_file_size)) {
+			// tant pis on compare les fichiers quand meme
+			// rien
+		}
+		else {
+			if(source_file_size != (ULONGLONG) dest_file_size.QuadPart) {
+				goto end;
+			}
+		}
 	}
 	
 	do {
@@ -1540,7 +1557,7 @@ end:
 	if(h_dst != NULL) {
 		CloseHandle(h_dst);
 	}
-	if(h_dst != NULL) {
+	if(h_dst != NULL) {	
 		CloseHandle(h_src);
 	}
 	if(buff_src != NULL) {
@@ -1563,13 +1580,16 @@ int delete_file_fs(wchar_t * file_name) {
 }
 
 void list_dir_fs(wchar_t * source_dir,
-		/*wchar_t * destination_dir,
-		wchar_t * backup_dir,
-		int purge_if_older,
-		*/
 		wchar_t * subdir,
 		bool recursive,
-		void (*callback)(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_t * backup_dir, int purge_if_older,*/ wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date, void * callback, bool *pf_dir_excluded),
+		void (*callback)(wchar_t * source_dir, 
+						wchar_t * subdir, 
+						wchar_t * file_name, 
+						bool is_dir, 
+						time_t source_last_modified_date, 
+						ULONGLONG source_size,
+						void * callback, 
+						bool *pf_dir_excluded),
 		void * context) {
 
 	vector<wchar_t*> subdir_list;
@@ -1601,6 +1621,7 @@ void list_dir_fs(wchar_t * source_dir,
 		}
 
 		time_t last_write_time = convert_file_time_to_time_t(FindFileData.ftLastWriteTime);
+		ULONGLONG file_size = static_cast<ULONGLONG>(FindFileData.nFileSizeHigh)<<32 & FindFileData.nFileSizeLow;
 		
 		bool f_dir_excluded = false;
 
@@ -1612,6 +1633,7 @@ void list_dir_fs(wchar_t * source_dir,
 		       	FindFileData.cFileName,
 			FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? true : false,
 			last_write_time,
+			file_size,
 			context,
 			&f_dir_excluded);
 
@@ -1633,7 +1655,11 @@ void list_dir_fs(wchar_t * source_dir,
 	
 	if(recursive) {
 		for(vector<wchar_t*>::iterator it=subdir_list.begin(); it!=subdir_list.end(); it++) {
-			list_dir_fs(source_dir, /*destination_dir, backup_dir, purge_if_older,*/ (*it), recursive, callback, context);
+			list_dir_fs(source_dir, 
+						(*it), 
+						recursive, 
+						callback, 
+						context);
 		}
 		subdir_list.empty();
 	}
@@ -1819,14 +1845,14 @@ time_t get_file_time(wchar_t * file_name) {
 	}
 }
 
-bool file_identifical(wchar_t * src, wchar_t * dst) {
+bool file_identical(wchar_t * src, ULONGLONG source_file_size, wchar_t * dst) {
 	if(is_ftp_prefix(src) || is_ftp_prefix(dst)) {
 		simple_error(L"erreur interne : fonction file_identifical() appelee avec une source ftp");
 		// on retourne false comme si les deux fichiers étaient forcément différents
 		return false;
 	}
 	else {
-		return file_identifical_fs(src, dst);
+		return file_identical_fs(src, source_file_size, dst);
 	}
 }
 void set_file_time(wchar_t * file_name, time_t tt) {
@@ -1886,7 +1912,14 @@ void list_dir(wchar_t * source_dir,
 		int purge_if_older,*/
 		wchar_t * subdir,
 		bool recursive,
-		void (*callback)(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_t * backup_dir, int purge_if_older,*/ wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date, void * context, bool *pf_exclude_dir),
+		void (*callback)(wchar_t * source_dir, 
+						wchar_t * subdir,
+						wchar_t * file_name,
+						bool is_dir,
+						time_t source_last_modified_date,
+						ULONGLONG source_file_size,
+						void * context,
+						bool *pf_exclude_dir),
 		void * context) {
 
 	if(is_ftp_prefix(source_dir)) {
@@ -1894,9 +1927,6 @@ void list_dir(wchar_t * source_dir,
 	}
 	else {
 		return list_dir_fs(source_dir,
-			/*destination_dir, 
-			backup_dir, 
-			purge_if_older,	*/
 			subdir, 
 			recursive, 
 			callback,
@@ -2430,7 +2460,14 @@ void read_cfg_file(wchar_t * argv0) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // main
-void list_dir_callback(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_t * backup_dir, int purge_if_older,*/ wchar_t * subdir, wchar_t * file_name, bool is_dir, time_t source_last_modified_date, void * context, bool *pf_dir_excluded) {
+void list_dir_callback(wchar_t * source_dir,
+					 wchar_t * subdir, 
+					 wchar_t * file_name, 
+					 bool is_dir, 
+					 time_t source_last_modified_date, 
+					 ULONGLONG source_file_size, 
+					 void * context, 
+					 bool *pf_dir_excluded) {
 	*pf_dir_excluded = false;
 	CFG_ITEM * cfg_item = (CFG_ITEM*) context;
 
@@ -2488,8 +2525,6 @@ void list_dir_callback(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_
 			*pf_dir_excluded = true;
 			return;
 		}
-		//printf("dbg callback src='%s' dest='%s' sub='%s' file_name='%s' is_dir=%d last_modified_date=%lu\n",
-			//source_dir, destination_dir, subdir, file_name, is_dir, last_modified_date);
 
 		path dest_file_name(destination_dir, (subdir==NULL?0:wcslen(subdir)+1)+wcslen(file_name)+1);
 		if(subdir!=NULL) {
@@ -2521,16 +2556,8 @@ void list_dir_callback(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_
 			}
 		}
 		else if(dest_last_write_time < source_last_modified_date) {
-			/*time_t tt = source_last_modified_date-dest_last_write_time;
-			int jours = (int) (tt/(24*60*60));
-			tt -= jours*(24*60*60);
-			int heures = (int) (tt/(60*60));
-			tt -= heures*(60*60);
-			int minutes = (int) (tt/60);
-			tt -= minutes*60;
-			int secondes = (int) tt;*/
-			
-			if(file_identifical(source_file_name.get(), dest_file_name.get())) {
+
+			if(file_identical(source_file_name.get(), source_file_size, dest_file_name.get())) {
 				struct tm * pt;
 				pt = localtime(&source_last_modified_date);
 
@@ -2555,11 +2582,6 @@ void list_dir_callback(wchar_t * source_dir, /*wchar_t * destination_dir, wchar_
 					}
 				}
 				else {
-					/*time_t current_tt = 0;
-					struct tm current_tm;
-					memset(&current_tm, sizeof(current_tm), 0);
-					_time64(&current_tt);
-					_localtime64_s(&current_tm, &current_tt);*/
 
 					path backup_file_name(backup_dir, (subdir==NULL?0:wcslen(subdir)+1) + wcslen(file_name)+1+7+15);
 					if(subdir != NULL) {
@@ -2634,8 +2656,7 @@ int wmain(int argc, wchar_t * argv[]) {
 
 	reference_time = time(NULL);
 	log_file_init(argv[0]);
-	log_msg(L"JEBSYNC VERSION 0.0.4");
-	log_msg(L"CVS ID $Id: main.cpp,v 1.17 2009/04/12 20:06:10 jeb Exp $");
+	log_msg(L"JEBSYNC VERSION 0.0.5 (2014/08/09)");
 	if(globalOptionTestOnly) {
 		log_msg(L"option test activee : aucune ecriture");
 	}
