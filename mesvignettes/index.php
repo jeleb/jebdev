@@ -1,5 +1,5 @@
 <?
-include "common.php";
+include "mesvignettes/common.php";
 
 // fucking useless comment again
 /* largeur MAX des miniatures  */
@@ -31,6 +31,7 @@ $nb_dir_columns='3';
 
 /* prefixes des images qu'il ne faut pas afficher (celles de mesvignettes principalement) */
 $dont_show_image_prefix = "mesvignettes_";
+$dont_show_dir = "mesvignettes";
 
 /* prefix de l'id des div qui contiennent les exifs complets */
 $exif_id_prefix = "image_exif_all_";
@@ -76,6 +77,19 @@ $nbImg = 0;
 <!--meta name="viewport" content="height=device-height" / -->
 
 <script language="javascript">
+
+function myFullScreen() {
+	var elem = document.getElementById("globalDiv");
+	if (elem.requestFullscreen) {
+	  elem.requestFullscreen();
+	} else if (elem.msRequestFullscreen) {
+	  elem.msRequestFullscreen();
+	} else if (elem.mozRequestFullScreen) {
+	  elem.mozRequestFullScreen();
+	} else if (elem.webkitRequestFullscreen) {
+	  elem.webkitRequestFullscreen();
+	}
+}
 
 function backUrl(theurl) {
 	var i = theurl.lastIndexOf("/");
@@ -195,7 +209,7 @@ function saveDescription() {
 	
 	// exceptionnellement on travaille en synchrone
 	var xmlhttp = new XMLHttpRequest();
-	xmlhttp.open("POST","saveDescription.php",false);
+	xmlhttp.open("POST","mesvignettes/saveDescription.php",false);
 	xmlhttp.send(json);
 	if (xmlhttp.status != 200) {
 		alert(xmlhttp.status + " : " + xmlhttp.statusText);
@@ -225,7 +239,7 @@ document.onkeydown = function(evt) {
 </head>
 <body text="#000000" link="#000000" alink="#000000" vlink="#000000" bgcolor="#000000" leftmargin="10" marginwidth="5" topmargin="10" marginheight="5">
 
-<div align="center"><?
+<div id="globalDiv" align="center"><?
 
 /* construction du title pour les images à partir des données d'exif */
 function computeExifTitle($exif, $eol) {
@@ -403,7 +417,6 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $fi
 		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
 
 
-
 			/* ### Extraction des dimensions de l'image ### */
 			$sizeimgo=getimagesize($imagesource);
 			$imglargo=$sizeimgo[0];
@@ -457,7 +470,7 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $fi
 
 				/* Redimensionnement à la volée */
 				if ($redimvoz=='1'){
-					?><img src="vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
+					?><img src="mesvignettes/vignettes.php?cadrak=<? echo $cadrak; ?>&extensaj=<? echo $extensaj; ?>&sourceimg=<? echo $imagesource; ?>&largeuro=<? echo $imglargo; ?>&hauteuro=<? echo $imghauto; ?>&largeur=<? echo $imglargoz; ?>&hauteur=<? echo $imghautoz; ?>" border="0" onload="oneMoreImageLoaded();"><?
 				}
 				else{
 					?><img src="<? echo $imagesource; ?>" border="0" width="<? echo $imglargoz; ?>" height="<? echo $imghautoz; ?>"><?
@@ -639,12 +652,16 @@ class DirDescription {
 
 // fonction d'affichage des vignettes de répertoire
 function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
-	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC, $currentDirDescription;
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC, $currentDirDescription, $dont_show_dir;
 
 	$i = 0;
 	$nb = sizeof($dirTab);
 	for($j=0; $j < $nb; $j++) {
 		$theDir = $dirTab[$nb-$j-1];
+		
+		if($theDir == $dont_show_dir) {
+			continue;
+		}
 
 		if($numDirName == is_numeric(substr($theDir, 0, 1))) {
 			continue;
@@ -680,7 +697,7 @@ function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
 		<td bgcolor="#000000" style="text-align:center;vertical-align:middle;" ><font face="arial" size="2">
 		<a href="#" onclick="gotourl('<?echo $urlmemot.$theDir; ?>', '<? echo $filtre; ?>', '<? echo $filtreDescription; ?>');return false;"><?
 		?>
-		<img title="<? echo $title; ?>" src="vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
+		<img title="<? echo $title; ?>" src="mesvignettes/vignettes_dir.php?cadrak=<? echo $cadrak; ?>&dir=<? echo $urlmemot.$theDir; ?>&largeur=<? echo $vignette_rep_max_largeur; ?>&hauteur=<? echo $vignette_rep_max_hauteur; ?>"/>
 		</a></font></td>
 		<?
 		
@@ -790,29 +807,32 @@ else{
 		<? /* <a href="index.php?url=<? echo $urlancien; ?>" style="color:white;font-family:arial;size:4;"> */
 		?>
 		<a href="" style="color:white;font-family:arial;size:4;" onclick="gotourl(backUrl('<? echo $url; ?>'), '<? echo $filtre; ?>', '<? echo $filtreDescription; ?>');return false;">
-		<img src="mesvignettes_return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/>
+		<img src="mesvignettes/return.png" style="opacity:0.4;width:100px;height:50px;transform:scaleY(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.4;"/>
 		</a></b><br/>
 		<?
 	}
 	if($nbImg > 0) {
 	?>
 	
-	<a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.3;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+	<a href="" onclick="window.scrollBy(-3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes/left.png" style="opacity:0.3;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
 	&nbsp;
-	<a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes_left.png" style="opacity:0.3;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+	<a href="" onclick="window.scrollBy(3000,0);return false;" style="color:white;font-family:arial;size:12;"><img src="mesvignettes/left.png" style="opacity:0.3;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
 	<br/>
 	<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
 	<br/>
+	<!-- pour du full screen on reverra avec du full ajax
+	a href="" onclick="myFullScreen();return false;">FULL SCREEN</a>
+	<br/ -->
 	<?
 	}
 
 	?>
-	<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
-	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
+	<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $filtre; ?>" />
+	<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
 	<br/>
 	<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="<? if($currentDirDescription!=null) { echo $currentDirDescription->getDescription(); } ?>">DESCR.</a></div>
-	<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtreDescription; ?>" />
-	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
+	<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $filtreDescription; ?>" />
+	<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
 	<br/>
 	</div>
 	<div id="descriptionDiv" style="display:none;">

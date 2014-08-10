@@ -1,4 +1,5 @@
 <?
+include "common.php";
 
 $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
