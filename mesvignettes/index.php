@@ -1,5 +1,7 @@
 <?
-// fucking useless comment again - more useless thant is impossible
+include "common.php";
+
+// fucking useless comment again
 /* largeur MAX des miniatures  */
 $larimage='2000';
 
@@ -33,11 +35,10 @@ $dont_show_image_prefix = "mesvignettes_";
 /* prefix de l'id des div qui contiennent les exifs complets */
 $exif_id_prefix = "image_exif_all_";
 
-/* nom des fichiers de description */
-$descriptionFileName = "_description.txt";
 
 /* description à afficher pour le répertoire courant */
-$descriptionTitle = "";
+//$descriptionTitle = "";
+$currentDirDescription = null;
 
 /* Récupération des variables */
 $hautscreen=$_GET["hautscreen"];
@@ -151,6 +152,57 @@ function gotourl(myurl, myfiltre, myfiltredescription) {
 		(myfiltre!=null ? "&filtre="+myfiltre : "") +
 		(myfiltredescription!=null ? "&filtreDescr="+myfiltredescription : "") +
 		"&hautscreen="+ getWindwHeight(); //screen.height;
+}
+
+var backupDescription = null;
+function toggleDescription() {
+	var textDiv  = document.getElementById("descriptionDiv");
+	var textArea = document.getElementById("descriptionTextArea");
+	
+	if(backupDescription == null) {
+		backupDescription = textArea.value;
+		if(backupDescription == null) {
+			backupDescription = "";
+		}
+	}
+	
+	var disp = textDiv.style.display;
+	if(disp == "none") {
+		textDiv.style.display="block";
+	}
+	else {
+		textDiv.style.display="none";
+	}
+}
+
+function cancelDescription(event) {
+	var textArea = document.getElementById("descriptionTextArea");
+	if(backupDescription != null) {
+		textArea.value = backupDescription;
+	}
+	else {
+		textArea.value = "";
+	}
+	toggleDescription();
+}
+
+function saveDescription() {
+	var textArea = document.getElementById("descriptionTextArea");
+
+	var message = { "dir":"2014/20140711", "newDescription": textArea.value };
+	var json = JSON.stringify(message);
+	//alert(json);
+	
+	// exceptionnellement on travaille en synchrone
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("POST","saveDescription.php",false);
+	xmlhttp.send(json);
+	if (xmlhttp.status != 200) {
+		alert(xmlhttp.status + " : " + xmlhttp.statusText);
+	}
+	backupDescription = textArea.value;
+	toggleDescription();
+	
 }
 
 // raccourcis :
@@ -276,7 +328,7 @@ function computeExifAll($exif, $eol) {
 
 /* Fonction d'affichage des photos miniatures */
 function affichimgs($larimage,$hautimage,$url,$redimvoz,$cadrak,$epaiscadretable,$coulcadretable){
-global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC, $descriptionTitle;
+global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC/*, $descriptionTitle*/, $currentDirDescription;
 	$start = 0;
 
 	if (isset($_REQUEST['start'])){
@@ -297,8 +349,8 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $fi
 	$dirDescr = new dirDescription($url);
 	if($dirDescr->exists()) {
 		$dirDescr->read();
-		$descriptionTitle = $dirDescr->getDescription();
-		error_log($descriptionTitle);
+		//$descriptionTitle = $dirDescr->getDescription();
+		$currentDirDescription = $dirDescr;
 	}
 
 	$images = array();
@@ -400,7 +452,7 @@ global $nbImg, $dont_show_image_prefix, $exif_id_prefix, $filtre, $filtreLC, $fi
 				?>
 				<td bgcolor="#000000" valign="middle" align="center">
 				<div style="position:relative" onmousedown="return false">
-				<a href="<? echo $imagesource; ?>" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="<? echo $exif_title ?>">
+				<a href="<? echo $imagesource; ?>" onclick="return false;" ondblclick="javascript:window.open('<? echo $imagesource; ?>');return false;" title="<? echo $imagesource."\n\n".$exif_title ?>">
 				<?
 
 				/* Redimensionnement à la volée */
@@ -569,11 +621,16 @@ class DirDescription {
 	}
 	
 	function getDescription() {
-		$str = $this->globalDescription . "\n";
+		$str = $this->globalDescription /*. "\n"*/;
 		
 		foreach($this->perImageDescriptionArray as $descr) {
-			$str = $str . $descr->firstImage . "->" . $descr->lastImage . ":\n";
-			$str = $str . $descr->description . "\n";
+			if($descr->lastImage == null || $descr->lastImage===$descr->firstImage) {
+				$str = $str . "*" . $descr->firstImage . "\n";
+			}
+			else {
+				$str = $str . "*" . $descr->firstImage . ":" . $descr->lastImage . ":\n";
+			}
+			$str = $str . $descr->description /*. "\n"*/;
 		}
 		
 		return $str;
@@ -582,7 +639,7 @@ class DirDescription {
 
 // fonction d'affichage des vignettes de répertoire
 function displayDir($urlmemo, $dirTab, $currentDirName, $numDirName) {
-	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC;
+	global $cadrak, $vignette_rep_max_largeur, $vignette_rep_max_hauteur, $nb_dir_columns, $filtre, $filtreLC, $filtreDescription, $filtreDescriptionLC, $currentDirDescription;
 
 	$i = 0;
 	$nb = sizeof($dirTab);
@@ -720,6 +777,7 @@ else{
 	</table>
 	
 	<div style="position:fixed;top:10px;left:10px;z-index:100;">
+	<div style="position:relative;text-align:center;float:left;">
 	<?
 	//ici en haut à gauche, le menu qui reste meme quand on scroll
 	if($nbImg > 0) {
@@ -752,11 +810,20 @@ else{
 	<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtre; ?>" />
 	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
 	<br/>
-	<div style="font:Arial;color:grey;font-size:8px;" title="<? echo $descriptionTitle; ?>">DESCR.</div>
+	<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="<? if($currentDirDescription!=null) { echo $currentDirDescription->getDescription(); } ?>">DESCR.</a></div>
 	<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" value="<? echo $filtreDescription; ?>" />
 	<img src="mesvignettes_close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
 	<br/>
-
+	</div>
+	<div id="descriptionDiv" style="display:none;">
+	<textarea id="descriptionTextArea" rows="10" cols="80" style="opacity:0.8;"/><?
+	if($currentDirDescription != null) {
+		echo $currentDirDescription->getDescription(); 
+	}
+?></textarea>
+	<button onclick="saveDescription();">enregistrer</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="cancelDescription();">annuler</button>
+	</div>
+	</div>
 	</div>
 
 	<?
