@@ -12,7 +12,7 @@ $filename = $dir."/".$descriptionFileName;
 
 error_log($myjson);
 
-$h = fopen($filename,"w");
+$h = fopen($file_lookup_prefix."/".$filename,"w");
 if($h === FALSE) {
 	throw new Exception("Ouverture du fichier '$filename' en echec");
 }

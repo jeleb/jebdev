@@ -1,7 +1,5 @@
 <?
 
-$file_lookup_prefix = "..";
-
 $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
 $hauteur=strtoupper($_GET["hauteur"]);

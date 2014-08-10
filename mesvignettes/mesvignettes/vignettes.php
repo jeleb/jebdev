@@ -1,4 +1,6 @@
 <?
+include "common.php";
+
 $sourceimg=strtoupper($_GET["sourceimg"]);
 $largeur=strtoupper($_GET["largeur"]);
 $hauteur=strtoupper($_GET["hauteur"]);
@@ -7,15 +9,14 @@ $largeuro=strtoupper($_GET["largeuro"]);
 $hauteuro=strtoupper($_GET["hauteuro"]);
 $cadrak=strtoupper($_GET["cadrak"]);
 
-$file_lookup_prefix = "..";
-
-
 // Set the content-type
 header('Content-Type: image/jpeg');
 
 header('Pragma: public');
 header('Cache-Control: max-age=86400');
 header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
+
+error_log($file_lookup_prefix."/".$sourceimg);
 
 /* ### Type d'image ### */
 if($extensaj=='.JPG' || $extensaj=='.JPEG'){
