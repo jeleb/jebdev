@@ -1,4 +1,7 @@
 <?
+
+$file_lookup_prefix = "..";
+
 $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
 $hauteur=strtoupper($_GET["hauteur"]);
@@ -15,7 +18,7 @@ header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
 $dirname = '';
 if($dir!=''){
 	$urlt=$dir.'/';
-	$dossier = opendir($urlt);
+	$dossier = opendir($file_lookup_prefix."/".$urlt);
 	$dirname = $dir;
 	$i = strrpos($dir,"/");
 	if($i > 0) {
@@ -24,7 +27,7 @@ if($dir!=''){
 	$dirname=str_replace('/', '', $dirname);
 }
 else{
-	$dossier = opendir('.');
+	$dossier = opendir($file_lookup_prefix);
 }
 
 $sourceimg = NULL;
@@ -44,18 +47,18 @@ if($sourceimg != NULL) {
 	/* ### Type d'image ### */
 	if($extensaj=='.JPG' || $extensaj=='.JPEG'){
 		header("Content-Type: image/JPEG");
-		$imxz=@imagecreatefromjpeg($urlt.$sourceimg);
+		$imxz=@imagecreatefromjpeg($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	if($extensaj=='.GIF'){
 		header("Content-Type: image/PNG");
-		$imxz=@imagecreatefromgif($urlt.$sourceimg);
+		$imxz=@imagecreatefromgif($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	if($extensaj=='.PNG'){
 		header("Content-Type: image/PNG");
-		$imxz=@imagecreatefrompng($urlt.$sourceimg);
+		$imxz=@imagecreatefrompng($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	
-	$sizeimgo=getimagesize($urlt.$sourceimg);
+	$sizeimgo=getimagesize($file_lookup_prefix."/".$urlt.$sourceimg);
 	$largeuro=$sizeimgo[0];
 	$hauteuro=$sizeimgo[1];
 	if($largeuro*$hauteur > $largeur*$hauteuro) {

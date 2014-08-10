@@ -7,6 +7,9 @@ $largeuro=strtoupper($_GET["largeuro"]);
 $hauteuro=strtoupper($_GET["hauteuro"]);
 $cadrak=strtoupper($_GET["cadrak"]);
 
+$file_lookup_prefix = "..";
+
+
 // Set the content-type
 header('Content-Type: image/jpeg');
 
@@ -17,15 +20,15 @@ header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
 /* ### Type d'image ### */
 if($extensaj=='.JPG' || $extensaj=='.JPEG'){
 	header("Content-Type: image/JPEG");
-	$imxz=@imagecreatefromjpeg($sourceimg);
+	$imxz=@imagecreatefromjpeg($file_lookup_prefix."/".$sourceimg);
 }
 if($extensaj=='.GIF'){
 	header("Content-Type: image/PNG");
-	$imxz=@imagecreatefromgif($sourceimg);
+	$imxz=@imagecreatefromgif($file_lookup_prefix."/".$sourceimg);
 }
 if($extensaj=='.PNG'){
 	header("Content-Type: image/PNG");
-	$imxz=@imagecreatefrompng($sourceimg);
+	$imxz=@imagecreatefrompng($file_lookup_prefix."/".$sourceimg);
 }
 
 
