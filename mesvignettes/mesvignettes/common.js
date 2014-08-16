@@ -72,3 +72,26 @@ function toggleDisplay(id) {
 		elt.style.display = "none";
 	}
 }
+
+/* lance une animation sur la base d'une simple callback */
+function animationOne(step, callback) {
+	var delayMilliSecondes = callback(step+1);
+
+	if(delayMilliSecondes > 0) {
+		setTimeout(function() {
+			animationOne(step+1, callback);
+		}
+		, delayMilliSecondes);
+	}
+}
+
+function beginAnimation(callback) {
+	var delayMilliSecondes = callback(1);
+	
+	if(delayMilliSecondes > 0) {
+		setTimeout(function() {
+			animationOne(2, callback);
+		}
+		, delayMilliSecondes);
+	}
+}
