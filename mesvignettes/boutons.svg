@@ -83,8 +83,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.175"
-     inkscape:cx="-2249.1032"
-     inkscape:cy="214.49189"
+     inkscape:cx="-54.937208"
+     inkscape:cy="413.40098"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -95,7 +95,8 @@
      inkscape:window-x="-5"
      inkscape:window-y="-5"
      inkscape:window-maximized="1"
-     inkscape:snap-global="true" />
+     inkscape:snap-global="true"
+     inkscape:snap-bbox-edge-midpoints="true" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -209,11 +210,57 @@
          sodipodi:nodetypes="ccccccccccccc" />
     </g>
     <path
-       style="color:#000000;fill:none;stroke:#999999;stroke-width:40;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;stroke-dasharray:none"
+       style="color:#000000;fill:none;stroke:#999999;stroke-width:30;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;stroke-dasharray:none"
        d="M -1736.7188 286.25 C -1738.0618 287.59301 -1738.0618 289.78199 -1736.7188 291.125 L -1627.8125 400.03125 L -1627.8125 490.46875 C -1627.8125 496.0246 -1623.3684 500.5 -1617.8125 500.5 L -1566.1875 500.5 C -1560.6316 500.5 -1556.1875 496.0246 -1556.1875 490.46875 L -1556.1875 400.03125 L -1447.2812 291.125 C -1445.9382 289.78199 -1445.9382 287.59303 -1447.2812 286.25 C -1603.5729 286.24999 -1605.9996 286.24991 -1736.7188 286.25 z "
        id="rect2998-89-1"
        inkscape:export-filename="C:\devGit\mesvignettes\mesvignettes\filter.png"
-       inkscape:export-xdpi="20.308687"
-       inkscape:export-ydpi="20.308687" />
+       inkscape:export-xdpi="22.10849"
+       inkscape:export-ydpi="22.10849" />
+    <g
+       id="g3949"
+       inkscape:export-filename="C:\devGit\mesvignettes\mesvignettes\return2.png"
+       inkscape:export-xdpi="16.122753"
+       inkscape:export-ydpi="16.122753">
+      <path
+         id="rect2996-7-1"
+         d="M -1823.1875 929.5 C -1824.0639 929.49998 -1824.9535 929.82849 -1825.625 930.5 L -1967.9062 1072.7812 C -1969.2493 1074.1243 -1969.2493 1076.3132 -1967.9062 1077.6562 L -1825.625 1219.9375 C -1824.282 1221.2805 -1822.1243 1221.2805 -1820.7812 1219.9375 C -1820.7812 1174.0895 -1820.7813 1161.5207 -1820.7812 1135.0312 L -1626.6562 1135.0312 C -1624.7569 1135.0312 -1623.2188 1133.5243 -1623.2188 1131.625 L -1623.2188 1018.8438 C -1623.2188 1016.9444 -1624.7569 1015.4062 -1626.6562 1015.4062 L -1820.7812 1015.4062 C -1820.7813 992.0173 -1820.7812 968.84633 -1820.7812 930.5 C -1821.4527 929.82849 -1822.3111 929.50002 -1823.1875 929.5 z "
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         transform="matrix(0,1,-1,0,0,0)"
+         ry="3.4283793"
+         y="1440.2346"
+         x="1015.4011"
+         height="116.42934"
+         width="119.63791"
+         id="rect2996-7-1-0"
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         transform="matrix(0,1,-1,0,0,0)"
+         ry="3.4283793"
+         y="1345.8265"
+         x="1015.4011"
+         height="30.715172"
+         width="119.63791"
+         id="rect2996-7-1-0-6"
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         transform="matrix(0,1,-1,0,0,0)"
+         ry="3.4283793"
+         y="1250.1937"
+         x="1015.4011"
+         height="30.715172"
+         width="119.63791"
+         id="rect2996-7-1-0-6-0"
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         transform="matrix(0,1,-1,0,0,0)"
+         ry="3.4283793"
+         y="1154.5609"
+         x="1015.4011"
+         height="30.715172"
+         width="119.63791"
+         id="rect2996-7-1-0-6-8"
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
   </g>
 </svg>
