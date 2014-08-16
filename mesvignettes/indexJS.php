@@ -359,16 +359,21 @@ function ajusteDir() {
 
 function ajusteImages() {
 	var trPhotos = document.getElementById("trImages");
-	var childList = trPhotos.childNodes;
+	//var childList = trPhotos.childNodes;
 	var height = getImageHeightFromWindowSize();
 
-	for(var i=0; i!=childList.length; i++) {
-		for(var j=0; j!=childList[i].childNodes.length; j++) {
-			var child = childList[i].childNodes[j];
-			if(child.tagName == "IMG") {
-				child.style.height = height+"px";
-			}
-		}
+	//for(var i=0; i!=childList.length; i++) {
+	//	for(var j=0; j!=childList[i].childNodes.length; j++) {
+	//		var child = childList[i].childNodes[j];
+	//		if(child.tagName == "IMG") {
+	//			child.style.height = height+"px";
+	//		}
+	//	}
+	//}
+	
+	var l = document.getElementsByClassName("myImage");
+	for(var i=0; i!=l.length; i++) {
+		l[i].style.height = height+"px";
 	}
 }
 
@@ -443,6 +448,7 @@ function beginOneImageLoad() {
 	var height = imageToLoadList[i].height;
 	
 	var img = document.createElement("IMG");
+	img.className = "myImage";
 	img.src = url;
 	if(height != null) {
 		img.style.height = height;
