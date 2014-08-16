@@ -1,22 +1,52 @@
 <?
 include "common.php";
 
-$sourceimg=strtoupper($_GET["sourceimg"]);
-$largeur=strtoupper($_GET["largeur"]);
-$hauteur=strtoupper($_GET["hauteur"]);
-$extensaj=strtoupper($_GET["extensaj"]);
-$largeuro=strtoupper($_GET["largeuro"]);
-$hauteuro=strtoupper($_GET["hauteuro"]);
-$cadrak=strtoupper($_GET["cadrak"]);
+$sourceimg=$_GET["sourceimg"];
+$largeur = 0;
+if(array_key_exists("largeur", $_GET)) {
+	$largeur=intval($_GET["largeur"]);
+}
+$hauteur = 0;
+if(array_key_exists("hauteur", $_GET)) {
+	$hauteur=strtoupper($_GET["hauteur"]);
+}
+//$extensaj=strtoupper($_GET["extensaj"]);
+//$largeuro=strtoupper($_GET["largeuro"]);
+//$hauteuro=strtoupper($_GET["hauteuro"]);
+$cadrak = "0";
+if(array_key_exists("cadrak", $_GET)) {
+	$cadrak=strtoupper($_GET["cadrak"]);
+}
 
-// Set the content-type
-header('Content-Type: image/jpeg');
 
-header('Pragma: public');
-header('Cache-Control: max-age=86400');
-header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
 
-error_log($file_lookup_prefix."/".$sourceimg);
+//error_log($file_lookup_prefix."/".$sourceimg);
+
+$extent=substr($sourceimg,strrpos($sourceimg,"."));
+$extensaj=strtoupper($extent);
+
+$sizeimgo=getimagesize($file_lookup_prefix."/".$sourceimg);
+$largeuro=$sizeimgo[0];
+$hauteuro=$sizeimgo[1];
+
+if($hauteur == 0 && $largeur == 0) {
+	$hauteur = 100;
+}
+
+if($hauteur == 0) {
+	$hauteur = $largeur*$hauteuro/$largeuro;
+}
+else if($largeur == 0) {
+	$largeur = $largeuro*$hauteur/$hauteuro;
+}
+else {
+	if($largeuro*$hauteur > $largeur*$hauteuro) {
+	  $hauteur = $largeur*$hauteuro/$largeuro;
+	}
+	else if($largeuro*$hauteur < $largeur*$hauteuro) {
+	  $largeur = $largeuro*$hauteur/$hauteuro;
+	}
+}
 
 /* ### Type d'image ### */
 if($extensaj=='.JPG' || $extensaj=='.JPEG'){
@@ -31,6 +61,9 @@ if($extensaj=='.PNG'){
 	header("Content-Type: image/PNG");
 	$imxz=@imagecreatefrompng($file_lookup_prefix."/".$sourceimg);
 }
+header('Pragma: public');
+header('Cache-Control: max-age=86400');
+header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
 
 
 /* ### Création de l'image à la longeur et la largeur de la vignette ### */

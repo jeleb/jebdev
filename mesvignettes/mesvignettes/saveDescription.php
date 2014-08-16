@@ -10,7 +10,9 @@ $newDescription = $message["newDescription"];
 
 $filename = $dir."/".$descriptionFileName;
 
-error_log($myjson);
+if($log_json) {
+	error_log($myjson);
+}
 
 $h = fopen($file_lookup_prefix."/".$filename,"w");
 if($h === FALSE) {

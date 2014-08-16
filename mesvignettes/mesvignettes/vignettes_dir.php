@@ -4,7 +4,10 @@ include "common.php";
 $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
 $hauteur=strtoupper($_GET["hauteur"]);
-$cadrak=strtoupper($_GET["cadrak"]);
+$cadrak = "0";
+if(array_key_exists("cadrak", $_GET)) {
+	$cadrak=strtoupper($_GET["cadrak"]);
+}
 
 // Set the content-type
 header('Content-Type: image/jpeg');
