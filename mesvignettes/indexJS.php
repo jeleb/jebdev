@@ -35,6 +35,11 @@ var imageRawHeight = 1100;
 /* nombre d'images à charger en parrallèle */
 var nbImageToLoadAtTheSameTime = 4;
 
+/* redimensionne les images cote serveur */
+/* en local ça va un peu plus vite sans redimensionner, par contre le  */
+/* browser utilise 700Mo de + pour un répertoire de 100 photos O_o */
+var redimensionneImages = true;
+
 /* gestion de l'opacite quand la souris passe au dessus des boutons */
 var opacityOver = "0.8";
 var opacityOut  = "0.4";
@@ -382,10 +387,23 @@ function showImageOne(imgName, height) {
 	var trPhotos = document.getElementById("trImages");
 	
 	var td = document.createElement("TD");
+	var a  = document.createElement("A");
+	
+	a.href = imgName;
+	a.onclick = function() { return false; };
+	a.ondblclick = function() { window.open(imgName); return false; };
+	
+	var url = null;
+	if(redimensionneImages) {
+		url = "mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight;
+	}
+	else {
+		url = imgName;
+	}
 	
 	imageToLoadList.push( {
-		"elt":td,
-		"url":"mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight,
+		"elt":a,
+		"url":url,
 		"height":height+"px",
 		"status":null
 	} );
@@ -395,6 +413,7 @@ function showImageOne(imgName, height) {
 	img.style.height = height+"px";
 	td.appendChild(img);*/
 	
+	td.appendChild(a);
 	trPhotos.appendChild(td);
 }
 
