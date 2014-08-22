@@ -322,7 +322,6 @@ function loadDirEntries(dir) {
 		}
 	}
 	
-	// send the collected data as JSON
 	xhr.send(JSON.stringify(message));
 
 }
@@ -359,36 +358,15 @@ function ajusteDir() {
 
 function ajusteImages() {
 	var trPhotos = document.getElementById("trImages");
-	//var childList = trPhotos.childNodes;
 	var height = getImageHeightFromWindowSize();
 
-	//for(var i=0; i!=childList.length; i++) {
-	//	for(var j=0; j!=childList[i].childNodes.length; j++) {
-	//		var child = childList[i].childNodes[j];
-	//		if(child.tagName == "IMG") {
-	//			child.style.height = height+"px";
-	//		}
-	//	}
-	//}
-	
 	var l = document.getElementsByClassName("myImage");
 	for(var i=0; i!=l.length; i++) {
 		l[i].style.height = height+"px";
 	}
 }
 
-/* function showImageOne(imgName, height) {
-	var trPhotos = document.getElementById("trImages");
-	
-	var td = document.createElement("TD");
-	var img = document.createElement("IMG");
-	img.src = "mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight;
-	img.style.height = height+"px";
-	
-	td.appendChild(img);
-	trPhotos.appendChild(td);
-} */
-function showImageOne(imgName, height) {
+function showImageOne(imgName) {
 	var trPhotos = document.getElementById("trImages");
 	
 	var td = document.createElement("TD");
@@ -409,15 +387,11 @@ function showImageOne(imgName, height) {
 	imageToLoadList.push( {
 		"elt":a,
 		"url":url,
-		"height":height+"px",
+		height:"window",
 		"status":null
 	} );
 	
-	/* var img = document.createElement("IMG");
-	img.src = "mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight;
-	img.style.height = height+"px";
-	td.appendChild(img);*/
-	
+
 	td.appendChild(a);
 	trPhotos.appendChild(td);
 }
@@ -451,7 +425,12 @@ function beginOneImageLoad() {
 	img.className = "myImage";
 	img.src = url;
 	if(height != null) {
-		img.style.height = height;
+		if(height == "window") {
+			img.style.height = getImageHeightFromWindowSize()+"px";
+		}
+		else {
+			img.style.height = height;
+		}
 	}
 	img.onload = function() {
 		oneMoreImageLoaded();
@@ -467,10 +446,9 @@ function beginOneImageLoad() {
 }
 
 function showImageList() {
-	var height = getImageHeightFromWindowSize();
 	
 	for(var i=0; i!=imageList.length; i++) {
-		showImageOne(imageList[i], height);
+		showImageOne(imageList[i]/*, height*/);
 	}
 	
 }
@@ -511,8 +489,6 @@ function showImageDirOne(dirName) {
 		changeCurrentDir(dirName);
 		return false;
 	}
-	//td.innerHTML = "<img src=\"mesvignettes/vignettes_dir.php?dir="+dirName+"&largeur="+imageDirRawWidth+"&hauteur="+imageDirRawHeight+"\" "
-	//	+ "onclick=\"changeCurrentDir('"+dirName+"');\"/>";
 	
 	imageToLoadList.push( {
 		"elt":a,
@@ -527,6 +503,14 @@ function showImageDirOne(dirName) {
 
 
 function showDirList() {
+	var scrollDir = document.getElementById("scrollDir");
+	var tableDir = document.getElementById("tableDir");
+	if(imageList.length > 0) {
+		scrollDir.style.width = "";
+	}
+	else {
+		scrollDir.style.width = (getWindwWidth()-20)+"px";
+	}
 	
 	for(var i=0; i!=dirList.length; i++) {
 		showImageDirOne(dirList[i]);
@@ -575,26 +559,48 @@ function clearScreen() {
 	tableDir.innerHTML = "<tr></tr>";
 	
 	while(trPhotos.childNodes.length > 3) {
-		//alert(trPhotos.childNodes[3].tagName);
 		trPhotos.removeChild(trPhotos.childNodes[3]);
 	}
 	
 }
 
 /* animation pour deplacer un scroll horizontal jusqu'a une position */
-function myScrollHorizontalTo(div, destLeft, nbStep) {
-	var intervalMs = 1/25;
+var myScrollHorizontalTotalSteps = -1;
+var myScrollHorizontalGoTo = -1;
+function myScrollHorizontalTo(div, destLeft) {
+	var intervalMs = 1/10;
 	var startLeft = div.scrollLeft;
-	
-	beginAnimation(function(step) {
-		if(step >= nbStep) {
-			div.scrollLeft = destLeft ;
-			return 0;
-		}
+	myScrollHorizontalGoTo = destLeft;
+
+	if(myScrollHorizontalTotalSteps == -1) {
+		myScrollHorizontalTotalSteps = 8;
 		
-		div.scrollLeft = startLeft + (destLeft - startLeft)*step/nbStep;
-		return intervalMs;
-	});
+		beginAnimation(function(step) {
+			if(step >= myScrollHorizontalTotalSteps) {
+				div.scrollLeft = myScrollHorizontalGoTo ;
+				myScrollHorizontalTotalSteps = -1;
+				myScrollHorizontalGoTo = -1;
+				return 0;
+			}
+			
+			div.scrollLeft = startLeft + (myScrollHorizontalGoTo - startLeft)*step/myScrollHorizontalTotalSteps;
+			return intervalMs;
+		});
+	}
+	else {
+		myScrollHorizontalTotalSteps += 8;
+	}
+	
+
+}
+
+function myScrollWheel(e) {	
+	if(e.deltaY > 0) {
+		myScrollLeft();
+	}
+	else {
+		myScrollRight();
+	}
 }
 
 function myScrollLeft() {
@@ -605,7 +611,7 @@ function myScrollLeft() {
 	
 	var trWidth = tr.clientWidth;
 	var screenWidth = scrollableDiv.clientWidth;
-	var currentPos = scrollableDiv.scrollLeft + screenWidth/2;
+	var currentPos = (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) + screenWidth/2;
 
 	var previousTdPosN1 = -1;
 	var previousTdPosN2 = -1;
@@ -620,8 +626,7 @@ function myScrollLeft() {
 
 		var tdPos = left + width/2;
 		if(tdPos > currentPos+1) {
-			//scrollableDiv.scrollLeft = previousTdPosN2 - screenWidth/2;
-			myScrollHorizontalTo(scrollableDiv, previousTdPosN2 - screenWidth/2, 15)
+			myScrollHorizontalTo(scrollableDiv, previousTdPosN2 - screenWidth/2)
 			break;
 		}
 
@@ -631,6 +636,8 @@ function myScrollLeft() {
 	}
 }
 
+
+
 function myScrollRight() {
 	var tr = document.getElementById("trImages");
 	var scrollableDiv = document.getElementById("scrollableDiv");
@@ -639,7 +646,7 @@ function myScrollRight() {
 	
 	var trWidth = tr.clientWidth;
 	var screenWidth = scrollableDiv.clientWidth;
-	var currentPos = scrollableDiv.scrollLeft + screenWidth/2;
+	var currentPos = (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) + screenWidth/2;
 	
 	for(var i=0; i!=tdList.length; i++) {
 		var td = tdList[i];
@@ -651,8 +658,7 @@ function myScrollRight() {
 
 		var tdPos = left + width/2;
 		if(tdPos > currentPos+1) {
-			//scrollableDiv.scrollLeft = tdPos - screenWidth/2;
-			myScrollHorizontalTo(scrollableDiv, tdPos - screenWidth/2, 15)
+			myScrollHorizontalTo(scrollableDiv, tdPos - screenWidth/2)
 			break;
 		}
 
@@ -663,14 +669,12 @@ function myScrollRight() {
 
 function myScrollLeftDouble() {
 	var div = document.getElementById("scrollableDiv");
-	//div.scrollLeft -= 6000;
-	myScrollHorizontalTo(scrollableDiv, div.scrollLeft - 6000, 15)
+	myScrollHorizontalTo(scrollableDiv, (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) - 6000);
 
 }
 function myScrollRightDouble() {
 	var div = document.getElementById("scrollableDiv");
-	//div.scrollLeft += 6000;
-	myScrollHorizontalTo(scrollableDiv, div.scrollLeft + 6000, 15)
+	myScrollHorizontalTo(scrollableDiv, (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) + 6000);
 }
 
 function bodyOnLoad() {
@@ -686,9 +690,9 @@ window.onresize = function(event) {
 
 </script>
 </head>
-<body style="background-color:#000000;height:97%:hidden"" onload="bodyOnLoad();">
+<body style="background-color:#000000;height:97%:hidden" onload="bodyOnLoad();" >
 <div id="globalFullScreen" style="height:100%;">
-<div id="scrollableDiv" style="overflow-x: scroll;;overflow-y:hidden;scrollbar-face-color: black;height:100%;">
+<div id="scrollableDiv" style="overflow-x: scroll;;overflow-y:hidden;scrollbar-face-color: black;height:100%;" onwheel="myScrollWheel(event);">
 <table  border="0" style="padding:0;border-spacing:4;background-color:#000000;height:100%;">
 <tbody style="height:100%;">
 	<tr id="trImages" style="height:100%;">
