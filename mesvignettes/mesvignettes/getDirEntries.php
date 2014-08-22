@@ -1,15 +1,22 @@
 <?
 include "common.php";
+include "dirDescriptionClass.php";
 
 $myjson = file_get_contents('php://input');
 $message = json_decode($myjson, true);
 
 $dir = $message["dir"];
-$filterFileNameRegex = $message["filterFileNameRegex"];
+$filterFileNameRegex = getWithDefault($message, "filterFileNameRegex", null);
+$filterFileNameRegexList = getWithDefault($message, "filterFileNameRegexList", null);
+$filterDescription = getWithDefault($message, "filterDescription", null);
+$recurseDir = getWithDefault($message, "recurseDir", false);
 
-// todo : filtre de nom de fichier JPEG, JPG, PNG, etc.
+
+if($recurseDir == null) {
+	$recurseDir = false;
+}
+
 // todo : filtre exif 
-// todo : filtre description
 
 if($log_json) {
 	error_log($myjson);
@@ -17,31 +24,72 @@ if($log_json) {
 
 $all_dir_entries = array();
 $all_file_entries = array();
+$dirFullName = $file_lookup_prefix."/".$dir;
 
-if ($handle = opendir($file_lookup_prefix."/".$dir)) {
+$dirDescr = new DirDescription($dirFullName);
+if($dirDescr->exists()) {
+	$dirDescr->read();
+}
+else {
+	$dirDescr = null;
+}
+
+
+if ($handle = opendir($dirFullName)) {
 	while (false !== ($entry = readdir($handle))) {
-//		error_log($entry);
 		if($entry == "." ||
 			$entry == "..") {
 			continue;
 		}
 		
-		if ((is_dir($file_lookup_prefix."/".$dir.'/'.$entry)) && $entry != "." && $entry != "..") {
+		$entryLC = strtolower($entry);
+		
+		$entryFullName = $dirFullName.'/'.$entry;
+		
+		if ( is_dir($entryFullName) ) {
 			if($dont_show_dir == $entry) {
 				continue;
+			}
+			
+			if($filterDescription != null && $filterDescription != "") {
+				$subDirDescr = new DirDescription($entryFullName);
+				if($subDirDescr->exists()) {
+					$subDirDescr->read();
+					if( ! $subDirDescr->contains($filterDescription)) {
+						continue;
+					}
+				}
+				else {
+					continue;
+				}
+				$subDirDescr = null;
 			}
 
 			array_push($all_dir_entries, $entry);
 		}
 		else {
 			if($entry == $descriptionFileName ||
-				preg_match("/^".$dont_show_image_prefix.".*$/", $entry)) {
+				preg_match("/^".$dont_show_image_prefix.".*$/", $entryLC)) {
 				continue;
 			}
 			
 			if($filterFileNameRegex != null &&
-				! preg_match("/^".$filterFileNameRegex."$/", strtolower($entry))) {
+				! preg_match("/^".$filterFileNameRegex."$/", $entryLC)) {
 				continue;
+			}
+
+			if($filterFileNameRegexList != null) {
+				foreach($filterFileNameRegexList as $filterRegex) {
+					if( ! preg_match("/^".$filterRegex."$/", $entryLC)) {
+						continue;
+					}
+				}
+			}
+			
+			if($filterDescription != null && $filterDescription != "" && $dirDescr != null) {
+				if( ! $dirDescr->containsForImg($entryLC, $filterDescription)) {
+					continue;
+				}
 			}
 		
 			array_push($all_file_entries, $entry);
@@ -51,6 +99,10 @@ if ($handle = opendir($file_lookup_prefix."/".$dir)) {
 }
 
 $return_message = array("fileEntries" => $all_file_entries, "dirEntries" => $all_dir_entries);
-echo json_encode($return_message);
+$return_message_json = json_encode($return_message);
+if($log_json) {
+	error_log($return_message_json);
+}
+echo $return_message_json;
 
 ?>

@@ -1,8 +1,10 @@
 <?
-$initDir = "";
-if(array_key_exists("dir", $_GET)) {
-	$initDir=$_GET["dir"];
-}
+include "mesvignettes/common.php";
+
+$initDir = getWithDefault($_GET, "dir", "");
+$initFilter = getWithDefault($_GET, "filter", "");
+$initFilterExif = getWithDefault($_GET, "filterExif", "");
+
 ?><!DOCTYPE html>
 <html style="height:100%">
 <head>
@@ -82,28 +84,46 @@ function initImageLoadedCount() {
 
 }
 
-/* todo
-function backUrl(theurl) {
-	var i = theurl.lastIndexOf("/");
-	if(i > 0) {
-		return theurl.substr(0, i);
-	}
-	else {
-		return "";
+function onFilterKeyPress(evt) {
+	if(evt.keyCode == 13) {
+		loadDirEntries();
 	}
 }
 
-function onFilterKeyPress(evt) {
-	if(evt.keyCode == 13) {
-		var myfilter = document.getElementById("filtreInput").value;
-		var myfilterDescription = document.getElementById("filtreDescriptionInput").value;
-		gotourl('<?echo $url; ?>', myfilter, myfilterDescription);
+function onFilterCancel() {
+	document.getElementById("filterInput").value = "";
+	loadDirEntries();
+}
+
+function onFilterExifCancel() {
+	document.getElementById("filterExifInput").value = "";
+	loadDirEntries();
+}
+
+function toggleDisplayFilter() {
+	toggleDisplay('divFilters');
+	
+	var reloadAtTheEnd = false;
+
+	if(document.getElementById("filterInput").value != "" && 
+		document.getElementById("filterExifInput").value != "") {
+		reloadAtTheEnd = true;
+	}
+	document.getElementById("filterInput").value = "";
+	document.getElementById("filterExifInput").value = "";
+	
+	if(reloadAtTheEnd) {
+		loadDirEntries();
 	}
 }
+
+/* 
+
+
 
 function toggleExifAll() {
 	var divArray = document.getElementsByTagName("DIV");
-	var prefix = "<? echo $exifIdPrefix; ?>";
+	var prefix = "<  ? echo $exifIdPrefix; ?>";
 	var toggleState = -1;
 	for(var i=0; i!=divArray.length; i++) { 
 		var mondiv = divArray[i];
@@ -237,7 +257,7 @@ function toggleFullScreen(id) {
 	}
 }
 
-var currentDir = "<? echo $initDir ?>";
+var currentDir = "<? echo $initDir; ?>";
 
 function backCurrentDir() {
 	var i = currentDir.lastIndexOf("/");
@@ -251,7 +271,7 @@ function backCurrentDir() {
 
 function changeCurrentDir(dir) {
 	currentDir = dir;
-	loadDirEntries(currentDir);
+	loadDirEntries();
 }
 
 function showCurrentDir() {
@@ -293,8 +313,15 @@ var dirList = [
 var imageToLoadList = [
 ];
 
-function loadDirEntries(dir) {
-	var message = { "dir":dir, filterFileNameRegex:".*\\.(jpg|jpeg|png|gif)" };
+function loadDirEntries() {
+	var dir = currentDir;
+	var currentFilter =	document.getElementById("filterInput").value;
+	var currentFilterExif = document.getElementById("filterExifInput").value;
+
+	var message = { "dir":dir, 
+					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
+					"filterDescription":currentFilter
+					};
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "mesvignettes/getDirEntries.php", true);
 	xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
@@ -309,10 +336,10 @@ function loadDirEntries(dir) {
 			
 			var i=0;
 			for(i=0; i!=reponse["fileEntries"].length; i++) {
-				imageList[i] = (dir==null||dir==""?"":dir+"/")+reponse["fileEntries"][i];
+				imageList[i] = (dir==null||dir=="" ? "":dir+"/")+reponse["fileEntries"][i];
 			}
 			for(i=0; i!=reponse["dirEntries"].length; i++) {
-				dirList[i] = (dir==null||dir==""?"":dir+"/")+reponse["dirEntries"][i];
+				dirList[i] = (dir==null||dir=="" ? "":dir+"/")+reponse["dirEntries"][i];
 			}
 			
 			sortImageList();
@@ -387,7 +414,8 @@ function showImageOne(imgName) {
 	imageToLoadList.push( {
 		"elt":a,
 		"url":url,
-		height:"window",
+		"height":"window",
+		"className":"myImage",
 		"status":null
 	} );
 	
@@ -420,9 +448,10 @@ function beginOneImageLoad() {
 	var elt    = imageToLoadList[i].elt;
 	var url    = imageToLoadList[i].url;
 	var height = imageToLoadList[i].height;
-	
+	var className = imageToLoadList[i].className;
+
 	var img = document.createElement("IMG");
-	img.className = "myImage";
+	img.className = className;
 	img.src = url;
 	if(height != null) {
 		if(height == "window") {
@@ -494,6 +523,7 @@ function showImageDirOne(dirName) {
 		"elt":a,
 		"url":"mesvignettes/vignettes_dir.php?dir="+dirName+"&largeur="+imageDirRawWidth+"&hauteur="+imageDirRawHeight,
 		"height":null,
+		"className":null,
 		"status":null
 	} );
 	
@@ -677,10 +707,11 @@ function myScrollRightDouble() {
 	myScrollHorizontalTo(scrollableDiv, (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) + 6000);
 }
 
+
 function bodyOnLoad() {
 	ajusteDir();
 	
-	loadDirEntries(currentDir);
+	loadDirEntries();
 }
 
 window.onresize = function(event) {
@@ -735,7 +766,7 @@ window.onresize = function(event) {
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
 	</a>
-	<a href="" onclick="toggleDisplay('divFilters');return false;">
+	<a href="" onclick="toggleDisplayFilter();return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/filter.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
 	</a>
 	
@@ -743,13 +774,13 @@ window.onresize = function(event) {
 		<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
 		<br/>
 
-		<input id="filtreInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $filtre; ?>" />
-		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', null, '<? echo $filtreDescription; ?>');return false;"/>
+		<input id="filterExifInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $initFilterExif; ?>" />
+		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterExifCancel();return false;"/>
 		<br/>
 
-		<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="<? if($currentDirDescription!=null) { echo $currentDirDescription->getDescription(); } ?>">DESCR.</a></div>
-		<input id="filtreDescriptionInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $filtreDescription; ?>" />
-		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="gotourl('<?echo $url; ?>', '<? echo $filtre; ?>', null);return false;"/>
+		<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a></div>
+		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $initFilter; ?>" />
+		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterCancel();return false;"/>
 	</div>
 	
 </div>

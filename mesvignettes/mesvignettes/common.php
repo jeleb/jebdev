@@ -13,6 +13,13 @@ $dont_show_dir = "mesvignettes";
 /* indique s'il faut logguer le json */
 $log_json = true;
 
-
+function getWithDefault($tab, $key, $defaultValue) {
+	if(array_key_exists($key, $tab)) {
+		return $tab[$key];
+	}
+	else {
+		return $defaultValue;
+	}
+}
 
 ?>
