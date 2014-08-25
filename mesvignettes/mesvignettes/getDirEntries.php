@@ -24,6 +24,11 @@ function exifFileMatch($filtre, $file) {
 	if($exif === false) {
 		return false;
 	}
+	return exifMatch($filtre, $exif);
+}
+
+function exifMatch($filtre, $exif) {
+
 
 	if(isset($exif["IFD0"])) {
 		if(isset($exif["IFD0"]["Comments"])) {
@@ -52,12 +57,19 @@ function exifFileMatch($filtre, $file) {
 	return false;
 }
 
-function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $depth) {
+function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $depth, $subDirDescr) {
 
 	if($dirFilterDescription != null && $dirFilterDescription != "") {
-		$subDirDescr = new DirDescription($dir);
-		if($subDirDescr->exists()) {
-			$subDirDescr->read();
+		if($subDirDescr != null) {
+			$subDirDescr = new DirDescription($dir);
+			if($subDirDescr->exists()) {
+				$subDirDescr->read();
+			}
+			else {
+				$subDirDescr = null;
+			}
+		}
+		if( $subDirDescr != null) {
 			if( $subDirDescr->contains($dirFilterDescription)) {
 				return true;
 			}
@@ -78,7 +90,7 @@ function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $
 			
 			if ( is_dir($subEntryFullName) ) {
 			
-				if( filterDirContainingFiles($subEntryFullName, $dirFilterDescription, $dirFilterExif, $depth+1) ) {
+				if( filterDirContainingFiles($subEntryFullName, $dirFilterDescription, $dirFilterExif, $depth+1, null) ) {
 					$ret = true;
 					break;
 				}
@@ -99,6 +111,62 @@ function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $
 	}
 	
 	return $ret;
+}
+
+function computeExifTitle($exif) {
+	$model = "";
+	$focalLength = "";
+	$aperture = "";
+	$expoTime = "";
+	$isoSpeed = "";
+	$userComment = "";
+	$keyWords = "";
+
+	if(isset($exif["IFD0"])) {
+		if(isset($exif["IFD0"]["Comments"])) {
+			$userComment = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Comments"]));
+		}
+		if(isset($exif["IFD0"]["Model"])) {
+			$model = $exif["IFD0"]["Model"];
+		}
+		if(isset($exif["IFD0"]["Keywords"])) {
+			$keyWords = utf8_encode(preg_replace('/[\x00-\x1F]/', '', $exif["IFD0"]["Keywords"]));
+		}
+	}
+	
+	if(isset($exif["COMPUTED"])) {
+		if(isset($exif["COMPUTED"]["ApertureFNumber"])) {
+			$aperture = $exif["COMPUTED"]["ApertureFNumber"];
+		}
+	}
+	
+	if($exif["EXIF"]) {
+		if(isset($exif["EXIF"]["FocalLength"])) {
+			$focalLength = $exif["EXIF"]["FocalLength"];
+			$diviserInstr = strpos($focalLength, "/");
+			if ($diviserInstr !== false) {
+				$d = substr($focalLength, 0, $diviserInstr);
+				$D = substr($focalLength, $diviserInstr+1);
+				$focalLength = floor((intval($d)/intval($D))*100)/100;
+			}
+			
+			$focalLength = $focalLength . "mm";
+		}
+		if(isset($exif["EXIF"]["ExposureTime"])) {
+			$expoTime = $exif["EXIF"]["ExposureTime"] . "s";
+		}
+		if(isset($exif["EXIF"]["ISOSpeedRatings"])) {
+			$isoSpeed = $exif["EXIF"]["ISOSpeedRatings"] . "ISO";
+		}
+	}
+	
+	$title = $model . "\n" . 
+			$aperture . " " . $expoTime . " " . $isoSpeed . "\n" .
+			$focalLength . "\n" .
+			$userComment . "\n" .
+			$keyWords;
+			
+	return $title;
 }
 
 
@@ -123,22 +191,32 @@ if ($handle = opendir($dirFullName)) {
 		}
 		
 		$entryLC = strtolower($entry);
-		
 		$entryFullName = $dirFullName.'/'.$entry;
+		$description = $entry;
 		
 		if ( is_dir($entryFullName) ) {
 			if($dont_show_dir == $entry) {
 				continue;
 			}
 			
+			$subDirDescr = new DirDescription($entryFullName);
+			if($subDirDescr->exists()) {
+				$subDirDescr->read();
+				$description = $description . "\n\n" . $subDirDescr->getGlobalDescription();
+			}
+			else {
+				$subDirDescr = null;
+			}
+
+			
 			if( ( $filterDescription != null && $filterDescription != "") ||
 				( $filterExif != null && $filterExif != "") ) {
-				if( ! filterDirContainingFiles($entryFullName, $filterDescription, $filterExif, 1) ) {
+				if( ! filterDirContainingFiles($entryFullName, $filterDescription, $filterExif, 1, $subDirDescr) ) {
 					continue;
 				}
 			}
 			
-			array_push($all_dir_entries, $entry);
+			array_push($all_dir_entries,  array("name" => $entry, "description" => $description));
 		}
 		else {
 			if($entry == $descriptionFileName ||
@@ -159,19 +237,34 @@ if ($handle = opendir($dirFullName)) {
 				}
 			}
 			
-			if($filterDescription != null && $filterDescription != "" && $dirDescr != null) {
-				if( ! $dirDescr->containsForImg($entryLC, $filterDescription)) {
-					continue;
+			if($dirDescr != null) {
+				if($filterDescription != null && $filterDescription != "") {
+					if( ! $dirDescr->containsForImg($entryLC, $filterDescription)) {
+						continue;
+					}
 				}
+				
+				$description = $description . "\n\n" . $dirDescr->getDescriptionForImg($entry);
 			}
 		
-			if($filterExif != null  && $filterExif != "") {
-				if( ! exifFileMatch($filterExif, $entryFullName)) {
-					continue;
+			if(preg_match("/^.*\\.(jpg|jpeg|png|gif)$/", $entryLC)) {
+				$exif = exif_read_data($entryFullName, 0, true);
+				if($exif !== false) {
+					$description = $description . "\n\n" . computeExifTitle($exif);
+				}
+
+				if($filterExif != null  && $filterExif != "") {
+					if($exif === false) {
+						continue;
+					}
+
+					if( ! exifMatch($filterExif, $exif)) {
+						continue;
+					}
 				}
 			}
 
-			array_push($all_file_entries, $entry);
+			array_push($all_file_entries, array("name" => $entry, "description" => $description));
 		}
 	}
 	closedir($handle);

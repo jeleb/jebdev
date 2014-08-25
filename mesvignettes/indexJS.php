@@ -337,10 +337,16 @@ function loadDirEntries() {
 			
 			var i=0;
 			for(i=0; i!=reponse["fileEntries"].length; i++) {
-				imageList[i] = (dir==null||dir=="" ? "":dir+"/")+reponse["fileEntries"][i];
+				imageList[i] = { 
+					name:(dir==null||dir=="" ? "":dir+"/")+reponse["fileEntries"][i]["name"],
+					description:reponse["fileEntries"][i]["description"]
+				};
 			}
 			for(i=0; i!=reponse["dirEntries"].length; i++) {
-				dirList[i] = (dir==null||dir=="" ? "":dir+"/")+reponse["dirEntries"][i];
+				dirList[i] = {
+					name:(dir==null||dir=="" ? "":dir+"/")+reponse["dirEntries"][i]["name"],
+					description:reponse["dirEntries"][i]["description"]
+				}
 			}
 			
 			sortImageList();
@@ -360,16 +366,16 @@ function sortImageList() {
 
 function sortDirList() {
 	dirList.sort( function (a, b) {
-	var truc = a.substr(a.lastIndexOf("/")+1);
-		var aDigit = isNaN(a.substr(a.lastIndexOf("/")+1)) ? false : true;
-		var bDigit = isNaN(b.substr(b.lastIndexOf("/")+1)) ? false : true;
+	//var truc = a.name.substr(a.name.lastIndexOf("/")+1);
+		var aDigit = isNaN(a.name.substr(a.name.lastIndexOf("/")+1)) ? false : true;
+		var bDigit = isNaN(b.name.substr(b.name.lastIndexOf("/")+1)) ? false : true;
 		var ret = 0;
 		
 		if(aDigit && bDigit) {
-			ret = b.localeCompare(a);
+			ret = b.name.localeCompare(a.name);
 		}
 		else if(!aDigit && !bDigit) {
-			ret = a.localeCompare(b);
+			ret = a.name.localeCompare(b.name);
 		}
 		else {
 			ret = aDigit ? -1 : 1;
@@ -394,7 +400,7 @@ function ajusteImages() {
 	}
 }
 
-function showImageOne(imgName) {
+function showImageOne(imgName, imgDescription) {
 	var trPhotos = document.getElementById("trImages");
 	
 	var td = document.createElement("TD");
@@ -403,6 +409,7 @@ function showImageOne(imgName) {
 	a.href = imgName;
 	a.onclick = function() { return false; };
 	a.ondblclick = function() { window.open(imgName); return false; };
+	a.title = imgDescription;
 	
 	var url = null;
 	if(redimensionneImages) {
@@ -478,12 +485,12 @@ function beginOneImageLoad() {
 function showImageList() {
 	
 	for(var i=0; i!=imageList.length; i++) {
-		showImageOne(imageList[i]/*, height*/);
+		showImageOne(imageList[i].name, imageList[i].description);
 	}
 	
 }
 
-function showImageDirOne(dirName) {
+function showImageDirOne(dirName, dirDescription) {
 	var tableDir = document.getElementById("tableDir");
 	
 	var tr = null;
@@ -515,6 +522,7 @@ function showImageDirOne(dirName) {
 	var td = document.createElement("TD");
 	var a = document.createElement("A");
 	a.href = "";
+	a.title = dirDescription;
 	a.onclick = function() {
 		changeCurrentDir(dirName);
 		return false;
@@ -544,7 +552,7 @@ function showDirList() {
 	}
 	
 	for(var i=0; i!=dirList.length; i++) {
-		showImageDirOne(dirList[i]);
+		showImageDirOne(dirList[i].name, dirList[i].description);
 	}
 }
 
