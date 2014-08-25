@@ -320,7 +320,8 @@ function loadDirEntries() {
 
 	var message = { "dir":dir, 
 					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
-					"filterDescription":currentFilter
+					"filterDescription":currentFilter,
+					"filterExif":currentFilterExif
 					};
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "mesvignettes/getDirEntries.php", true);
@@ -598,7 +599,7 @@ function clearScreen() {
 var myScrollHorizontalTotalSteps = -1;
 var myScrollHorizontalGoTo = -1;
 function myScrollHorizontalTo(div, destLeft) {
-	var intervalMs = 1/10;
+	var intervalMs = 1/25*1000;
 	var startLeft = div.scrollLeft;
 	myScrollHorizontalGoTo = destLeft;
 
@@ -710,6 +711,13 @@ function myScrollRightDouble() {
 
 function bodyOnLoad() {
 	ajusteDir();
+	document.getElementById("filterInput").value = "<? echo $initFilter; ?>";
+	document.getElementById("filterExifInput").value = "<? echo $initFilterExif; ?>";
+
+	if( ( document.getElementById("filterInput").value != null &&  document.getElementById("filterInput").value != "") ||
+		( document.getElementById("filterInput").value != null &&  document.getElementById("filterInput").value != "") ) {
+		document.getElementById("divFilters").style.display = "block";
+	}
 	
 	loadDirEntries();
 }
@@ -774,12 +782,12 @@ window.onresize = function(event) {
 		<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
 		<br/>
 
-		<input id="filterExifInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $initFilterExif; ?>" />
+		<input id="filterExifInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
 		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterExifCancel();return false;"/>
 		<br/>
 
 		<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a></div>
-		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();" value="<? echo $initFilter; ?>" />
+		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
 		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterCancel();return false;"/>
 	</div>
 	
