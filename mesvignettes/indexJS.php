@@ -122,76 +122,79 @@ function toggleExifAll() {
 
 
 
-function gotourl(myurl, myfiltre, myfiltredescription) {
-	var str = ""+window.location;
-	var i = str.lastIndexOf('?');
-	str = str.substring(0, i);
-	i = str.lastIndexOf('/');
-	str = str.substring(0, i+1);
-	if(myfiltre != null && myfiltre=="") {
-		myfiltre = null
-	}
-	if(myfiltredescription != null && myfiltredescription=="") {
-		myfiltredescription = null
+*/
+
+function loadDescription() {
+	
+	var message = { "dir":currentDir };
+	var json = JSON.stringify(message);
+	
+	// exceptionnellement on travaille en synchrone
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST","mesvignettes/getDescription.php",true);
+	xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if (xhr.status != 200) {
+				alert(xhr.status + " : " + xhr.statusText);
+			}
+			else {
+				var reponse = JSON.parse(xhr.responseText);
+				document.getElementById("descriptionTextArea").value = reponse["description"];
+			}
+		}
 	}
 	
-	window.location = str+"index.php?url="+myurl+
-		(myfiltre!=null ? "&filtre="+myfiltre : "") +
-		(myfiltredescription!=null ? "&filtreDescr="+myfiltredescription : "") +
-		"&hautscreen="+ getWindwHeight(); //screen.height;
+	xhr.send(json);
 }
 
-var backupDescription = null;
 function toggleDescription() {
 	var textDiv  = document.getElementById("descriptionDiv");
 	var textArea = document.getElementById("descriptionTextArea");
 	
-	if(backupDescription == null) {
-		backupDescription = textArea.value;
-		if(backupDescription == null) {
-			backupDescription = "";
-		}
-	}
-	
 	var disp = textDiv.style.display;
 	if(disp == "none") {
 		textDiv.style.display="block";
+		loadDescription();
 	}
 	else {
 		textDiv.style.display="none";
+		textArea.value = "";
 	}
 }
 
 function cancelDescription(event) {
 	var textArea = document.getElementById("descriptionTextArea");
-	if(backupDescription != null) {
-		textArea.value = backupDescription;
-	}
-	else {
-		textArea.value = "";
-	}
-	toggleDescription();
+	textArea.value = "";
+	toggleDisplay("descriptionDiv");
 }
 
 function saveDescription() {
 	var textArea = document.getElementById("descriptionTextArea");
 
-	var message = { "dir":"2014/20140711", "newDescription": textArea.value };
+	var message = { "dir":currentDir, "newDescription": textArea.value };
 	var json = JSON.stringify(message);
-	//alert(json);
 	
 	// exceptionnellement on travaille en synchrone
-	var xmlhttp = new XMLHttpRequest();
-	xmlhttp.open("POST","mesvignettes/saveDescription.php",false);
-	xmlhttp.send(json);
-	if (xmlhttp.status != 200) {
-		alert(xmlhttp.status + " : " + xmlhttp.statusText);
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST","mesvignettes/saveDescription.php",true);
+	xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if (xhr.status != 200) {
+				alert(xhr.status + " : " + xhr.statusText);
+			}
+			else {
+				toggleDisplay("descriptionDiv");
+			}
+		}
 	}
-	backupDescription = textArea.value;
-	toggleDescription();
 	
+	xhr.send(json);
 }
-*/
+
 // raccourcis :
 // v : va 'loin' à gauche
 // f : va 'loin' à droite
@@ -772,9 +775,6 @@ window.onresize = function(event) {
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
 	</a>
-	<!--a href="" onclick="toggleDisplayFilter();return false;">
-		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/filter.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
-	</a-->
 	
 	<div id="divFilters" style="display:block;">
 		<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
@@ -790,7 +790,7 @@ window.onresize = function(event) {
 	
 </div>
 <div id="descriptionDiv" style="display:none;">
-	<textarea id="descriptionTextArea" rows="10" cols="80" style="opacity:0.8;"/></textarea>
+	<textarea id="descriptionTextArea" rows="10" cols="80" style="opacity:0.8;" onkeydown="event.stopPropagation();"/></textarea>
 	<button onclick="saveDescription();">enregistrer</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="cancelDescription();">annuler</button>
 </div>
 </div>
