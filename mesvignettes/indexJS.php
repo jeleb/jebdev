@@ -3,7 +3,6 @@ include "mesvignettes/common.php";
 
 $initDir = getWithDefault($_GET, "dir", "");
 $initFilter = getWithDefault($_GET, "filter", "");
-$initFilterExif = getWithDefault($_GET, "filterExif", "");
 
 ?><!DOCTYPE html>
 <html style="height:100%">
@@ -45,6 +44,9 @@ var redimensionneImages = true;
 /* gestion de l'opacite quand la souris passe au dessus des boutons */
 var opacityOver = "0.8";
 var opacityOut  = "0.4";
+
+/* préfixe à rajouter dans l'input des filtres pour qu'il soit appliqué aux exifs */
+ var exifFilterPrefix = "exif:";
 
 function opacityOnMouseOver(e) {
 	e.style.opacity = opacityOver;
@@ -93,28 +95,6 @@ function onFilterKeyPress(evt) {
 function onFilterCancel() {
 	document.getElementById("filterInput").value = "";
 	loadDirEntries();
-}
-
-function onFilterExifCancel() {
-	document.getElementById("filterExifInput").value = "";
-	loadDirEntries();
-}
-
-function toggleDisplayFilter() {
-	toggleDisplay('divFilters');
-	
-	var reloadAtTheEnd = false;
-
-	if(document.getElementById("filterInput").value != "" && 
-		document.getElementById("filterExifInput").value != "") {
-		reloadAtTheEnd = true;
-	}
-	document.getElementById("filterInput").value = "";
-	document.getElementById("filterExifInput").value = "";
-	
-	if(reloadAtTheEnd) {
-		loadDirEntries();
-	}
 }
 
 /* 
@@ -316,12 +296,28 @@ var imageToLoadList = [
 function loadDirEntries() {
 	var dir = currentDir;
 	var currentFilter =	document.getElementById("filterInput").value;
-	var currentFilterExif = document.getElementById("filterExifInput").value;
-
+	
+	var splt = currentFilter.split(" ");
+	var filterDescription = "";
+	var filterExif = "";
+	
+	for(var i=0; i!=splt.length; i++) {
+		var str = splt[i];
+		if(str.substring(0, exifFilterPrefix.length) == exifFilterPrefix) {
+			filterExif = " " + str.substring(exifFilterPrefix.length).trim();
+		}
+		else {
+			filterDescription = " " + str;
+		}
+	}
+	
+	filterDescription = filterDescription.trim();
+	filterExif = filterExif.trim();
+	
 	var message = { "dir":dir, 
 					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
-					"filterDescription":currentFilter,
-					"filterExif":currentFilterExif
+					"filterDescription":filterDescription,
+					"filterExif":filterExif
 					};
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "mesvignettes/getDirEntries.php", true);
@@ -720,12 +716,6 @@ function myScrollRightDouble() {
 function bodyOnLoad() {
 	ajusteDir();
 	document.getElementById("filterInput").value = "<? echo $initFilter; ?>";
-	document.getElementById("filterExifInput").value = "<? echo $initFilterExif; ?>";
-
-	if( ( document.getElementById("filterInput").value != null &&  document.getElementById("filterInput").value != "") ||
-		( document.getElementById("filterInput").value != null &&  document.getElementById("filterInput").value != "") ) {
-		document.getElementById("divFilters").style.display = "block";
-	}
 	
 	loadDirEntries();
 }
@@ -764,7 +754,7 @@ window.onresize = function(event) {
 	<span id="spanNbImg">0</span><span id="spanNbImgSep"> / </span><span id="spanNbTotalImg">0</span><br/>
 	<b>
 	<a id="buttonBack" href="" style="color:white;font-family:arial;size:4;" onclick="backCurrentDir();return false;">
-		<img src="mesvignettes/return2.png" style="opacity:0.4;width:80px;height:40px;transform:scaleY(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/>
+		<img src="mesvignettes/return2.png" style="opacity:0.4;width:120px;height:40px;transform:scaleY(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/>
 	</a>
 	</b>
 
@@ -782,21 +772,20 @@ window.onresize = function(event) {
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
 	</a>
-	<a href="" onclick="toggleDisplayFilter();return false;">
+	<!--a href="" onclick="toggleDisplayFilter();return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/filter.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
-	</a>
+	</a-->
 	
-	<div id="divFilters" style="display:none;">
+	<div id="divFilters" style="display:block;">
 		<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
+		&nbsp;
+		<a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a>
 		<br/>
 
-		<input id="filterExifInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
-		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterExifCancel();return false;"/>
-		<br/>
-
-		<div><a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a></div>
 		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
 		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterCancel();return false;"/>
+		<br/>
+
 	</div>
 	
 </div>
