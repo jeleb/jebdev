@@ -10,6 +10,8 @@ $newDescription = $message["newDescription"];
 
 $filename = $dir."/".$descriptionFileName;
 
+securityCheckPath($dir);
+
 if($log_json) {
 	error_log($myjson);
 }

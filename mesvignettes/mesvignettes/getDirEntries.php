@@ -13,11 +13,12 @@ $filterExif = getWithDefault($message, "filterExif", null);
 
 $filterExif = strtolower($filterExif);
 
-// todo : security sur ., .., /
-
 if($log_json) {
 	error_log($myjson);
 }
+
+securityCheckPath($dir);
+
 
 function exifFileMatch($filtre, $file) {
 	$exif = exif_read_data($file, 0, true);

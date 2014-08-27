@@ -13,6 +13,8 @@ if($log_json) {
 	error_log($myjson);
 }
 
+securityCheckPath($dir);
+
 $description = file_get_contents($file_lookup_prefix."/".$filename);
 if($description === false) {
 	$description = "";

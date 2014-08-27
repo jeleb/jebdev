@@ -22,4 +22,29 @@ function getWithDefault($tab, $key, $defaultValue) {
 	}
 }
 
+function securityCheckPath($path) {
+	if(substr($path, 0, 1) == "/") {
+		throw new Exception("invalid Path : ".$path);
+	}
+	
+	if(strpos($path, "\\") !== false) {
+		throw new Exception("invalid Path : ".$path);
+	}
+
+	if(strpos($path, "//") !== false) {
+		throw new Exception("invalid Path : ".$path);
+	}
+
+	if(strpos($path, "~") !== false) {
+		throw new Exception("invalid Path : ".$path);
+	}
+
+	if(strpos($path, "?") !== false) {
+		throw new Exception("invalid Path : ".$path);
+	}
+
+	if(strpos($path, ":") !== false) {
+		throw new Exception("invalid Path : ".$path);
+	}
+}
 ?>
