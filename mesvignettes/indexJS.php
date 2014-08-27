@@ -4,6 +4,8 @@ include "mesvignettes/common.php";
 $initDir = getWithDefault($_GET, "dir", "");
 $initFilter = getWithDefault($_GET, "filter", "");
 
+$initDir = parameterReplace($initDir);
+
 ?><!DOCTYPE html>
 <html style="height:100%">
 <head>
