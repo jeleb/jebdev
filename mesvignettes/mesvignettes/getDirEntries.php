@@ -61,7 +61,7 @@ function exifMatch($filtre, $exif) {
 function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $depth, $subDirDescr) {
 
 	if($dirFilterDescription != null && $dirFilterDescription != "") {
-		if($subDirDescr != null) {
+		if($subDirDescr == null) {
 			$subDirDescr = new DirDescription($dir);
 			if($subDirDescr->exists()) {
 				$subDirDescr->read();
@@ -97,7 +97,7 @@ function filterDirContainingFiles($dir, $dirFilterDescription, $dirFilterExif, $
 				}
 			}
 			else {
-				if($depth == 1 && // pas de récursion pour l'exif sinon c'est trop long ... pas très intuitif, que trouver de mieux ?
+				if($depth == 1 && // pas de récursion pour l'exif sinon c'est trop long ... TODO : pas très intuitif, que trouver de mieux ?
 					$dirFilterExif != null  && $dirFilterExif != "" &&
 					preg_match("/^.*\\.(jpg|jpeg|png|gif)$/", $subEntryLC)) {
 					if( exifFileMatch($dirFilterExif, $subEntryFullName)) {
@@ -141,7 +141,7 @@ function computeExifTitle($exif) {
 		}
 	}
 	
-	if($exif["EXIF"]) {
+	if(isset($exif["EXIF"])) {
 		if(isset($exif["EXIF"]["FocalLength"])) {
 			$focalLength = $exif["EXIF"]["FocalLength"];
 			$diviserInstr = strpos($focalLength, "/");
@@ -173,7 +173,13 @@ function computeExifTitle($exif) {
 
 $all_dir_entries = array();
 $all_file_entries = array();
-$dirFullName = $file_lookup_prefix."/".$dir;
+
+if($dir==null || $dir=="") {
+	$dirFullName = $file_lookup_prefix;
+}
+else {
+	$dirFullName = $file_lookup_prefix."/".$dir;
+}
 
 $dirDescr = new DirDescription($dirFullName);
 if($dirDescr->exists()) {
@@ -192,6 +198,7 @@ if ($handle = opendir($dirFullName)) {
 		}
 		
 		$entryLC = strtolower($entry);
+
 		$entryFullName = $dirFullName.'/'.$entry;
 		$description = $entry;
 		

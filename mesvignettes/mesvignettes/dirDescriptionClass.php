@@ -43,6 +43,7 @@ class DirDescription {
 
 		while(! feof($h))  {
 			$line = trim(fgets($h));
+			$line = removeUTF8InvalidCaracters($line);
 			
 			if(substr($line, 0, 1) == "*") {
 				$separatorPos = strpos($line, ":", 1);
@@ -73,12 +74,14 @@ class DirDescription {
 	}
 	
 	function contains($text) {
-		if(strpos(strtolower($this->globalDescription), $text) !== FALSE) {
+		$text = normalizeString($text);
+	
+		if(strpos(normalizeString($this->globalDescription), $text) !== FALSE) {
 			return TRUE;
 		}
 		
 		foreach($this->perImageDescriptionArray as $descr) {
-			if(strpos(strtolower($descr->description), $text) !== FALSE) {
+			if(strpos(normalizeString($descr->description), $text) !== FALSE) {
 				return TRUE;
 			}
 		}
@@ -87,7 +90,9 @@ class DirDescription {
 	}
 	
 	function containsForImg($img, $text) {
-		if(strpos(strtolower($this->globalDescription), $text) !== FALSE ) {
+		$text = normalizeString($text);
+
+		if(strpos(normalizeString($this->globalDescription), $text) !== FALSE ) {
 			return TRUE;
 		}
 	

@@ -1,5 +1,5 @@
 <?
-/* ailleurs que dans index.php, les fichiers sont � rechercher dans .. car ces fichiers sont dans un sous-r�pertorie "mesvignettes"*/ 
+/* ailleurs que dans index.php, les fichiers sont à rechercher dans .. car ces fichiers sont dans un sous-répertorie "mesvignettes"*/ 
 $file_lookup_prefix = "..";
 
 /* nom des fichiers de description */
@@ -51,9 +51,9 @@ function securityCheckPath($path) {
 
 // remplace les variables standard
 // ${now:format} remplace par la date courante en utilisant le formatage :
-//    YYYY : ann�es sur 4 chiffres
-//    YY   : ann�es sur 2 chiffres
-//    MM   : mois de l'ann�e sur 2 chiffres
+//    YYYY : années sur 4 chiffres
+//    YY   : années sur 2 chiffres
+//    MM   : mois de l'année sur 2 chiffres
 //    DD   : jour du mois sur deux chiffres
 function parameterReplace($str) {
 	$matches = array();
@@ -72,5 +72,29 @@ function parameterReplace($str) {
 	
 	return $str;
 }
+
+// enleve les carateres utf8 invalides
+function removeUTF8InvalidCaracters($str) {
+	return mb_convert_encoding($str, 'UTF-8', 'UTF-8');
+}
+
+// normalise une string :
+// * remplace les é è ê ë par e
+// * remplace les à ä â par a
+// * remplace les ç par c
+function normalizeString($str) {
+	$ret = str_replace("é", "e", $str);
+	$ret = str_replace("è", "e", $ret);
+	$ret = str_replace("ê", "e", $ret);
+	$ret = str_replace("ë", "e", $ret);
+	$ret = str_replace("à", "a", $ret);
+	$ret = str_replace("ä", "a", $ret);
+	$ret = str_replace("â", "a", $ret);
+	$ret = str_replace("ç", "c", $ret);
+	$ret = strtolower($ret);
+
+	return $ret;
+}
+
 
 ?>

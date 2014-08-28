@@ -10,17 +10,11 @@ $hauteur = 0;
 if(array_key_exists("hauteur", $_GET)) {
 	$hauteur=strtoupper($_GET["hauteur"]);
 }
-//$extensaj=strtoupper($_GET["extensaj"]);
-//$largeuro=strtoupper($_GET["largeuro"]);
-//$hauteuro=strtoupper($_GET["hauteuro"]);
+
 $cadrak = "0";
 if(array_key_exists("cadrak", $_GET)) {
 	$cadrak=strtoupper($_GET["cadrak"]);
 }
-
-
-
-//error_log($file_lookup_prefix."/".$sourceimg);
 
 $extent=substr($sourceimg,strrpos($sourceimg,"."));
 $extensaj=strtoupper($extent);

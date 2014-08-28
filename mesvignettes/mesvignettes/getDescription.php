@@ -19,6 +19,9 @@ $description = file_get_contents($file_lookup_prefix."/".$filename);
 if($description === false) {
 	$description = "";
 }
+else {
+	$description = removeUTF8InvalidCaracters($description);
+}
 
 $return_message = array("description" => $description);
 $return_message_json = json_encode($return_message);

@@ -63,6 +63,7 @@ if($sourceimg != NULL) {
 	$sizeimgo=getimagesize($file_lookup_prefix."/".$urlt.$sourceimg);
 	$largeuro=$sizeimgo[0];
 	$hauteuro=$sizeimgo[1];
+	
 	if($largeuro*$hauteur > $largeur*$hauteuro) {
 	  //$text_delta_y = ($hauteur - $largeur*$hauteuro/$largeuro)/2;
 	  $hauteur = $largeur*$hauteuro/$largeuro;
@@ -71,6 +72,7 @@ if($sourceimg != NULL) {
 	  //$text_delta_x = ($largeur - $largeuro*$hauteur/$hauteuro)/2;
 	  $largeur = $largeuro*$hauteur/$hauteuro;
 	}
+	
 }
 
 /* ### Création de l'image à la longeur et la largeur de la vignette ### */
@@ -116,14 +118,7 @@ else {
 	imagettftext($im, $fontsize, 0, 11, 11+$fontsize, $black, 'arialbd.ttf', $dirname);
 }
 
-/* ### Affichage de l'image ### */
-//if($extensaj=='.JPG' || $extensaj=='.JPEG'){
-	imagejpeg($im); /* image compressée à un taux de 90% */
-//}
-//if($extensaj=='.GIF' || $extensaj=='.PNG'){
-//	imagepng ($im);
-//}
-
+imagejpeg($im); /* image compressée à un taux de 90% */
 
 /* ### Destruction de la source ### */
 imagedestroy ($im);
