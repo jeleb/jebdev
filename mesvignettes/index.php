@@ -228,7 +228,27 @@ document.onkeydown = function(evt) {
 };
 
 
+var slideShow = false;
+function toggleSlideShow() {
+	if(slideShow) {
+		slideShow = false;
+	}
+	else {
+		slideShow = true;
 
+		beginAnimation(function(step) {
+			if(slideShow == false) {
+				return 0;
+			}
+			
+			if(myScrollRight() == false) {
+				return 0;
+			}
+			
+			return 2000;
+		});
+	}
+}
 
 var fullScreen = false;
 function toggleFullScreen(id) {
@@ -674,11 +694,13 @@ function myScrollLeft() {
 		previousTdPosN1 = tdPos;
 		left += width+2;
 	}
+	
 }
 
 
 
 function myScrollRight() {
+	var found = false;
 	var tr = document.getElementById("trImages");
 	var scrollableDiv = document.getElementById("scrollableDiv");
 	var tdList = tr.childNodes;
@@ -699,11 +721,14 @@ function myScrollRight() {
 		var tdPos = left + width/2;
 		if(tdPos > currentPos+1) {
 			myScrollHorizontalTo(scrollableDiv, tdPos - screenWidth/2)
+			found = true;
 			break;
 		}
 
 		left += width+2;
 	}
+
+	return found;
 }
 
 
@@ -776,6 +801,9 @@ window.onresize = function(event) {
 
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
 		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
+	</a>
+	<a href="" onclick="toggleSlideShow();return false;">
+		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
 	</a>
 	
 	<div id="divFilters" style="display:block;">
