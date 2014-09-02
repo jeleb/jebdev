@@ -541,6 +541,7 @@ function showImageDirOne(dirName, dirDescription) {
 	
 	
 	var td = document.createElement("TD");
+	td.style.paddingRight = "4px";
 	var a = document.createElement("A");
 	a.href = "";
 	a.title = dirDescription;
@@ -768,7 +769,6 @@ window.onresize = function(event) {
 	<!-- menu de navigation des dossiers -->
 	<div id="scrollDir" style="overflow-y:auto;overflow-x:hidden">
 	<table id="tableDir" border="0" style="padding:0;border-spacing:0;background-color:#000000;">
-		<tr></tr>
 	</table>
 	</td>
 	</div>

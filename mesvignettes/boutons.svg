@@ -99,11 +99,11 @@
      showgrid="false"
      inkscape:snap-bbox="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="1440"
-     inkscape:window-height="854"
-     inkscape:window-x="-5"
-     inkscape:window-y="-5"
-     inkscape:window-maximized="1"
+     inkscape:window-width="709"
+     inkscape:window-height="455"
+     inkscape:window-x="92"
+     inkscape:window-y="92"
+     inkscape:window-maximized="0"
      inkscape:snap-global="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:bbox-nodes="true"
@@ -120,7 +120,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -279,7 +279,10 @@
     </g>
     <g
        id="g3930"
-       clip-path="url(#clipPath3994)">
+       clip-path="url(#clipPath3994)"
+       inkscape:export-filename="C:\devGit\mesvignettes\mesvignettes\slide.png"
+       inkscape:export-xdpi="14.890617"
+       inkscape:export-ydpi="14.890617">
       <g
          id="g3887">
         <rect
