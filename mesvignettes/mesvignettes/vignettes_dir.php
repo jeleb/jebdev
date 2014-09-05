@@ -10,7 +10,7 @@ if(array_key_exists("cadrak", $_GET)) {
 }
 
 // taille des bord arrondis (pour l'instant, ils sont juste coupés)
-$border_rounded_radius = 10;
+//$border_rounded_radius = 15;
 
 // Set the content-type
 header('Content-Type: image/jpeg');
@@ -125,14 +125,16 @@ else {
 	imagettftext($im, $fontsize, 0, 11, 11+$fontsize, $black, 'arialbd.ttf', $dirname);
 }
 
+
 // bords coupes haut gauche
-imagefilledpolygon($im, array(0, 0, 0, $border_rounded_radius, $border_rounded_radius, 0), 3, $black);
+/*imagefilledpolygon($im, array(0, 0, 0, $border_rounded_radius, $border_rounded_radius, 0), 3, $black);
 // bords coupes haut droite
 imagefilledpolygon($im, array($largeur, 0, $largeur-$border_rounded_radius, 0, $largeur, $border_rounded_radius), 3, $black);
 // bords coupes bas gauche
 imagefilledpolygon($im, array(0, $hauteur, 0, $hauteur-$border_rounded_radius, $border_rounded_radius, $hauteur), 3, $black);
 // bords coupes haut droite
 imagefilledpolygon($im, array($largeur, $hauteur, $largeur, $hauteur-$border_rounded_radius, $largeur-$border_rounded_radius, $hauteur), 3, $black);
+*/
 
 imagejpeg($im); /* image compressée à un taux de 90% */
 

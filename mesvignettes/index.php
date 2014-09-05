@@ -445,7 +445,8 @@ function showImageOne(imgName, imgDescription) {
 		"url":url,
 		"height":"window",
 		"className":"myImage",
-		"status":null
+		"status":null,
+		"borderRadius":null
 	} );
 	
 
@@ -478,10 +479,14 @@ function beginOneImageLoad() {
 	var url    = imageToLoadList[i].url;
 	var height = imageToLoadList[i].height;
 	var className = imageToLoadList[i].className;
+	var borderRadius = imageToLoadList[i].borderRadius;
 
 	var img = document.createElement("IMG");
 	img.className = className;
 	img.src = url;
+	if(borderRadius != null) {
+		img.style.borderRadius = borderRadius;
+	}
 	if(height != null) {
 		if(height == "window") {
 			img.style.height = getImageHeightFromWindowSize()+"px";
@@ -555,7 +560,8 @@ function showImageDirOne(dirName, dirDescription) {
 		"url":"mesvignettes/vignettes_dir.php?dir="+dirName+"&largeur="+imageDirRawWidth+"&hauteur="+imageDirRawHeight,
 		"height":null,
 		"className":null,
-		"status":null
+		"status":null,
+		"borderRadius":"20px"
 	} );
 	
 	td.appendChild(a);
