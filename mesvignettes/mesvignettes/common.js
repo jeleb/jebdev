@@ -86,12 +86,14 @@ function animationOne(step, callback) {
 }
 
 function beginAnimation(callback) {
+	var h = null;
 	var delayMilliSecondes = callback(1);
 	
 	if(delayMilliSecondes > 0) {
-		setTimeout(function() {
+		h = setTimeout(function() {
 			animationOne(2, callback);
 		}
 		, delayMilliSecondes);
 	}
+	return h;
 }

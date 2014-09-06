@@ -9,7 +9,6 @@ $descriptionFileName = "_description.txt";
 $dont_show_image_prefix = "mesvignettes_";
 $dont_show_dir = "mesvignettes";
 
-
 /* indique s'il faut logguer le json */
 $log_json = true;
 

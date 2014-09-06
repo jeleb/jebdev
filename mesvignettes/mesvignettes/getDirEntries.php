@@ -208,9 +208,11 @@ if ($handle = opendir($dirFullName)) {
 			}
 			
 			$subDirDescr = new DirDescription($entryFullName);
+			$cover = null;
 			if($subDirDescr->exists()) {
 				$subDirDescr->read();
 				$description = $description . "\n\n" . $subDirDescr->getGlobalDescription();
+				$cover = $subDirDescr->getCover();
 			}
 			else {
 				$subDirDescr = null;
@@ -224,7 +226,7 @@ if ($handle = opendir($dirFullName)) {
 				}
 			}
 			
-			array_push($all_dir_entries,  array("name" => $entry, "description" => $description));
+			array_push($all_dir_entries,  array("name" => $entry, "description" => $description, "cover" => $cover));
 		}
 		else {
 			if($entry == $descriptionFileName ||

@@ -48,7 +48,13 @@ var opacityOver = "0.8";
 var opacityOut  = "0.4";
 
 /* préfixe à rajouter dans l'input des filtres pour qu'il soit appliqué aux exifs */
- var exifFilterPrefix = "exif:";
+var exifFilterPrefix = "exif:";
+ 
+/* timeout de mise a jour des multi-vignettes de répertoire */
+var rollingDivTimeout = 5000; // en millisecondes
+var rollingDivTransitionDelay = 50; // en millisecondes
+var rollingDivTransitionNbSteps = 10;
+
 
 function opacityOnMouseOver(e) {
 	e.style.opacity = opacityOver;
@@ -227,6 +233,76 @@ document.onkeydown = function(evt) {
 
 };
 
+var rollingDivTimeoutHandler = null;
+function rollingDivReset() {
+	if(rollingDivTimeoutHandler != null) {
+		clearTimeout(rollingDivTimeoutHandler);
+		rollingDivTimeoutHandler = null;
+	}
+	
+	rollingDivTimeoutHandler = beginAnimation(function (step) {
+		if(step <=1) {
+			return rollingDivTimeout;
+		}
+
+		var imagesToSwitch = [];
+		var divList = document.getElementsByClassName("rollingDiv");
+		for(var i=0; i!=divList.length; i++) {
+			var current = 0;
+			/*if(divList[i] == null || divList[i].childNodes == null) {
+				continue;
+			}*/
+			var imgList = divList[i].childNodes;
+			if(imgList!=null && imgList.length > 1) {
+				for(current=0; current!=imgList.length; current++) {
+					if(imgList[current].style.display == "block") {
+						break;
+					}
+				}
+				
+				var toShow = current+1;
+				if(toShow >= imgList.length) {
+					toShow = 0;
+				}
+				
+				//imgList[current].style.display = "none";
+				//imgList[toShow].style.display = "block";
+				imagesToSwitch.push({ "from":imgList[current],
+									  "to":imgList[toShow] });
+			}
+		}
+		
+		beginAnimation(function(step) {
+			if(step <= rollingDivTransitionNbSteps) {
+				for(var i=0; i!=imagesToSwitch.length; i++) {
+					imagesToSwitch[i].from.style.opacity = 1-step/rollingDivTransitionNbSteps;
+				}
+			}
+			else if(step == rollingDivTransitionNbSteps+1) {
+				for(var i=0; i!=imagesToSwitch.length; i++) {
+					imagesToSwitch[i].from.style.display = "none";
+					imagesToSwitch[i].from.style.opacity = 1;
+					imagesToSwitch[i].to.style.opacity = 0;
+					imagesToSwitch[i].to.style.display = "block";
+				}
+			}
+			else if(step < 2*rollingDivTransitionNbSteps+1) {
+				for(var i=0; i!=imagesToSwitch.length; i++) {
+					imagesToSwitch[i].to.style.opacity = (step-rollingDivTransitionNbSteps+1)/rollingDivTransitionNbSteps;
+				}
+			}
+			else {
+				for(var i=0; i!=imagesToSwitch.length; i++) {
+					imagesToSwitch[i].to.style.opacity = 1;
+				}
+				return 0;
+			}
+			return rollingDivTransitionDelay;
+		});
+		
+		return rollingDivTimeout;
+	});
+}
 
 var slideShow = false;
 function toggleSlideShow() {
@@ -366,7 +442,8 @@ function loadDirEntries() {
 			for(i=0; i!=reponse["dirEntries"].length; i++) {
 				dirList[i] = {
 					name:(dir==null||dir=="" ? "":dir+"/")+reponse["dirEntries"][i]["name"],
-					description:reponse["dirEntries"][i]["description"]
+					description:reponse["dirEntries"][i]["description"],
+					cover:reponse["dirEntries"][i]["cover"]
 				}
 			}
 			
@@ -446,7 +523,7 @@ function showImageOne(imgName, imgDescription) {
 		"height":"window",
 		"className":"myImage",
 		"status":null,
-		"borderRadius":null
+		"style":null
 	} );
 	
 
@@ -479,13 +556,13 @@ function beginOneImageLoad() {
 	var url    = imageToLoadList[i].url;
 	var height = imageToLoadList[i].height;
 	var className = imageToLoadList[i].className;
-	var borderRadius = imageToLoadList[i].borderRadius;
+	var style = imageToLoadList[i].style;
 
 	var img = document.createElement("IMG");
 	img.className = className;
 	img.src = url;
-	if(borderRadius != null) {
-		img.style.borderRadius = borderRadius;
+	if(style != null) {
+		img.style = style;
 	}
 	if(height != null) {
 		if(height == "window") {
@@ -516,7 +593,7 @@ function showImageList() {
 	
 }
 
-function showImageDirOne(dirName, dirDescription) {
+function showImageDirOne(dirName, dirDescription, dirCover) {
 	var tableDir = document.getElementById("tableDir");
 	
 	var tr = null;
@@ -546,7 +623,6 @@ function showImageDirOne(dirName, dirDescription) {
 	
 	
 	var td = document.createElement("TD");
-	td.style.paddingRight = "4px";
 	var a = document.createElement("A");
 	a.href = "";
 	a.title = dirDescription;
@@ -554,16 +630,40 @@ function showImageDirOne(dirName, dirDescription) {
 		changeCurrentDir(dirName);
 		return false;
 	}
+	var stackDiv = document.createElement("Div");
+	stackDiv.style.position = "relative";
+	stackDiv.style.verticalAlign = "top";
 	
 	imageToLoadList.push( {
-		"elt":a,
-		"url":"mesvignettes/vignettes_dir.php?dir="+dirName+"&largeur="+imageDirRawWidth+"&hauteur="+imageDirRawHeight,
+		"elt":stackDiv,
+		"url":"mesvignettes/vignettes_dir.php?dir="+dirName+
+				"&largeur="+imageDirRawWidth+
+				"&hauteur="+imageDirRawHeight+
+				(dirCover==null||dirCover.length==0?"":"&cover="+dirCover[0]),
 		"height":null,
 		"className":null,
 		"status":null,
-		"borderRadius":"20px"
+		"style": "border-radius:20px;display:block" 
 	} );
 	
+	if(dirCover!=null && dirCover.length>1) {
+		stackDiv.className = "rollingDiv";
+		for(var i=1; i<dirCover.length; i++) {
+			imageToLoadList.push( {
+				"elt":stackDiv,
+				"url":"mesvignettes/vignettes_dir.php?dir="+dirName+
+						"&largeur="+imageDirRawWidth+
+						"&hauteur="+imageDirRawHeight+
+						"&cover="+dirCover[i],
+				"height":null,
+				"className":null,
+				"status":null,
+				"style": "border-radius:20px;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;" 
+			} );
+		}
+	}
+		
+	a.appendChild(stackDiv);
 	td.appendChild(a);
 	tr.appendChild(td);
 }
@@ -580,7 +680,7 @@ function showDirList() {
 	}
 	
 	for(var i=0; i!=dirList.length; i++) {
-		showImageDirOne(dirList[i].name, dirList[i].description);
+		showImageDirOne(dirList[i].name, dirList[i].description, dirList[i].cover);
 	}
 }
 
@@ -611,11 +711,13 @@ function refreshScreen() {
 	showCurrentDir();
 	initImageLoadedCount();
 	showHideButtons();
+	//rollingDivReset();
 	
 	for(var i=0; i!=nbImageToLoadAtTheSameTime; i++) {
 		beginOneImageLoad();
 	}
 
+	rollingDivReset();
 }
 
 function clearScreen() {

@@ -5,9 +5,7 @@ $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
 $hauteur=strtoupper($_GET["hauteur"]);
 $cadrak = "0";
-if(array_key_exists("cadrak", $_GET)) {
-	$cadrak=strtoupper($_GET["cadrak"]);
-}
+$cover = getWithDefault($_GET, "cover", null);
 
 // taille des bord arrondis (pour l'instant, ils sont juste coupés)
 //$border_rounded_radius = 15;
@@ -35,14 +33,22 @@ else{
 	$dossier = opendir($file_lookup_prefix);
 }
 
-$sourceimg = NULL;
-while($fichier = readdir($dossier)){
-	$extent=substr($fichier,strrpos($fichier,"."));
-	$extensaj=strtoupper($extent);
-	if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
-		$sourceimg=$fichier;
-		break;
+$sourceimg = null;
+$extensaj = null;
+if($cover == null) {
+	while($fichier = readdir($dossier)){
+		$extent=substr($fichier,strrpos($fichier,"."));
+		$extensaj=strtoupper($extent);
+		if($extensaj=='.JPG' || $extensaj=='.JPEG' || $extensaj=='.GIF' || $extensaj=='.PNG'){
+			$sourceimg=$fichier;
+			break;
+		}
 	}
+}
+else {
+	$sourceimg = $cover;
+	$extent=substr($sourceimg,strrpos($sourceimg,"."));
+	$extensaj=strtoupper($extent);
 }
 
 $imxz = NULL;
@@ -83,6 +89,8 @@ imagefill ($im, 0, 0, imagecolorallocate($im, 0, 0, 0));
 /* ### Construction d'un cadre autour de l'image ### */
 $pos_src_x=0;
 $pos_src_y=0;
+$posixe=0;
+$posigrek=0;
 if($cadrak=='1'){
 	$largeur=$largeur-2;
 	$hauteur=$hauteur-2;

@@ -24,12 +24,14 @@ class DirDescription {
 	var $fileName;
 	var $globalDescription;
 	var $perImageDescriptionArray;
+	var $cover;
 	
 	function DirDescription($dir) {
 		global $descriptionFileName;
 		$this->fileName = $dir."/".$descriptionFileName;
 		$this->perImageDescriptionArray = array();
 		$this->globalDescription = "";
+		$this->cover = null;
 	}
 	
 	function exists() {
@@ -59,6 +61,10 @@ class DirDescription {
 				}
 				$perImageCurrent = new DirDescriptionPerImage($first, $last);
 				array_push($this->perImageDescriptionArray, $perImageCurrent);
+			}
+			else if($perImageCurrent == null &&
+					substr($line, 0, 1) == "!") {
+				$this->cover = explode(",", substr($line, 1));
 			}
 			else {
 				if($perImageCurrent != null) {
@@ -141,6 +147,10 @@ class DirDescription {
 		}
 		
 		return $str;
+	}
+	
+	function getCover() {
+		return $this->cover;
 	}
 }
 
