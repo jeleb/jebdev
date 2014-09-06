@@ -105,32 +105,6 @@ function onFilterCancel() {
 	loadDirEntries();
 }
 
-/* 
-
-
-
-function toggleExifAll() {
-	var divArray = document.getElementsByTagName("DIV");
-	var prefix = "<  ? echo $exifIdPrefix; ?>";
-	var toggleState = -1;
-	for(var i=0; i!=divArray.length; i++) { 
-		var mondiv = divArray[i];
-		if(mondiv.id.substr(0, prefix.length) == prefix) {
-			if(toggleState == -1) {
-				toggleState = (mondiv.style.display == "none" ? 0 : 1);
-			}
-			
-			mondiv.style.display = (toggleState==0 ? "block" : "none");
-		}
-	} 
-
-}
-
-
-
-
-
-*/
 
 function loadDescription() {
 	
@@ -500,7 +474,7 @@ function showImageOne(imgName, imgDescription) {
 	var a  = document.createElement("A");
 	
 	a.href = imgName;
-	a.onclick = function() { return false; };
+	a.onclick = function(e) { toggleImageMenu(imgName, e.clientX, e.clientY);	return false; };
 	a.ondblclick = function() { window.open(imgName); return false; };
 	a.title = imgDescription;
 	
@@ -697,6 +671,21 @@ function showHideButtons() {
 		buttonsImageNavigation.style.display = "block";
 	}
 	
+}
+
+var menuCurrentImage = null;
+function toggleImageMenu(imgName, x, y) {
+	var menu = document.getElementById("imgMenu");
+	if(menu.style.display == "none") {
+		menu.style.left = x+"px";
+		menu.style.top = y+"px";
+		menu.style.display = "block";
+		menuCurrentImage = imgName;
+	}
+	else {
+		menu.style.display = "none";
+		menuCurrentImage = null;
+	}
 }
 
 function refreshScreen() {
@@ -926,6 +915,19 @@ window.onresize = function(event) {
 	<button onclick="saveDescription();">enregistrer</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="cancelDescription();">annuler</button>
 </div>
 </div>
+</div>
+<div id="imgMenu" style="position:absolute;top:1px;left:1px;display:none;">
+<a href="" onclick="return false;">
+	<img src="mesvignettes/dl_sd.png" style="height:50px"/>
+</a>
+<br/>
+<a href="" onclick="return false;">
+	<img src="mesvignettes/dl_hd.png" style="height:50px"/>
+</a>
+<br/>
+<a href="" onclick="return false;">
+	<img src="mesvignettes/zoom_in.png" style="height:50px"/>
+</a>
 </div>
 </div>
 </body>

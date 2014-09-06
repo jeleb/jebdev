@@ -91,19 +91,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="-2598.9963"
-     inkscape:cy="509.81919"
+     inkscape:zoom="0.24748738"
+     inkscape:cx="-3589.189"
+     inkscape:cy="-1752.4417"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-bbox="true"
      inkscape:snap-bbox-midpoints="true"
-     inkscape:window-width="709"
-     inkscape:window-height="455"
-     inkscape:window-x="92"
-     inkscape:window-y="92"
-     inkscape:window-maximized="0"
+     inkscape:window-width="1440"
+     inkscape:window-height="854"
+     inkscape:window-x="-5"
+     inkscape:window-y="-5"
+     inkscape:window-maximized="1"
      inkscape:snap-global="true"
      inkscape:snap-bbox-edge-midpoints="true"
      inkscape:bbox-nodes="true"
@@ -111,7 +111,8 @@
      inkscape:object-paths="true"
      inkscape:snap-intersection-paths="true"
      inkscape:object-nodes="true"
-     inkscape:snap-smooth-nodes="true" />
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-nodes="false" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -128,6 +129,24 @@
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="color:#000000;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:7;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3832"
+       width="987.92957"
+       height="1474.2916"
+       x="-5419.4688"
+       y="1311.9713"
+       rx="44.446712"
+       ry="44.446712" />
+    <rect
+       rx="44.446712"
+       ry="44.446712"
+       y="2213.5325"
+       x="-5161.3745"
+       height="449.51797"
+       width="536.39117"
+       id="rect3830-8-4"
+       style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:7;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     <g
        id="g3001">
       <path
@@ -429,6 +448,122 @@
            y="2718.375"
            ry="0"
            transform="matrix(0,1,-1,0,0,0)" />
+      </g>
+    </g>
+    <g
+       id="g3834"
+       inkscape:export-filename="C:\devGit\mesvignettes\mesvignettes\dl_sd.png"
+       inkscape:export-xdpi="15.939861"
+       inkscape:export-ydpi="15.939861">
+      <rect
+         rx="44.446712"
+         ry="44.446712"
+         y="1546.8318"
+         x="-4106.7754"
+         height="449.51797"
+         width="536.39117"
+         id="rect3830"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:7;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m -3984.302,1798.7121 c 0,0.8764 0.3285,1.766 1,2.4375 l 142.2812,142.2812 c 1.3431,1.3431 3.532,1.3431 4.875,0 l 142.2813,-142.2812 c 1.343,-1.343 1.343,-3.5007 0,-4.8438 -45.848,0 -58.4168,10e-5 -84.9063,0 l 0,-194.125 c 0,-1.8993 -1.5069,-3.4374 -3.4062,-3.4374 l -112.7812,0 c -1.8994,0 -3.4376,1.5381 -3.4376,3.4374 l 0,194.125 c -23.3889,10e-5 -46.5598,0 -84.9062,0 -0.6715,0.6715 -1,1.5299 -1,2.4063 z"
+         id="rect2996-7-1-1"
+         inkscape:connector-curvature="0" />
+      <flowRoot
+         transform="translate(-158.23727,-661.06107)"
+         style="font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#808080;fill-opacity:1;stroke:#000000;stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+         id="flowRoot3052"
+         xml:space="preserve"><flowRegion
+           id="flowRegion3054"><rect
+             style="font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808080;stroke:#000000;stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+             y="2280.7078"
+             x="-3709.28"
+             height="703.06616"
+             width="1381.8887"
+             id="rect3056" /></flowRegion><flowPara
+           id="flowPara3060">SD</flowPara></flowRoot>    </g>
+    <g
+       transform="translate(16.162597,569.72605)"
+       id="g3834-1"
+       inkscape:export-filename="C:\devGit\mesvignettes\mesvignettes\dl_hd.png"
+       inkscape:export-xdpi="15.939861"
+       inkscape:export-ydpi="15.939861">
+      <rect
+         rx="44.446712"
+         ry="44.446712"
+         y="1546.8318"
+         x="-4106.7754"
+         height="449.51797"
+         width="536.39117"
+         id="rect3830-8"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:7;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         style="color:#000000;fill:none;stroke:#999999;stroke-width:43.69308472;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:2;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m -3984.302,1798.7121 c 0,0.8764 0.3285,1.766 1,2.4375 l 142.2812,142.2812 c 1.3431,1.3431 3.532,1.3431 4.875,0 l 142.2813,-142.2812 c 1.343,-1.343 1.343,-3.5007 0,-4.8438 -45.848,0 -58.4168,10e-5 -84.9063,0 l 0,-194.125 c 0,-1.8993 -1.5069,-3.4374 -3.4062,-3.4374 l -112.7812,0 c -1.8994,0 -3.4376,1.5381 -3.4376,3.4374 l 0,194.125 c -23.3889,10e-5 -46.5598,0 -84.9062,0 -0.6715,0.6715 -1,1.5299 -1,2.4063 z"
+         id="rect2996-7-1-1-2"
+         inkscape:connector-curvature="0" />
+      <flowRoot
+         transform="translate(-158.23727,-661.06107)"
+         style="font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr;text-anchor:start;fill:#808080;fill-opacity:1;stroke:#000000;stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+         id="flowRoot3052-9"
+         xml:space="preserve"><flowRegion
+           id="flowRegion3054-7"><rect
+             style="font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr;text-anchor:start;fill:#808080;stroke:#000000;stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+             y="2280.7078"
+             x="-3709.28"
+             height="703.06616"
+             width="1381.8887"
+             id="rect3056-6" /></flowRegion><flowPara
+           id="flowPara3878">HD</flowPara></flowRoot>    </g>
+    <rect
+       style="color:#000000;fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:49.90000153;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3901"
+       width="185.71428"
+       height="34.285713"
+       x="-3782.8572"
+       y="2703.7908"
+       rx="44.446712"
+       ry="34.285713" />
+    <rect
+       style="color:#000000;fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:49.90000153;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3901-2"
+       width="185.71428"
+       height="34.285713"
+       x="2628.0764"
+       y="3672.8572"
+       rx="44.446712"
+       ry="34.285713"
+       transform="matrix(0,1,-1,0,0,0)" />
+    <g
+       id="g3929"
+       transform="matrix(0.49161632,-0.49161632,0.49161632,0.49161632,-4466.9396,-389.53142)">
+      <path
+         id="path2985-0"
+         d="m -3309.5625,2231.5625 c -97.8333,0 -177.125,79.323 -177.125,177.1563 0,79.2128 51.9978,146.2766 123.7187,168.9374 -0.7722,3.2918 -1.1874,6.7161 -1.1874,10.25 l 0,65.9063 c 0,24.6235 19.814,44.4375 44.4374,44.4375 l 20.3126,0 c 24.6234,0 44.4687,-19.814 44.4687,-44.4375 l 0,-65.9063 c 0,-3.5339 -0.4153,-6.9582 -1.1875,-10.25 71.7182,-22.6624 123.7188,-89.7265 123.7188,-168.9374 0,-97.8333 -79.323,-177.1563 -177.1563,-177.1563 z"
+         style="fill:none;stroke:#999999;stroke-width:70;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none"
+         inkscape:connector-curvature="0" />
+      <g
+         transform="translate(0,-14.285714)"
+         id="g3925">
+        <rect
+           ry="34.285713"
+           rx="44.446712"
+           y="2405.6707"
+           x="-3402.4041"
+           height="34.285713"
+           width="185.71428"
+           id="rect3921"
+           style="color:#000000;fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:49.90000153;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <rect
+           transform="matrix(0,1,-1,0,0,0)"
+           ry="34.285713"
+           rx="44.446712"
+           y="3292.4041"
+           x="2329.9563"
+           height="34.285713"
+           width="185.71428"
+           id="rect3923"
+           style="color:#000000;fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:49.90000153;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
       </g>
     </g>
   </g>
