@@ -233,14 +233,9 @@ document.onkeydown = function(evt) {
 
 };
 
-var rollingDivTimeoutHandler = null;
-function rollingDivReset() {
-	if(rollingDivTimeoutHandler != null) {
-		clearTimeout(rollingDivTimeoutHandler);
-		rollingDivTimeoutHandler = null;
-	}
+function rollingDivStart() {
 	
-	rollingDivTimeoutHandler = beginAnimation(function (step) {
+	beginAnimation(function (step) {
 		if(step <=1) {
 			return rollingDivTimeout;
 		}
@@ -711,13 +706,11 @@ function refreshScreen() {
 	showCurrentDir();
 	initImageLoadedCount();
 	showHideButtons();
-	//rollingDivReset();
 	
 	for(var i=0; i!=nbImageToLoadAtTheSameTime; i++) {
 		beginOneImageLoad();
 	}
 
-	rollingDivReset();
 }
 
 function clearScreen() {
@@ -857,6 +850,7 @@ function bodyOnLoad() {
 	document.getElementById("filterInput").value = "<? echo $initFilter; ?>";
 	
 	loadDirEntries();
+	rollingDivStart();
 }
 
 window.onresize = function(event) {
