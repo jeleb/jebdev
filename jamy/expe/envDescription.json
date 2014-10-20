@@ -1,0 +1,126 @@
+var envDescription = {
+	"envList" : [
+		"Local",
+		"DEV1",
+		"REC", 
+		"PreProd", 
+		"Prod"
+	],
+	"externalApplications" : {
+		"ZEUS" : { 
+			"description" : "L'appli de Zeus",
+			"connectors" : {
+				"godIsListening" : {
+					"type" : "webService"
+				}
+			}
+		}, 
+		"JUPITER" : {
+			"description" : "L'appli de Jupiter"
+		}
+	},
+	"application" : {
+		"name" : "VOITURE",
+		"description" : "l'application qui roxe",
+		"modules" : {
+			"MOTEUR" : {
+				"description" : "blabla",
+				"instances" : {
+					"noeud1" : {
+						"url" : "${moteur.noeud1.url}",
+						"adminUser" : "${moteur.noeud1.adminUser}",
+						"adminPassword" : "${moteur.noeud1.adminPassword}"
+					}
+				}
+			},
+			"ROUES" : {
+				"description" : "blabla",
+				"instances" : {
+					"noeud1" : {
+						"url" : "${roues.noeud1.url}",
+						"adminUser" : "${roues.noeud1.adminUser}",
+						"adminPassword" : "${roues.noeud1.adminPassword}"
+					}
+				},
+				"connectors" : {
+					"moteurIsListening" : {
+						"type" : "JMS"
+					}
+				}
+			},
+			"PORTES" : {
+					"noeud1" : {
+						"url" : "${portes.noeud1.url}",
+						"adminUser" : "${portes.noeud1.adminUser}",
+						"adminPassword" : "${portes.noeud1.adminPassword}"
+					}
+			}
+		}
+	},
+	"links" : [
+		{ "from" : "MOTEUR",
+		  "to"   : "ZEUS",
+		  "connector":"godIsListening"
+		},
+		{ "from" : "MOTEUR",
+		  "to"   : "ROUES",
+		  "connector":"moteurIsListening"
+		}
+	],
+	"linkTypes" : {
+		"webService" : {
+			"style" : {
+			},
+			"parameters" : [
+				"url",
+				"wsdl"
+			]
+		},
+		"httpsWebService" : {
+			"style" : {
+			},
+			"parameters" : [
+				"url",
+				"wsdl",
+				"certif",
+				"pki"
+			]
+		},
+		"JMS" : {
+			"style" : {
+			}
+		}
+	},
+	"positioning" : {
+		"ZEUS" : {
+			"x" : "10",
+			"y" : "10",
+			"h" : "50",
+			"w" : "150"
+		},
+		"JUPITER" : {
+			"x" : "700",
+			"y" : "200",
+			"h" : "50",
+			"w" : "150"
+		},
+		"MOTEUR" : {
+			"x" : "400",
+			"y" : "150",
+			"h" : "50",
+			"w" : "150"
+		},
+		"ROUES" : {
+			"x" : "150",
+			"y" : "200",
+			"h" : "50",
+			"w" : "150"
+		},
+		"PORTES" : {
+			"x" : "500",
+			"y" : "250",
+			"h" : "50",
+			"w" : "150"
+		}
+	}
+}
