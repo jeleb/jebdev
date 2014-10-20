@@ -94,7 +94,7 @@ function svgDefs() {
 }
 
 function drawLink(fromRectangle, toConnector) {
-	var toX = toConnector.x;
+	/*var toX = toConnector.x;
 	var toY = toConnector.y;
 	
 	var fromX = fromRectangle.x;
@@ -102,6 +102,7 @@ function drawLink(fromRectangle, toConnector) {
 
 	var fromOrientation = null;
 
+	 tout horizontal
 	// todo : on doit pouvoir faire une matrice de tout ça
 	if(toConnector.orientation == "l") {
 		if(toConnector.x < fromRectangle.x+fromRectangle.w) {
@@ -136,7 +137,51 @@ function drawLink(fromRectangle, toConnector) {
 		strPath += " V" + toConnector.y;
 		strPath += " H" + toConnector.x;
 	}
+	*/
 	
+	// THE matrice
+	var matrice = { "l": [	[ "M${sx} $(syb} V${ey} H${ex}"							, "M${sx} ${syb} V${midy_b} H${exm} V${ey} H${ex}"],
+							[ "M${sx} ${syb} V${sybp} H${midx_left} V${ey} H${ex}"	, "M${sx} ${syb} V${sybp} H${exm} ${ey} H${ex}"],
+							[ "M${sx} ${syt} V${ey} H${ex}"							, "M${sx} ${syt} V${midy_t} H${exm} V${ey} H${ex}"] ],
+					"r": [	["M${sx} ${syb} V${midy_b} H${exp} V${ey} H${ex}"		, "M${sx} ${syb} V${ey} H${ex}"],
+							["M${sx} ${syb} V${sybp} H${exp} V${ey} H${ex}"			, "M${sx} ${syb} V${sybp} H${midx_right} V${ey} H${ex}"],
+							["M${sx} ${syt} V${midy_t} H${exp} V${ey} H${ex}"		, "M${sx} ${syt} V${ey} H${ex}"] ] };
+	
+	var pattern = null;
+	
+	
+	var ex = toConnector.x;
+	var exm = ex-20;
+	var exp = ex+20;
+	var ey = toConnector.y;
+	var sx = fromRectangle.x+fromRectangle.w/2;
+	var syt = fromRectangle.y;
+	var syb = fromRectangle.y+fromRectangle.h;
+	var sytm = syt-20;
+	var sybp = syb+20;
+	var midy_t=(syt + ey)/2;
+	var midy_b=(syb + ey)/2;
+	var midx_left=(fromRectangle.x+fromRectangle.w+toConnector.x)/2
+	var midx_right=(fromRectangle.x+toConnector.x)/2
+	
+	var i1 = (ey>syb?0:ey>syt?1:2);
+	var i2 = (ex>sx?0:1);
+	var strPath = matrice[toConnector.orientation][i1][i2];
+	
+	var strPath = strPath.replace("${ex}", ex);
+	var strPath = strPath.replace("${exm}", exm);
+	var strPath = strPath.replace("${exp}", exp);
+	var strPath = strPath.replace("${ey}", ey);
+	var strPath = strPath.replace("${sx}", sx);
+	var strPath = strPath.replace("${syt}", syt);
+	var strPath = strPath.replace("${syb}", syb);
+	var strPath = strPath.replace("${sytm}", sytm);
+	var strPath = strPath.replace("${sybp}", sybp);
+	var strPath = strPath.replace("${midy_t}", midy_t);
+	var strPath = strPath.replace("${midy_b}", midy_b);
+	var strPath = strPath.replace("${midx_left}", midx_left);
+	var strPath = strPath.replace("${midx_right}", midx_right);
+
 	var p = document.createElementNS(svgNS, "path");
 	p.setAttributeNS(null, "marker-end", "url(#head)");
 	p.setAttributeNS(null, "fill", "none");

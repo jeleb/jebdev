@@ -78,7 +78,7 @@ var envDescription = {
 	"links" : [
 		{ "from" : "MOTEUR",
 		  "to"   : "ZEUS",
-		  "connector":"godIsListeningOnTheRight3"
+		  "connector":"godIsListeningOnTheLeft1"
 		},
 		{ "from" : "MOTEUR",
 		  "to"   : "ROUES",
@@ -111,8 +111,8 @@ var envDescription = {
 	},
 	"positioning" : {
 		"ZEUS" : {
-			"x" : "10",
-			"y" : "10",
+			"x" : "30",
+			"y" : "20",
 			"h" : "50",
 			"w" : "150"
 		},
