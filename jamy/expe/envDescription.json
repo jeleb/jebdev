@@ -10,8 +10,25 @@ var envDescription = {
 		"ZEUS" : { 
 			"description" : "L'appli de Zeus",
 			"connectors" : {
-				"godIsListening" : {
-					"type" : "webService"
+				"godIsListeningOnTheRight1" : {
+					"type" : "webService",
+					"orientation" : "right"
+				},
+				"godIsListeningOnTheRight2" : {
+					"type" : "webService",
+					"orientation" : "right"
+				},
+				"godIsListeningOnTheRight3" : {
+					"type" : "webService",
+					"orientation" : "right"
+				},
+				"godIsListeningOnTheLeft1" : {
+					"type" : "webService",
+					"orientation" : "left"
+				},
+				"godIsListeningOnTheLeft2" : {
+					"type" : "webService",
+					"orientation" : "left"
 				}
 			}
 		}, 
@@ -44,7 +61,8 @@ var envDescription = {
 				},
 				"connectors" : {
 					"moteurIsListening" : {
-						"type" : "JMS"
+						"type" : "JMS",
+						"orientation" : "left"
 					}
 				}
 			},
@@ -60,7 +78,7 @@ var envDescription = {
 	"links" : [
 		{ "from" : "MOTEUR",
 		  "to"   : "ZEUS",
-		  "connector":"godIsListening"
+		  "connector":"godIsListeningOnTheRight3"
 		},
 		{ "from" : "MOTEUR",
 		  "to"   : "ROUES",

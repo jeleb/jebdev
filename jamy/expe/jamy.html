@@ -7,7 +7,7 @@
 <script type="text/javascript" src="envDescription.json"></script>
 <script>
 var svgNS = "http://www.w3.org/2000/svg";  
-var orientationEnum = { "l":"left", "r":"right", "u":"up", "d": "down"};
+var orientationEnum = { "left":"l", "right":"r", "up":"u", "down":"d"};
 
 var gRectangles = {};
 var gConnectors = {};
@@ -62,11 +62,12 @@ function drawRectangle(name, connectors, position) {
 	addToSvg(g);
 	
 	// store in context
-	gRectangles[name] = {"x":x, "y":y, "w":w, "h":h};
+	var rectangle = {"x":x, "y":y, "w":w, "h":h};
+	gRectangles[name] = rectangle;
 	
 	// add connectors
 	if(connectors != null) {
-		drawConnectors(x, y, w, h, connectors, name);
+		drawConnectors(rectangle, connectors, name);
 	}
 }
 
@@ -83,13 +84,67 @@ function svgDefs() {
 	marker.setAttributeNS(null, "orient", "auto");
 	marker.setAttributeNS(null, "markerWidth", "2");
 	marker.setAttributeNS(null, "markerHeight", "4");
-	marker.setAttributeNS(null, "refX", "0.1");
+	marker.setAttributeNS(null, "refX", "2");
 	marker.setAttributeNS(null, "refY", "2");
 	markerPath.setAttributeNS(null, "d", "M0,0 V4 L2,2 Z");
 	markerPath.setAttributeNS(null, "fill", "red");
 	marker.appendChild(markerPath);
 	defs.appendChild(marker);
 	addToSvg(defs);
+}
+
+function drawLink(fromRectangle, toConnector) {
+	var toX = toConnector.x;
+	var toY = toConnector.y;
+	
+	var fromX = fromRectangle.x;
+	var fromY = fromRectangle.y+fromRectangle.h/2;
+
+	var fromOrientation = null;
+
+	// todo : on doit pouvoir faire une matrice de tout ça
+	if(toConnector.orientation == "l") {
+		if(toConnector.x < fromRectangle.x+fromRectangle.w) {
+			fromOrientation = "l";
+		}
+		else {
+			fromOrientation = "r";
+		}
+	}
+	else {
+		if(toConnector.x < fromRectangle.x) {
+			fromOrientation = "l";
+		}
+		else {
+			fromOrientation = "r";
+		}
+	}
+	
+	var fromX = (fromOrientation=="l" ? fromRectangle.x : fromRectangle.x+fromRectangle.w);
+	var fromY = (fromRectangle.y+fromRectangle.h/2);
+	if(fromOrientation == toConnector.orientation) {
+		// C-shape
+		var strPath = "M" + fromX + " " + fromY;
+		strPath += " H" + (toX+(fromOrientation=="l"?-20:20));
+		strPath += " V" + toConnector.y;
+		strPath += " H" + toConnector.x;
+	}
+	else {
+		// Z-shape
+		var strPath = "M" + fromX + " " + fromY;
+		strPath += " H" + ((fromX+toConnector.x)/2);
+		strPath += " V" + toConnector.y;
+		strPath += " H" + toConnector.x;
+	}
+	
+	var p = document.createElementNS(svgNS, "path");
+	p.setAttributeNS(null, "marker-end", "url(#head)");
+	p.setAttributeNS(null, "fill", "none");
+	p.setAttributeNS(null, "stroke", "blue");
+	p.setAttributeNS(null, "stroke-width", "5");
+	p.setAttributeNS(null, "d", strPath);
+	addToSvg(p);
+	
 }
 
 function showLinks() {
@@ -115,18 +170,12 @@ function showLinks() {
 		var fromRectangle = gRectangles[fromName];
 		var toConnector = gConnectors[toName+gSep+toConnectorName];
 		
-		var p = document.createElementNS(svgNS, "path");
-		p.setAttributeNS(null, "marker-end", "url(#head)");
-		p.setAttributeNS(null, "fill", "none");
-		p.setAttributeNS(null, "stroke", "blue");
-		p.setAttributeNS(null, "stroke-width", "5");
-		p.setAttributeNS(null, "d", "M"+fromRectangle.x+" "+fromRectangle.y+" H"+toConnector.x+" V"+toConnector.y);
-		addToSvg(p);
+		drawLink(fromRectangle, toConnector);
 	}
 
 }
 
-function drawConnectors(x, y, w, h, connectors, namePrefix) {
+function drawConnectors(rectangle, connectors, namePrefix) {
 	if(connectors == null) {
 		return;
 	}
@@ -134,10 +183,43 @@ function drawConnectors(x, y, w, h, connectors, namePrefix) {
 	var width = 8;
 	var n = Object.keys(connectors).length;
 	
+	var orientedConnectors = {};
+	for(var i=0; i!=Object.keys(orientationEnum).length; i++) {
+		var orientationName = Object.keys(orientationEnum)[i];
+		orientedConnectors[orientationName] = [];
+	}
+
 	for(var i=0; i!=n; i++) {
 		connectorName = Object.keys(connectors)[i];
-		var myy = y + h*(i+1)/(n+1);
-		drawConnector(namePrefix+gSep+connectorName, x-width/2, myy-width/2, width, "l")
+		connector = connectors[connectorName];
+		connector.name = connectorName;
+		orientedConnectors[connector.orientation].push(connector);
+	}
+	
+	for(var i=0; i!=Object.keys(orientedConnectors).length; i++) {
+		var orientationName = Object.keys(orientedConnectors)[i];
+		var orientation = orientationEnum[orientationName];
+		var connectorList = orientedConnectors[orientationName]
+		
+		for(var j=0; j!=connectorList.length; j++) {
+			// todo : up and down orientation
+			var connector = connectorList[j];
+			
+			if(orientation == "r") {
+				var y = rectangle.y + rectangle.h*(j+1)/(connectorList.length+1);
+				var x = rectangle.x + rectangle.w;
+			}
+			else {
+				var y = rectangle.y + rectangle.h*(j+1)/(connectorList.length+1);
+				var x = rectangle.x;
+			}
+			
+			drawConnector(namePrefix+gSep+connector.name, 
+						x, 
+						y, 
+						width, 
+						orientation)
+		}
 	}
 }
 
@@ -145,8 +227,8 @@ function drawConnector(name, x, y, w, orientation) {
 	
 	// draw
 	var r = document.createElementNS(svgNS, "rect");
-	r.setAttributeNS(null, "x", x);
-	r.setAttributeNS(null, "y", y);
+	r.setAttributeNS(null, "x", x-w/2);
+	r.setAttributeNS(null, "y", y-w/2);
 	r.setAttributeNS(null, "width", w);
 	r.setAttributeNS(null, "height", w);
 	r.setAttributeNS(null, "style", "fill:white;stroke:black;");
