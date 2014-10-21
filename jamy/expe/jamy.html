@@ -4,6 +4,40 @@
 <meta charset="UTF-8">
 <title>Jamy</title>
 
+<style>
+
+.environmentRadioButton {
+	display:none;
+}
+
+.environmentRadioButton + label {
+	display:block;
+	background-color:lightblue;
+	font-size:14px;
+	font-family:Verdana;
+	width:120px;
+    border-radius: 5px;
+	margin:3px;
+	text-align:center;	
+	vertical-align:middle;
+    color:black;
+}
+
+.environmentRadioButton:checked + label {
+   font-weight: bold;
+   background-color:darkblue;
+   color:white;
+}
+
+.environmentLabel {
+	height : 25px;
+}
+
+.environmentLabel span {
+	vertical-align : middle;
+}
+</style>
+
 <script>
 var envDetails = {};
 </script>
@@ -21,15 +55,37 @@ function showEnvList() {
 	var div = document.getElementById("envList");
 	
 	div.innerHTML = "";
+	var str = "";
 	for(var i=0; i!=envList.length; i++) {
-		var c = document.createElement("input");
-		c.type = "button";
+		str += '<div><input id="env_radio_'+i+'" class="environmentRadioButton" type="radio" name="environment" value="'+envList[i]+'"'+(i==0?'checked':'')+'/>'
+		+'<label for="env_radio_'+i+'" class="environmentLabel"><span >'+envList[i]+'</span></label></div>';
+	
+		/*var c = document.createElement("input");
+		c.type = "radio";
+		c.name = "environment";
 		c.value = envList[i];
 		c.style.width = "150px";
-		
+		c.appendChild(document.createTextNode(envList[i]));
+
 		div.appendChild(c);
 		div.appendChild(document.createElement("br"));
+		*/
 	}
+
+	/*div.appendChild(f);*/
+	div.innerHTML = str;
+	
+}
+
+function getSelectedEnvironment() {
+	var radios = document.getElementsByName('environment');
+	var length=radios.length;
+	for (var i=0; i<length; i++) {
+		if (radios[i].checked) {
+			return radios[i].value;
+		}
+	}
+	return null;
 }
 
 function drawRectangle(name, connectors, position) {
@@ -281,7 +337,7 @@ function drawConnector(name, shortName, x, y, w, orientation) {
 	r.setAttributeNS(null, "width", w);
 	r.setAttributeNS(null, "height", w);
 	r.setAttributeNS(null, "style", "fill:white;stroke:black;");
-	r.onclick = function() { alert(name); }
+	r.onclick = function() { alert("connector:"+name+"\nenvironment:"+getSelectedEnvironment()); }
 	addToSvg(r);
 	
 	var fontSize = 11;

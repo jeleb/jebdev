@@ -1,0 +1,50 @@
+envDetails["REC"] = {
+	"externalApplications" = {
+		"ZEUS" : { 
+			"connectors" : {
+				"godIsListeningOnTheRight1" : {
+					"url" : "http://rec.truc.com/machin"
+					"https" : "no",
+					"pkiUrl : ""
+				},
+				"godIsListeningOnTheRight2" : {
+					"url" : "http://rec.othertruc.com/othermachin"
+				},
+				"godIsListeningOnTheRight3" : {
+					"url" : "http://rec.godIsListeningOnTheRight3/",
+				},
+				"godIsListeningOnTheLeft1" : {
+					"url" : "http://rec.godIsListeningOnTheLeft1/",
+				},
+				"godIsListeningOnTheLeft2" : {
+					"url" : "http://rec.godIsListeningOnTheLeft2/",
+				}
+			}
+		}, 
+		"JUPITER" : {
+		}
+	},
+	"application" : {
+		"modules" : {
+			"MOTEUR" : {
+				"enabled" = "false"
+			},
+			"ROUES" : {
+				"version" = "4.5.6",
+				"statusUrl" : "http://roues.com/status"
+				"connectors" : {
+					"moteurIsListening" : {
+						"url" : "t3s://abcdefghi"
+					}
+				}
+			},
+			"PORTES" : {
+				"version" = "7.8.9",
+				"noeud1" : {
+					"url" : "http://porte.com/porte",
+					"adminUser" : "admin",
+					"adminPassword" : "superSecurePasswordInClearForEveryOne"
+				}
+			}
+		}
+	}
