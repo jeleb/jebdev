@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Jamy</title>
 
+<script>
+var envDetails = {};
+</script>
 <script type="text/javascript" src="envDescription.json"></script>
 <script>
 var svgNS = "http://www.w3.org/2000/svg";  
@@ -260,6 +263,7 @@ function drawConnectors(rectangle, connectors, namePrefix) {
 			}
 			
 			drawConnector(namePrefix+gSep+connector.name, 
+						connector.name,
 						x, 
 						y, 
 						width, 
@@ -268,7 +272,7 @@ function drawConnectors(rectangle, connectors, namePrefix) {
 	}
 }
 
-function drawConnector(name, x, y, w, orientation) {
+function drawConnector(name, shortName, x, y, w, orientation) {
 	
 	// draw
 	var r = document.createElementNS(svgNS, "rect");
@@ -277,8 +281,22 @@ function drawConnector(name, x, y, w, orientation) {
 	r.setAttributeNS(null, "width", w);
 	r.setAttributeNS(null, "height", w);
 	r.setAttributeNS(null, "style", "fill:white;stroke:black;");
+	r.onclick = function() { alert(name); }
 	addToSvg(r);
 	
+	var fontSize = 11;
+	
+	var t = document.createElementNS(svgNS, "text");
+	t.setAttributeNS(null, "x", (orientation=="l"?x+w:x-w));
+	t.setAttributeNS(null, "y", y);
+	t.setAttributeNS(null, "font-family", "Verdana");
+	t.setAttributeNS(null, "font-size", fontSize);
+	t.setAttributeNS(null, "font-tyle", "italic");
+	t.setAttributeNS(null, "fill", "black");
+	t.setAttributeNS(null, "text-anchor", (orientation=="l"?"start":"end") );
+	t.appendChild(document.createTextNode(shortName));
+	addToSvg(t);
+
 	// store in context
 	gConnectors[name] = {"x":x, "y":y, "w":w, "orientation":orientation};
 

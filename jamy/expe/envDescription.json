@@ -41,24 +41,10 @@ var envDescription = {
 		"description" : "l'application qui roxe",
 		"modules" : {
 			"MOTEUR" : {
-				"description" : "blabla",
-				"instances" : {
-					"noeud1" : {
-						"url" : "${moteur.noeud1.url}",
-						"adminUser" : "${moteur.noeud1.adminUser}",
-						"adminPassword" : "${moteur.noeud1.adminPassword}"
-					}
-				}
+				"description" : "blabla"
 			},
 			"ROUES" : {
 				"description" : "blabla",
-				"instances" : {
-					"noeud1" : {
-						"url" : "${roues.noeud1.url}",
-						"adminUser" : "${roues.noeud1.adminUser}",
-						"adminPassword" : "${roues.noeud1.adminPassword}"
-					}
-				},
 				"connectors" : {
 					"moteurIsListening" : {
 						"type" : "JMS",
@@ -67,11 +53,6 @@ var envDescription = {
 				}
 			},
 			"PORTES" : {
-					"noeud1" : {
-						"url" : "${portes.noeud1.url}",
-						"adminUser" : "${portes.noeud1.adminUser}",
-						"adminPassword" : "${portes.noeud1.adminPassword}"
-					}
 			}
 		}
 	},
@@ -88,21 +69,11 @@ var envDescription = {
 	"linkTypes" : {
 		"webService" : {
 			"style" : {
-			},
-			"parameters" : [
-				"url",
-				"wsdl"
-			]
+			}
 		},
 		"httpsWebService" : {
 			"style" : {
-			},
-			"parameters" : [
-				"url",
-				"wsdl",
-				"certif",
-				"pki"
-			]
+			}
 		},
 		"JMS" : {
 			"style" : {
@@ -113,31 +84,31 @@ var envDescription = {
 		"ZEUS" : {
 			"x" : "30",
 			"y" : "20",
-			"h" : "50",
-			"w" : "150"
+			"h" : "150",
+			"w" : "500"
 		},
 		"JUPITER" : {
 			"x" : "700",
 			"y" : "200",
-			"h" : "50",
-			"w" : "150"
+			"h" : "100",
+			"w" : "200"
 		},
 		"MOTEUR" : {
 			"x" : "400",
-			"y" : "150",
-			"h" : "50",
+			"y" : "300",
+			"h" : "100",
 			"w" : "150"
 		},
 		"ROUES" : {
-			"x" : "150",
-			"y" : "200",
-			"h" : "50",
-			"w" : "150"
+			"x" : "200",
+			"y" : "500",
+			"h" : "100",
+			"w" : "300"
 		},
 		"PORTES" : {
-			"x" : "500",
-			"y" : "250",
-			"h" : "50",
+			"x" : "700",
+			"y" : "500",
+			"h" : "100",
 			"w" : "150"
 		}
 	}
