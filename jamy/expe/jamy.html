@@ -15,9 +15,8 @@
 	background-color:lightblue;
 	font-size:14px;
 	font-family:Verdana;
-	width:120px;
+	width:140px;
     border-radius: 5px;
-	margin:3px;
 	text-align:center;	
 	vertical-align:middle;
     color:black;
@@ -36,12 +35,37 @@
 .environmentLabel span {
 	vertical-align : middle;
 }
+
+.detailsTitle {
+	font-family:Verdana;
+	font-size:14px;
+	font-weight:bold;
+	margin-top:7px;
+	margin-bottom:7px;
+}
+
+.detailsTable {
+	border:0;
+	margin:0;
+    border-collapse: collapse;
+	width : 100%;
+}
+
+.detailsTable td {
+	border-color : grey;
+	border-width:1px; 
+	border-style:solid; 
+	padding:3px;
+}
 </style>
+
 
 <script>
 var envDetails = {};
 </script>
 <script type="text/javascript" src="envDescription.json"></script>
+<script type="text/javascript" src="env_Rec.json"></script>
+<script type="text/javascript" src="env_Prod.json"></script>
 <script>
 var svgNS = "http://www.w3.org/2000/svg";  
 var orientationEnum = { "left":"l", "right":"r", "up":"u", "down":"d"};
@@ -50,29 +74,40 @@ var gRectangles = {};
 var gConnectors = {};
 var gSep = "|";
 
+var gSelection = null;
+
+function setSelection(selection, onRefreshFunction) {
+	gSelection = { "object":selection, "onrefresh":onRefreshFunction};
+}
+
+function refreshSelection() {
+	if(gSelection != null) {
+		gSelection.onrefresh();
+	}
+}
+
 function showEnvList() {
 	var envList = envDescription.envList;
 	var div = document.getElementById("envList");
 	
 	div.innerHTML = "";
-	var str = "";
+	var str = '<table style="border:0;margin:0;padding:0;"><tr><td>';
 	for(var i=0; i!=envList.length; i++) {
-		str += '<div><input id="env_radio_'+i+'" class="environmentRadioButton" type="radio" name="environment" value="'+envList[i]+'"'+(i==0?'checked':'')+'/>'
-		+'<label for="env_radio_'+i+'" class="environmentLabel"><span >'+envList[i]+'</span></label></div>';
+		str += '<input id="env_radio_'+i+'" class="environmentRadioButton" '
+			+'type="radio" name="environment" value="'+envList[i]+'"'+(i==0?'checked':'')+' '
+			+'onclick="refreshSelection()" '
+			+'/>'
+			+'<label for="env_radio_'+i+'" class="environmentLabel"><span >'+envList[i]+'</span></label>';
 	
-		/*var c = document.createElement("input");
-		c.type = "radio";
-		c.name = "environment";
-		c.value = envList[i];
-		c.style.width = "150px";
-		c.appendChild(document.createTextNode(envList[i]));
-
-		div.appendChild(c);
-		div.appendChild(document.createElement("br"));
-		*/
+		if(i%2==0){
+			str += "</td><td>";
+		}
+		else {
+			str += "</td></tr><tr><td>";
+		}
 	}
 
-	/*div.appendChild(f);*/
+	str += "</td></tr></table>";
 	div.innerHTML = str;
 	
 }
@@ -116,6 +151,19 @@ function drawRectangle(name, connectors, position) {
 	t.setAttributeNS(null, "text-anchor", "middle");
 	t.appendChild(document.createTextNode(name));
 
+	r.onclick  = function()  { 
+		// when the rectangle (module/externalApplication) is clicked
+
+		setSelection(r, function(){ 
+			var details = getRectangleDetails(getSelectedEnvironment(), name);
+			showDetails(details, name);
+		} );
+	
+		var envName = getSelectedEnvironment();
+		var details = getRectangleDetails(getSelectedEnvironment(), name);
+		showDetails(details, name);
+	}
+	
 	g.appendChild(r);
 	g.appendChild(t);
 	addToSvg(g);
@@ -337,8 +385,6 @@ function drawConnector(name, shortName, x, y, w, orientation) {
 	r.setAttributeNS(null, "width", w);
 	r.setAttributeNS(null, "height", w);
 	r.setAttributeNS(null, "style", "fill:white;stroke:black;");
-	r.onclick = function() { alert("connector:"+name+"\nenvironment:"+getSelectedEnvironment()); }
-	addToSvg(r);
 	
 	var fontSize = 11;
 	
@@ -351,12 +397,124 @@ function drawConnector(name, shortName, x, y, w, orientation) {
 	t.setAttributeNS(null, "fill", "black");
 	t.setAttributeNS(null, "text-anchor", (orientation=="l"?"start":"end") );
 	t.appendChild(document.createTextNode(shortName));
+
+	r.onclick = t.onclick = function()  { 
+		// when the connector is clicked
+		var splt = name.split(gSep);
+		var moduleName = splt[0];
+		var connectorName = splt[1];
+
+		setSelection(r, function(){ 
+			var details = getConnectorDetails(getSelectedEnvironment(), moduleName, connectorName);
+			showDetails(details, moduleName+" - "+connectorName);
+		} );
+	
+		var envName = getSelectedEnvironment();
+		var details = getConnectorDetails(envName, moduleName, connectorName);
+		showDetails(details, moduleName+" - "+connectorName);
+	}
+	
+	addToSvg(r);
 	addToSvg(t);
 
 	// store in context
 	gConnectors[name] = {"x":x, "y":y, "w":w, "orientation":orientation};
 
 }
+
+function getRectangleDetails(envName, name) {
+	var myenv = envDetails[envName];
+	if(myenv == null) {
+		return null;
+	}
+	var myapplication = myenv.application;
+	if(myapplication == null) {
+		return null;
+	}
+	var modules = myapplication.modules;
+	var externalApplications = myenv.externalApplications;
+	
+	if(modules!=null && modules[name] != null) {
+		return modules[name];
+	}
+	else if(externalApplications!=null && externalApplications[name] != null) {
+		return externalApplications[name];
+	}
+}
+
+
+function getConnectorDetails(envName, moduleName, connectorName) {
+	var myenv = envDetails[envName];
+	if(myenv == null) {
+		return null;
+	}
+	var myapplication = myenv.application;
+	if(myapplication == null) {
+		return null;
+	}
+	var modules = myapplication.modules;
+	var externalApplications = myenv.externalApplications;
+	
+	if(modules!=null && modules[moduleName] != null) {
+		return modules[moduleName].connectors[connectorName];
+	}
+	else if(externalApplications!=null && externalApplications[moduleName] != null) {
+		return externalApplications[moduleName].connectors[connectorName];
+	}
+}
+
+function getFormatedValue(value) {
+	if(value.startsWith("http://") ||
+		value.startsWith("https://")) {
+		var a = document.createElement("a");
+		a.href = value;
+		a.appendChild(document.createTextNode(value));
+		return a;
+	}
+	
+	return document.createTextNode(value);
+};
+
+function showDetails(o, title) {
+	var mydiv = document.getElementById("mydetails");
+	mydiv.innerHTML = "";
+	
+	if(title != null) {
+		var d = document.createElement("div");
+		d.appendChild(document.createTextNode(title));
+		d.className = "detailsTitle";
+		mydiv.appendChild(d);
+	}
+
+	if(o == null) {
+		mydiv.appendChild(document.createTextNode("Nothing to display."));
+	}
+	else {
+		
+		var t = document.createElement("table");
+		t.className = "detailsTable";
+		
+		//alert(Object.keys(o).length + "details to display");
+		for(var i=0; i!=Object.keys(o).length; i++) {
+			var detailName = Object.keys(o)[i];
+			var detailValue = o[detailName];
+			
+			if((typeof detailValue)=="string") {
+				var tr = document.createElement("tr");
+				var td1 = document.createElement("td");
+				var td2 = document.createElement("td");
+				
+				td1.appendChild(document.createTextNode(detailName));
+				td2.appendChild(getFormatedValue(detailValue));
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+				t.appendChild(tr);
+				mydiv.appendChild(t);
+			}			
+		}
+	}
+}
+
 
 function showApplication() {
 	var application = envDescription.application;
@@ -420,19 +578,22 @@ function myBodyOnload() {
 </head>
 <body onload="myBodyOnload();">
 
-<table><tr><td style="width:200px;vertical-align:top" >
+<table><tr><td style="width:400px;vertical-align:top;height:1%;" >
     <div id="envList"/>
 
-<div>
- autres infos ici
-</div>
-</td><td>
+
+</td><td rowspan="2">
 
 <svg id="mysvg" height="600" width="900" 
  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"/>
  
 </svg> 
 
+</td></tr>
+<tr><td style="vertical-align:top;">
+<div id="mydetails">
+	...
+</div>
 </td></tr></table>
 
 </body>
