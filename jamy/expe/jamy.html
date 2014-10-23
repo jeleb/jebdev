@@ -89,6 +89,7 @@ var envDetails = {};
 <script type="text/javascript" src="env_Prod.json"></script>
 <script>
 var svgNS = "http://www.w3.org/2000/svg";  
+var svgXLinkNS = "http://www.w3.org/1999/xlink";  
 var orientationEnum = { "left":"l", "right":"r", "up":"u", "down":"d"};
 
 var gRectangles = {};
@@ -365,7 +366,25 @@ function drawConnectors(rectangle, connectors, namePrefix) {
 }
 
 function drawConnector(name, shortName, x, y, w, orientation, type) {
-	
+
+	// check if there is an image to display
+	var imageWidth = 0;
+	var i = null;
+	if(type != null) {
+		var connectorType = envDescription.connectorTypes[type];
+		if(connectorType.image != null) {
+			imageWidth = 50;
+			i = document.createElementNS(svgNS, "image");
+			i.setAttributeNS(null, "x", (orientation=="l"?x+w:x-w-imageWidth));
+			i.setAttributeNS(null, "y", y-imageWidth/2);
+			i.setAttributeNS(null, "height", imageWidth);
+			i.setAttributeNS(null, "width", imageWidth);
+			i.setAttributeNS(svgXLinkNS, "href", connectorType.image);
+
+			addToSvg(i);
+		}
+	}
+
 	// draw
 	var r = document.createElementNS(svgNS, "rect");
 	r.setAttributeNS(null, "x", x-w/2);
@@ -377,7 +396,7 @@ function drawConnector(name, shortName, x, y, w, orientation, type) {
 	var fontSize = 11;
 	
 	var t = document.createElementNS(svgNS, "text");
-	t.setAttributeNS(null, "x", (orientation=="l"?x+w:x-w));
+	t.setAttributeNS(null, "x", (orientation=="l"?x+w+imageWidth:x-w-imageWidth));
 	t.setAttributeNS(null, "y", y);
 	t.setAttributeNS(null, "font-family", "Verdana");
 	t.setAttributeNS(null, "font-size", fontSize);
@@ -401,10 +420,13 @@ function drawConnector(name, shortName, x, y, w, orientation, type) {
 		var details = getConnectorDetails(envName, moduleName, connectorName);
 		showDetails(details, moduleName+" - "+connectorName);
 	}
+	if(i != null) {
+		i.onclick = r.onclick;
+	}
 	
 	addToSvg(r);
 	addToSvg(t);
-
+	
 	// store in context
 	gConnectors[name] = {"x":x, "y":y, "w":w, "orientation":orientation, "type":type};
 
