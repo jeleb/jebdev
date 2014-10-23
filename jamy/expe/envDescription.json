@@ -15,7 +15,7 @@ var envDescription = {
 					"orientation" : "right"
 				},
 				"godIsListeningOnTheRight2" : {
-					"type" : "webService",
+					"type" : "JMS",
 					"orientation" : "right"
 				},
 				"godIsListeningOnTheRight3" : {
@@ -23,7 +23,7 @@ var envDescription = {
 					"orientation" : "right"
 				},
 				"godIsListeningOnTheLeft1" : {
-					"type" : "webService",
+					"type" : "JMS",
 					"orientation" : "left"
 				},
 				"godIsListeningOnTheLeft2" : {
@@ -47,7 +47,7 @@ var envDescription = {
 				"description" : "blabla",
 				"connectors" : {
 					"moteurIsListening" : {
-						"type" : "JMS",
+						"type" : "httpsWebService",
 						"orientation" : "left"
 					}
 				}
@@ -66,18 +66,16 @@ var envDescription = {
 		  "connector":"moteurIsListening"
 		}
 	],
-	"linkTypes" : {
+	"connectorTypes" : {
 		"webService" : {
-			"style" : {
-			}
+			"style" : "stroke-width:5;"
 		},
 		"httpsWebService" : {
-			"style" : {
-			}
+			"style" : "stroke-dasharray:5,5;"
 		},
 		"JMS" : {
-			"style" : {
-			}
+			"style" : "stroke-width:1;stroke-dasharray:5,2;",
+			"image" : "img/jms.png"
 		}
 	},
 	"positioning" : {

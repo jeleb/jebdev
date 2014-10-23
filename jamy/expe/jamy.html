@@ -57,6 +57,27 @@
 	border-style:solid; 
 	padding:3px;
 }
+
+.arrow {
+	marker-end:url(#arrowHead);
+	fill:none;
+	stroke:lightgrey;
+	stroke-width:3;
+}
+
+.arrowHeadStyle {
+	fill:lightgrey;
+}
+
+.arrowHover {
+	marker-end:url(#arrowHeadHover);
+	stroke:black;
+}
+
+.arrowHeadHoverStyle {
+	fill:black;
+}
+
 </style>
 
 
@@ -151,7 +172,7 @@ function drawRectangle(name, connectors, position) {
 	t.setAttributeNS(null, "text-anchor", "middle");
 	t.appendChild(document.createTextNode(name));
 
-	r.onclick  = function()  { 
+	r.onclick  = t.onclick  = function()  { 
 		// when the rectangle (module/externalApplication) is clicked
 
 		setSelection(r, function(){ 
@@ -179,72 +200,38 @@ function drawRectangle(name, connectors, position) {
 }
 
 function addToSvg(o) {
-	// todo : ca s'optimise ?
 	document.getElementById("mysvg").appendChild(o);
+}
+
+function svgCreateArrowDef(id, style) {
+	var marker = document.createElementNS(svgNS, "marker");
+	var markerPath = document.createElementNS(svgNS, "path");
+	marker.setAttributeNS(null, "id", id);
+	marker.setAttributeNS(null, "markerUnits", "userSpaceOnUse");
+	marker.setAttributeNS(null, "orient", "auto");
+	marker.setAttributeNS(null, "markerWidth", "9");
+	marker.setAttributeNS(null, "markerHeight", "18");
+	marker.setAttributeNS(null, "refX", "9");
+	marker.setAttributeNS(null, "refY", "9");
+	markerPath.setAttributeNS(null, "d", "M0,0 V18 L9,9 Z");
+	markerPath.setAttributeNS(null, "class", style);
+	marker.appendChild(markerPath);
+	return marker;
 }
 
 function svgDefs() {
 	var defs = document.createElementNS(svgNS, "defs");
-	var marker = document.createElementNS(svgNS, "marker");
-	var markerPath = document.createElementNS(svgNS, "path");
-	marker.setAttributeNS(null, "id", "head");
-	marker.setAttributeNS(null, "orient", "auto");
-	marker.setAttributeNS(null, "markerWidth", "2");
-	marker.setAttributeNS(null, "markerHeight", "4");
-	marker.setAttributeNS(null, "refX", "2");
-	marker.setAttributeNS(null, "refY", "2");
-	markerPath.setAttributeNS(null, "d", "M0,0 V4 L2,2 Z");
-	markerPath.setAttributeNS(null, "fill", "red");
-	marker.appendChild(markerPath);
+	
+	var marker = svgCreateArrowDef("arrowHead", "arrowHeadStyle");
 	defs.appendChild(marker);
+
+	var markerHover = svgCreateArrowDef("arrowHeadHover", "arrowHeadHoverStyle");
+	defs.appendChild(markerHover);
+	
 	addToSvg(defs);
 }
 
 function drawLink(fromRectangle, toConnector) {
-	/*var toX = toConnector.x;
-	var toY = toConnector.y;
-	
-	var fromX = fromRectangle.x;
-	var fromY = fromRectangle.y+fromRectangle.h/2;
-
-	var fromOrientation = null;
-
-	 tout horizontal
-	// todo : on doit pouvoir faire une matrice de tout ça
-	if(toConnector.orientation == "l") {
-		if(toConnector.x < fromRectangle.x+fromRectangle.w) {
-			fromOrientation = "l";
-		}
-		else {
-			fromOrientation = "r";
-		}
-	}
-	else {
-		if(toConnector.x < fromRectangle.x) {
-			fromOrientation = "l";
-		}
-		else {
-			fromOrientation = "r";
-		}
-	}
-	
-	var fromX = (fromOrientation=="l" ? fromRectangle.x : fromRectangle.x+fromRectangle.w);
-	var fromY = (fromRectangle.y+fromRectangle.h/2);
-	if(fromOrientation == toConnector.orientation) {
-		// C-shape
-		var strPath = "M" + fromX + " " + fromY;
-		strPath += " H" + (toX+(fromOrientation=="l"?-20:20));
-		strPath += " V" + toConnector.y;
-		strPath += " H" + toConnector.x;
-	}
-	else {
-		// Z-shape
-		var strPath = "M" + fromX + " " + fromY;
-		strPath += " H" + ((fromX+toConnector.x)/2);
-		strPath += " V" + toConnector.y;
-		strPath += " H" + toConnector.x;
-	}
-	*/
 	
 	// THE matrice
 	var matrice = { "l": [	[ "M${sx} $(syb} V${ey} H${ex}"							, "M${sx} ${syb} V${midy_b} H${exm} V${ey} H${ex}"],
@@ -290,27 +277,27 @@ function drawLink(fromRectangle, toConnector) {
 	var strPath = strPath.replace("${midx_right}", midx_right);
 
 	var p = document.createElementNS(svgNS, "path");
-	p.setAttributeNS(null, "marker-end", "url(#head)");
-	p.setAttributeNS(null, "fill", "none");
-	p.setAttributeNS(null, "stroke", "blue");
-	p.setAttributeNS(null, "stroke-width", "5");
+	p.setAttributeNS(null, "class", "arrow");
+	if(toConnector.type != null) {
+		var connectorType = envDescription.connectorTypes[toConnector.type];
+		if(connectorType!=null && connectorType.style!=null) {
+			p.setAttributeNS(null, "style", connectorType.style);
+		}
+	}
 	p.setAttributeNS(null, "d", strPath);
+	
+	p.onmouseover = function(e) {
+		e.target.setAttributeNS(null, "class", "arrow arrowHover");
+	}
+	p.onmouseout = function(e) {
+		e.target.setAttributeNS(null, "class", "arrow");
+	}
+	
 	addToSvg(p);
 	
 }
 
 function showLinks() {
-	/*
-
-	var p = document.createElementNS(svgNS, "path");
-	p.setAttributeNS(null, "marker-end", "url(#head)");
-	p.setAttributeNS(null, "fill", "none");
-	p.setAttributeNS(null, "stroke", "blue");
-	p.setAttributeNS(null, "stroke-width", "5");
-	p.setAttributeNS(null, "d", "M100 100 H140 V140 H180 V180");
-
-	addToSvg(p);*/
-	
 	var links = envDescription.links;
 	for(var i=0; i!=links.length; i++) {
 		var link = links[i];
@@ -354,8 +341,8 @@ function drawConnectors(rectangle, connectors, namePrefix) {
 		var connectorList = orientedConnectors[orientationName]
 		
 		for(var j=0; j!=connectorList.length; j++) {
-			// todo : up and down orientation
 			var connector = connectorList[j];
+			var connectorType = connector.type;
 			
 			if(orientation == "r") {
 				var y = rectangle.y + rectangle.h*(j+1)/(connectorList.length+1);
@@ -371,12 +358,13 @@ function drawConnectors(rectangle, connectors, namePrefix) {
 						x, 
 						y, 
 						width, 
-						orientation)
+						orientation,
+						connectorType)
 		}
 	}
 }
 
-function drawConnector(name, shortName, x, y, w, orientation) {
+function drawConnector(name, shortName, x, y, w, orientation, type) {
 	
 	// draw
 	var r = document.createElementNS(svgNS, "rect");
@@ -418,7 +406,7 @@ function drawConnector(name, shortName, x, y, w, orientation) {
 	addToSvg(t);
 
 	// store in context
-	gConnectors[name] = {"x":x, "y":y, "w":w, "orientation":orientation};
+	gConnectors[name] = {"x":x, "y":y, "w":w, "orientation":orientation, "type":type};
 
 }
 
