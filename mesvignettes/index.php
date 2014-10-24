@@ -707,7 +707,12 @@ function clearScreen() {
 	var trPhotos = document.getElementById("trImages");
 	document.getElementById("scrollableDiv").scrollLeft = 0;
 	
-	tableDir.innerHTML = "<tr></tr>";
+	// erroeur dans ie
+	//tableDir.innerHTML = "<tr></tr>";
+	// a remplacer par :
+	var newTbody = document.createElement('tbody');
+	newTbody.id = "tableDir";
+	tableDir.parentNode.replaceChild(newTbody, tableDir)
 	
 	while(trPhotos.childNodes.length > 3) {
 		trPhotos.removeChild(trPhotos.childNodes[3]);
@@ -859,7 +864,9 @@ window.onresize = function(event) {
 	
 	<!-- menu de navigation des dossiers -->
 	<div id="scrollDir" style="overflow-y:auto;overflow-x:hidden">
-	<table id="tableDir" border="0" style="padding:0;border-spacing:0;background-color:#000000;">
+	<table border="0" style="padding:0;border-spacing:0;background-color:#000000;">
+		<tbody id="tableDir" >
+		</tbody>
 	</table>
 	</td>
 	</div>
