@@ -113,6 +113,26 @@ function setSelection(selection, onRefreshFunction) {
 	gSelection = { "object":selection, "onrefresh":onRefreshFunction};
 }
 
+function refreshPage() {
+	refreshSelection();
+	refreshRectangles();
+}
+
+function refreshRectangles() {
+	for(var i=0; i!=Object.keys(gRectangles).length; i++) {
+		var rectangleName = Object.keys(gRectangles)[i];
+		var details = getRectangleDetails(getSelectedEnvironment(), rectangleName);
+		var svgObject = gRectangles[rectangleName].svgObject;
+		if(details != null && details.enabled=="false") {
+			svgObject.setAttributeNS(null, "opacity", "0.2");
+		}
+		else {
+			svgObject.setAttributeNS(null, "opacity", "1");
+		}
+	}
+
+}
+
 function refreshSelection() {
 	if(gSelection != null) {
 		gSelection.onrefresh();
@@ -128,7 +148,7 @@ function showEnvList() {
 	for(var i=0; i!=envList.length; i++) {
 		str += '<input id="env_radio_'+i+'" class="environmentRadioButton" '
 			+'type="radio" name="environment" value="'+envList[i]+'"'+(i==0?'checked':'')+' '
-			+'onclick="refreshSelection()" '
+			+'onclick="refreshPage()" '
 			+'/>'
 			+'<label for="env_radio_'+i+'" class="environmentLabel"><span >'+envList[i]+'</span></label>';
 	
@@ -225,7 +245,7 @@ function drawRectangle(name, connectors, position, image, textStyle, rectangleSt
 	addToSvg(g);
 	
 	// store in context
-	var rectangle = {"x":x, "y":y, "w":w, "h":h};
+	var rectangle = {"x":x, "y":y, "w":w, "h":h, "svgObject":g};
 	gRectangles[name] = rectangle;
 	
 	// add connectors
@@ -471,10 +491,12 @@ function getRectangleDetails(envName, name) {
 	if(myenv == null) {
 		return null;
 	}
+	
 	var myapplication = myenv.application;
 	if(myapplication == null) {
 		return null;
 	}
+	
 	var modules = myapplication.modules;
 	var externalApplications = myenv.externalApplications;
 	
