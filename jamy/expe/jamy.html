@@ -78,6 +78,17 @@
 	fill:black;
 }
 
+.rectangleStyle {
+	fill:lightblue;
+	stroke:black;
+}
+
+.rectangleTextStyle {
+	font-family:Verdana;
+	font-size:20;
+	fill:black;
+}
+
 </style>
 
 
@@ -145,7 +156,9 @@ function getSelectedEnvironment() {
 	return null;
 }
 
-function drawRectangle(name, connectors, position) {
+function drawRectangle(name, connectors, position, image, textStyle, rectangleStyle) {
+	var imageHeight = 70;
+	var imageWidth  = 70;
 	
 	//draw
 	var x = parseInt(position.x);
@@ -156,23 +169,38 @@ function drawRectangle(name, connectors, position) {
 	var r = document.createElementNS(svgNS, "rect");
 	var t = document.createElementNS(svgNS, "text");
 	var g = document.createElementNS(svgNS, "g");
+	var i = null;
 	var fontSize = 20;
 	
-	r.setAttributeNS(null, "x", position.x);
-	r.setAttributeNS(null, "y", position.y);
-	r.setAttributeNS(null, "width", position.w);
-	r.setAttributeNS(null, "height", position.h);
-	//r.setAttributeNS(null, "style", "fill:white;stroke:black;stroke-width:5;");
-	r.setAttributeNS(null, "style", "fill:white;stroke:black;");
+	r.setAttributeNS(null, "x", x);
+	r.setAttributeNS(null, "y", y);
+	r.setAttributeNS(null, "width", w);
+	r.setAttributeNS(null, "height", h);
+	r.setAttributeNS(null, "class", "rectangleStyle");
+	if(rectangleStyle != null) {
+		r.setAttributeNS(null, "style", rectangleStyle);
+	}
 		
-	t.setAttributeNS(null, "x", parseInt(position.x)+parseInt(position.w)/2);
-	t.setAttributeNS(null, "y", parseInt(position.y)+parseInt(position.h)/2+fontSize/2);
-	t.setAttributeNS(null, "font-family", "Verdana");
-	t.setAttributeNS(null, "font-size", fontSize);
-	t.setAttributeNS(null, "fill", "black");
+	t.setAttributeNS(null, "x", x+w/2);
+	t.setAttributeNS(null, "y", y+h/2+(image==null?fontSize/2:-fontSize/2));
 	t.setAttributeNS(null, "text-anchor", "middle");
+	t.setAttributeNS(null, "class", "rectangleTextStyle");
+	t.setAttributeNS(null, "font-size", fontSize);
+	if(textStyle != null) {
+		t.setAttributeNS(null, "style", textStyle);
+	}
 	t.appendChild(document.createTextNode(name));
 
+	if(image != null) {
+		i = document.createElementNS(svgNS, "image");
+		i.setAttributeNS(null, "x", x+w/2-imageWidth/2);
+		i.setAttributeNS(null, "y", y+h/2);
+		i.setAttributeNS(null, "height", imageWidth);
+		i.setAttributeNS(null, "width", imageWidth);
+		i.setAttributeNS(svgXLinkNS, "href", image);
+	}
+
+	
 	r.onclick  = t.onclick  = function()  { 
 		// when the rectangle (module/externalApplication) is clicked
 
@@ -185,9 +213,15 @@ function drawRectangle(name, connectors, position) {
 		var details = getRectangleDetails(getSelectedEnvironment(), name);
 		showDetails(details, name);
 	}
+	if(i != null) {
+		i.onclick = r.onclick;
+	}
 	
 	g.appendChild(r);
 	g.appendChild(t);
+	if(i != null) {
+		g.appendChild(i);
+	}
 	addToSvg(g);
 	
 	// store in context
@@ -536,7 +570,7 @@ function showApplication() {
 		var module = modules[moduleName];
 		var position = positioning[moduleName];
 		
-		drawRectangle(moduleName, module.connectors, position)
+		drawRectangle(moduleName, module.connectors, position, module.image, module.textStyle, module.rectangleStyle)
 	}
 }
 
@@ -549,7 +583,7 @@ function showExternalApplications() {
 		var externalApplication = externalApplications[externalApplicationName];
 		var position = positioning[externalApplicationName];
 		
-		drawRectangle(externalApplicationName, externalApplication.connectors, position);
+		drawRectangle(externalApplicationName, externalApplication.connectors, position, externalApplication.image, externalApplication.textStyle, externalApplication.rectangleStyle);
 	}
 
 }
@@ -594,7 +628,7 @@ function myBodyOnload() {
 
 </td><td rowspan="2">
 
-<svg id="mysvg" height="600" width="900" 
+<svg id="mysvg" height="800" width="900" 
  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"/>
  
 </svg> 

@@ -9,6 +9,9 @@ var envDescription = {
 	"externalApplications" : {
 		"ZEUS" : { 
 			"description" : "L'appli de Zeus",
+			"rectangleStyle" : "fill:blue;stroke:red;",
+			"textStyle" : "fill:green;",
+			"image" : "img/pda2.jpg",
 			"connectors" : {
 				"godIsListeningOnTheRight1" : {
 					"type" : "webService",
@@ -41,7 +44,10 @@ var envDescription = {
 		"description" : "l'application qui roxe",
 		"modules" : {
 			"MOTEUR" : {
-				"description" : "blabla"
+				"description" : "blabla",
+				"rectangleStyle" : "fill:lightgreen;stroke:lightred;",
+				"textStyle" : "stroke:pink;",
+				"image" : "img/iphone_icon.png"
 			},
 			"ROUES" : {
 				"description" : "blabla",
@@ -81,7 +87,7 @@ var envDescription = {
 	"positioning" : {
 		"ZEUS" : {
 			"x" : "30",
-			"y" : "20",
+			"y" : "5",
 			"h" : "150",
 			"w" : "500"
 		},
@@ -94,12 +100,12 @@ var envDescription = {
 		"MOTEUR" : {
 			"x" : "400",
 			"y" : "300",
-			"h" : "100",
+			"h" : "150",
 			"w" : "150"
 		},
 		"ROUES" : {
 			"x" : "200",
-			"y" : "500",
+			"y" : "600",
 			"h" : "100",
 			"w" : "300"
 		},
