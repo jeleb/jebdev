@@ -744,14 +744,14 @@ function myScrollHorizontalTo(div, destLeft) {
 		});
 	}
 	else {
-		myScrollHorizontalTotalSteps += 8;
+		//myScrollHorizontalTotalSteps += 8;
 	}
 	
 
 }
 
 function myScrollWheel(e) {	
-	if(e.deltaY > 0) {
+	if(e.deltaY < 0) {
 		myScrollLeft();
 	}
 	else {
