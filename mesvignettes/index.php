@@ -474,8 +474,8 @@ function showImageOne(imgName, imgDescription) {
 	var a  = document.createElement("A");
 	
 	a.href = imgName;
-	a.onclick = function(e) { toggleImageMenu(imgName, e.clientX, e.clientY);	return false; };
-	a.ondblclick = function() { window.open(imgName); return false; };
+	a.onclick = function(e) { toggleImageMenu(imgName, e.clientX, e.clientY, false);	return false; };
+	a.ondblclick = function() { zoomImage(imgName); return false; };
 	a.title = imgDescription;
 	
 	var url = null;
@@ -674,18 +674,23 @@ function showHideButtons() {
 }
 
 var menuCurrentImage = null;
-function toggleImageMenu(imgName, x, y) {
+function toggleImageMenu(imgName, x, y, hideOnly) {
 	var menu = document.getElementById("imgMenu");
 	if(menu.style.display == "none") {
-		menu.style.left = x+"px";
-		menu.style.top = y+"px";
-		menu.style.display = "block";
-		menuCurrentImage = imgName;
+		if(!hideOnly) {
+			menu.style.left = x+"px";
+			menu.style.top = y+"px";
+			menu.style.display = "block";
+			menuCurrentImage = imgName;
+		}
 	}
 	else {
 		menu.style.display = "none";
 		menuCurrentImage = null;
 	}
+}
+function hideImageMenu(imgName, x, y) {
+	toggleImageMenu(imgName, x, y, true);
 }
 
 function refreshScreen() {
@@ -724,6 +729,8 @@ function clearScreen() {
 var myScrollHorizontalTotalSteps = -1;
 var myScrollHorizontalGoTo = -1;
 function myScrollHorizontalTo(div, destLeft) {
+	hideImageMenu();
+
 	var intervalMs = 1/25*1000;
 	var startLeft = div.scrollLeft;
 	myScrollHorizontalGoTo = destLeft;
@@ -838,6 +845,9 @@ function myScrollRightDouble() {
 	myScrollHorizontalTo(scrollableDiv, (myScrollHorizontalGoTo==-1 ? scrollableDiv.scrollLeft : myScrollHorizontalGoTo) + 6000);
 }
 
+function zoomImage(imgName) {
+	window.open(imgName);
+}
 
 function bodyOnLoad() {
 	ajusteDir();
@@ -932,7 +942,7 @@ window.onresize = function(event) {
 	<img src="mesvignettes/dl_hd.png" style="height:50px"/>
 </a>
 <br/>
-<a href="" onclick="return false;">
+<a href="" onclick="zoomImage(menuCurrentImage);return false;">
 	<img src="mesvignettes/zoom_in.png" style="height:50px"/>
 </a>
 </div>
