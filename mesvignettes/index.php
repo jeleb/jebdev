@@ -467,6 +467,17 @@ function ajusteImages() {
 	}
 }
 
+function getSdImageUrl(imgName) {
+	return "mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight;
+}
+function getSdImageName(imgName) {
+	var i = imgName.lastIndexOf("/");
+	if(i >= 0) {
+		return "p_"+imgName.substring(i);
+	}	
+	return "p_"+imgName;
+}
+
 function showImageOne(imgName, imgDescription) {
 	var trPhotos = document.getElementById("trImages");
 	
@@ -480,7 +491,7 @@ function showImageOne(imgName, imgDescription) {
 	
 	var url = null;
 	if(redimensionneImages) {
-		url = "mesvignettes/vignettes.php?sourceimg="+imgName+"&hauteur="+imageRawHeight;
+		url = getSdImageUrl(imgName);
 	}
 	else {
 		url = imgName;
@@ -678,10 +689,13 @@ function toggleImageMenu(imgName, x, y, hideOnly) {
 	var menu = document.getElementById("imgMenu");
 	if(menu.style.display == "none") {
 		if(!hideOnly) {
-			menu.style.left = x+"px";
-			menu.style.top = y+"px";
+			menu.style.left = (x+1)+"px";
+			menu.style.top = (y+1)+"px";
 			menu.style.display = "block";
 			menuCurrentImage = imgName;
+			document.getElementById("imageMenuHdDownload").href = imgName;
+			document.getElementById("imageMenuSdDownload").href = getSdImageUrl(imgName);
+			document.getElementById("imageMenuSdDownload").download = getSdImageName(imgName);
 		}
 	}
 	else {
@@ -689,8 +703,8 @@ function toggleImageMenu(imgName, x, y, hideOnly) {
 		menuCurrentImage = null;
 	}
 }
-function hideImageMenu(imgName, x, y) {
-	toggleImageMenu(imgName, x, y, true);
+function hideImageMenu() {
+	toggleImageMenu(null, 0, 0, true);
 }
 
 function refreshScreen() {
@@ -934,11 +948,12 @@ window.onresize = function(event) {
 </div>
 </div>
 <div id="imgMenu" style="position:absolute;top:1px;left:1px;display:none;">
-<a href="" onclick="return false;">
+<a id="imageMenuSdDownload" href="" onclick="hideImageMenu();" download="">
 	<img src="mesvignettes/dl_sd.png" style="height:50px"/>
 </a>
 <br/>
-<a href="" onclick="return false;">
+<!--a href="" onclick="return false;"-->
+<a id="imageMenuHdDownload" href="" onclick="hideImageMenu();" download>
 	<img src="mesvignettes/dl_hd.png" style="height:50px"/>
 </a>
 <br/>
