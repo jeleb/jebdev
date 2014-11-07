@@ -23,8 +23,8 @@ $initDir = parameterReplace($initDir);
 
 
 /* dimensions des vignettes des repertoires */
-var imageDirRawWidth  = 300;
-var imageDirRawHeight = 300;
+var imageDirRawWidth  = 270;
+var imageDirRawHeight = 270;
 
 /* nombre de colonnes pour les vignettes de répertoire */
 var nbDirColumns='3';
