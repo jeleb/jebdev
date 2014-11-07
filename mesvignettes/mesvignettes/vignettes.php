@@ -57,7 +57,8 @@ if($extensaj=='.PNG'){
 }
 header('Pragma: public');
 header('Cache-Control: max-age=86400');
-header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
+// 100 jours de cache
+header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 8640000));
 
 
 /* ### Création de l'image à la longeur et la largeur de la vignette ### */
