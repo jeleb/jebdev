@@ -102,11 +102,11 @@ if($cadrak=='1'){
 else{
 	
 	if($largeuro*$hauteur > $largeur*$hauteuro) {
-		$pos_src_x = ($largeuro - $largeur*$hauteuro/$hauteur);
+		$pos_src_x = ($largeuro - $largeur*$hauteuro/$hauteur)/2;
 		$largeuro = $largeur*$hauteuro/$hauteur;
 	}
 	else if($largeuro*$hauteur < $largeur*$hauteuro) {
-		$pos_src_y = ($hauteuro - $largeuro*$hauteur/$largeur);
+		$pos_src_y = ($hauteuro - $largeuro*$hauteur/$largeur)/2;
 		$hauteuro = $largeuro*$hauteur/$largeur;
 	}
 }
