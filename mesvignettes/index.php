@@ -321,8 +321,17 @@ function backCurrentDir() {
 
 function changeCurrentDir(dir) {
 	currentDir = dir;
+	
+	var stateObj = { thedir: dir };
+	history.pushState(stateObj, "photos", "index.php?dir="+dir);
+	
 	loadDirEntries();
 }
+
+window.onpopstate = function(event) {
+	currentDir = event.state.thedir;
+	loadDirEntries();
+};
 
 function showCurrentDir() {
 	var divCurrentDir = document.getElementById("divCurrentDir");
@@ -867,7 +876,7 @@ function bodyOnLoad() {
 	ajusteDir();
 	document.getElementById("filterInput").value = "<? echo $initFilter; ?>";
 	
-	loadDirEntries();
+	changeCurrentDir(currentDir);
 	rollingDivStart();
 }
 
