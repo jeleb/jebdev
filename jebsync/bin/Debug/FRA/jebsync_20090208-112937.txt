@@ -1,2 +1,0 @@
-JEBSYNC VERSION 0.0.1
-FATAL: fichier 'c:\DEV\jebsync\jebsync-0.0.2\bin\debug\fra\jebsync.ini' vide ou incomplet

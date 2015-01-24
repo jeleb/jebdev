@@ -1,4 +1,0 @@
-JEBSYNC VERSION 0.0.2
-INI FILE : C:\DEV\jebsync\jebsync-0.0.2\bin\Debug\FRA\jebsync.ini
-
-fichier ini : unicode
