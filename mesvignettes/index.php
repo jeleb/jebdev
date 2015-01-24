@@ -705,9 +705,26 @@ function toggleImageMenu(imgName, x, y, hideOnly) {
 			document.getElementById("imageMenuHdDownload").href = imgName;
 			document.getElementById("imageMenuSdDownload").href = getSdImageUrl(imgName);
 			document.getElementById("imageMenuSdDownload").download = getSdImageName(imgName);
+			
+			opacityOnMouseOver(document.getElementById("imgReturn"));
+			opacityOnMouseOver(document.getElementById("imgLeftDouble"));
+			opacityOnMouseOver(document.getElementById("imgLeft"));
+			opacityOnMouseOver(document.getElementById("imgRight"));
+			opacityOnMouseOver(document.getElementById("imgRightDouble"));
+			opacityOnMouseOver(document.getElementById("imgFullScreen"));
+			opacityOnMouseOver(document.getElementById("imgSlideShow"));
 		}
 	}
 	else {
+	
+		opacityOnMouseOut(document.getElementById("imgReturn"));
+		opacityOnMouseOut(document.getElementById("imgLeftDouble"));
+		opacityOnMouseOut(document.getElementById("imgLeft"));
+		opacityOnMouseOut(document.getElementById("imgRight"));
+		opacityOnMouseOut(document.getElementById("imgRightDouble"));
+		opacityOnMouseOut(document.getElementById("imgFullScreen"));
+		opacityOnMouseOut(document.getElementById("imgSlideShow"));
+	
 		menu.style.display = "none";
 		menuCurrentImage = null;
 	}
@@ -915,26 +932,26 @@ window.onresize = function(event) {
 	<span id="spanNbImg">0</span><span id="spanNbImgSep"> / </span><span id="spanNbTotalImg">0</span><br/>
 	<b>
 	<a id="buttonBack" href="" style="color:white;font-family:arial;size:4;" onclick="backCurrentDir();return false;">
-		<img src="mesvignettes/return2.png" style="opacity:0.4;width:120px;height:40px;transform:scaleY(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/>
+		<img id="imgReturn" src="mesvignettes/return2.png" style="opacity:0.4;width:120px;height:40px;transform:scaleY(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/>
 	</a>
 	</b>
 
 	<div id="buttonsImageNavigation">
 		<a href="" onclick="myScrollLeftDouble();return false;" style="color:white;font-family:arial;size:12;"
-			><img src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+			><img id="imgLeftDouble" src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;" onmouseover="opacityOnMouseOver(this);" onmouseout="this.style.opacity=0.3;"/></a>
 		<a href="" onclick="myScrollLeft();return false;" style="color:white;font-family:arial;size:12;"
-			><img src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+			><img id="imgLeft" src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);;"/></a>
 		<a href="" onclick="myScrollRight();return false;" style="color:white;font-family:arial;size:12;"
-			><img src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+			><img id="imgRight" src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
 		<a href="" onclick="myScrollRightDouble();return false;" style="color:white;font-family:arial;size:12;"
-			><img src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;"/></a>
+			><img id="imgRightDouble" src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
 	</div>
 
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
-		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
+		<img id="imgFullScreen" style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	<a href="" onclick="toggleSlideShow();return false;">
-		<img style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" />
+		<img id="imgSlideShow" style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	
 	<div id="divFilters" style="display:block;">
@@ -943,8 +960,8 @@ window.onresize = function(event) {
 		<a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a>
 		<br/>
 
-		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
-		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=0.3;" onclick="onFilterCancel();return false;"/>
+		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
+		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" onclick="onFilterCancel();return false;"/>
 		<br/>
 
 	</div>
