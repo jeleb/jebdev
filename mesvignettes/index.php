@@ -951,7 +951,7 @@ window.onresize = function(event) {
 		<img id="imgFullScreen" style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	<a href="" onclick="toggleSlideShow();return false;">
-		<img id="imgSlideShow" style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
+		<img id="imgSlideShow" style="height:30px;width:30px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	
 	<div id="divFilters" style="display:block;">
