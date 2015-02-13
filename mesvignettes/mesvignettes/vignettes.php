@@ -1,5 +1,6 @@
 <?
 include "common.php";
+include "cache.php";
 
 $sourceimg=$_GET["sourceimg"];
 $largeur = 0;
@@ -14,6 +15,13 @@ if(array_key_exists("hauteur", $_GET)) {
 $cadrak = "0";
 if(array_key_exists("cadrak", $_GET)) {
 	$cadrak=strtoupper($_GET["cadrak"]);
+}
+
+$img_cached_filename = cache_get_filename($sourceimg);
+$img_cached = cache_check($img_cached_filename);
+if($img_cached !== FALSE) {
+  echo $img_cached;
+  exit(0);
 }
 
 $extent=substr($sourceimg,strrpos($sourceimg,"."));
@@ -95,6 +103,7 @@ if($extensaj=='.GIF' || $extensaj=='.PNG'){
 	imagepng ($im);
 }
 
+cache_save($img_cached_filename, $im);
 
 /* ### Destruction de la source ### */
 imagedestroy ($im);

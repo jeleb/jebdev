@@ -1,5 +1,6 @@
 <?
 include "common.php";
+include "cache.php";
 
 $dir=strtoupper($_GET["dir"]);
 $largeur=strtoupper($_GET["largeur"]);
@@ -51,6 +52,13 @@ else {
 	$sourceimg = $cover;
 	$extent=substr($sourceimg,strrpos($sourceimg,"."));
 	$extensaj=strtoupper($extent);
+}
+
+$img_cached_filename = cache_get_filename("dir_".$urlt.$sourceimg);
+$img_cached = cache_check($img_cached_filename);
+if($img_cached !== FALSE) {
+  echo $img_cached;
+  exit(0);
 }
 
 $imxz = NULL;
@@ -147,7 +155,9 @@ imagefilledpolygon($im, array($largeur, $hauteur, $largeur, $hauteur-$border_rou
 */
 
 imagejpeg($im); /* image compressée à un taux de 90% */
+cache_save($img_cached_filename, $im);
 
 /* ### Destruction de la source ### */
 imagedestroy ($im);
+
 ?>
