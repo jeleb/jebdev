@@ -319,13 +319,23 @@ var currentDir = "<? echo $initDir; ?>";
 var joinSubDir = "<? echo $joinSubDir; ?>";
 
 function backCurrentDir() {
-	var i = currentDir.lastIndexOf("/");
-	if(i > 0) {
-		changeCurrentDir(currentDir.substring(0, i));
+	var newdir = currentDir;
+	while(1) {
+		var i = newdir.lastIndexOf("/");
+		if(i <= 0) {
+			newdir = "";
+			break;
+		}
+		
+		if(newdir.charAt(i-1) != "/") {
+			newdir = newdir.substring(0, i);
+			break;
+		}
+		
+		newdir = newdir.substring(0, i-1);
 	}
-	else {
-		changeCurrentDir("");
-	}
+	
+	changeCurrentDir(newdir);
 }
 
 function changeCurrentDir(dir) {
@@ -408,7 +418,7 @@ function loadDirEntries() {
 	filterDescription = filterDescription.trim();
 	filterExif = filterExif.trim();
 	
-	var message = { "dir":dir, 
+	var message = { "dir":dir.replace(/\/\//g, "/"), 
 					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
 					"filterDescription":filterDescription,
 					"filterExif":filterExif,
@@ -434,8 +444,10 @@ function loadDirEntries() {
 				};
 			}
 			for(i=0; i!=reponse["dirEntries"].length; i++) {
+				var thedir = (dir==null||dir=="" ? "":dir+"/");
+				thedir = thedir + (reponse["dirEntries"][i]["name"]).replace(/\//g, "//");
 				dirList[i] = {
-					name:(dir==null||dir=="" ? "":dir+"/")+reponse["dirEntries"][i]["name"],
+					name:thedir,
 					description:reponse["dirEntries"][i]["description"],
 					cover:reponse["dirEntries"][i]["cover"]
 				}
@@ -592,7 +604,7 @@ function beginOneImageLoad() {
 
 	var img = document.createElement("IMG");
 	img.className = className;
-	img.src = url;
+	img.src = url.replace(/\/\//g, "/");
 	if(style != null) {
 		img.setAttribute("style", style);
 	}
