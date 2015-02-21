@@ -80,7 +80,36 @@ function getNbDirColumns() {
 	}
 }
 
-function oneMoreImageLoaded() {
+function oneMoreImageLoaded(img, dirImgName) {
+	if(scrollDirGoto >= 0) {
+		var scroll = document.getElementById("scrollDir");
+		if(scroll.scrollHeight >= scrollDirGoto+scroll.clientHeight) {
+			scroll.scrollTop = scrollDirGoto;
+			scrollDirGoto = -1;
+		}
+	}
+	
+	if(dirImgGoto!=null && dirImgName!=null) {
+		if(dirImgGoto == dirImgName) {
+			var scroll = document.getElementById("scrollDir");
+			//scroll.scrollTop = scroll.scrollHeight - scroll.clientHeight;
+			
+			var top = 0;
+			var elt = img;
+			while(elt!=null && elt!=scroll) {
+				top += elt.offsetTop;
+				elt = elt.offsetParent;
+			}
+			top = top - 100;
+			if(top < 0) {
+				top = 0;
+			}
+			
+			scroll.scrollTop = top;
+			dirImgGoto = null;
+		}
+	}
+
 	var nbSpan = document.getElementById("spanNbImg");
 	var nbTotalSpan = document.getElementById("spanNbTotalImg");
 	if( nbSpan.innerHTML != null && nbSpan.innerHTML != "" ) {
@@ -316,7 +345,10 @@ function toggleFullScreen(id) {
 }
 
 var currentDir = "<? echo $initDir; ?>";
+//var previousDir = null;
 var joinSubDir = "<? echo $joinSubDir; ?>";
+var scrollDirGoto = -1;
+var dirImgGoto = null;
 
 function backCurrentDir() {
 	var newdir = currentDir;
@@ -335,16 +367,28 @@ function backCurrentDir() {
 		newdir = newdir.substring(0, i-1);
 	}
 	
+	var thePreviousDir = currentDir.replace(/\/\//g, "/");
 	changeCurrentDir(newdir, false);
+	dirImgGoto = thePreviousDir;
+}
+
+function getUrlParams(dir, joinSubDir) {
+	return "dir="+dir+(joinSubDir=="1"?"&joinSubDir=1":"");
 }
 
 function changeCurrentDir(dir, first) {
+	scrollDirGoto = -1;
+	dirImgGoto = null;
 	currentDir = dir;
-	var params = "dir="+dir+(joinSubDir=="1"?"&joinSubDir=1":"");
 	
 	if(history.pushState) {
-		var stateObj = { thedir: dir,  thejoinsubdir: joinSubDir};
-		history.pushState(stateObj, "photos", "index.php?"+params);
+		var scroll = document.getElementById("scrollDir");
+	
+		history.state.thescrollv = scroll.scrollTop;
+		history.replaceState({ thedir: history.state.thedir,  thejoinsubdir: history.state.thejoinsubdir, thescrollv:scroll.scrollTop},
+			"photos", "index.php?"+getUrlParams(history.state.thedir, history.state.thejoinsubdir));
+		history.pushState({ thedir: dir,  thejoinsubdir: joinSubDir, thescrollv:-1},
+			"photos", "index.php?"+getUrlParams(dir, joinSubDir));
 		loadDirEntries();
 	}
 	else {
@@ -368,6 +412,7 @@ window.onpopstate = function(event) {
 	if(event.state != null) {
 		currentDir = event.state.thedir;
 		joinSubDir = event.state.thejoinsubdir;
+		scrollDirGoto = event.state.thescrollv;
 		loadDirEntries();
 	}
 };
@@ -380,7 +425,7 @@ function showCurrentDir() {
 
 	var changeDirName = "";
 	var first = true;
-	var splt = currentDir.split("/");
+	var splt = currentDir.replace(/\/\//g, "/").split("/");
 	for(var i=0; i!=splt.length; i++) {
 		if(first) {	
 			first = false;
@@ -571,7 +616,8 @@ function showImageOne(imgName, imgDescription) {
 		"className":"myImage",
 		"status":null,
 		"style":null,
-		"isdir":false
+		"isdir":false,
+		"dirname":null
 	} );
 	
 
@@ -586,6 +632,7 @@ function removeImageToLoad(url) {
 			break;
 		}
 	}
+	
 }
 
 function beginOneImageLoad() {
@@ -605,10 +652,11 @@ function beginOneImageLoad() {
 	var className = imageToLoadList[i].className;
 	var style = imageToLoadList[i].style;
 	var isdir = imageToLoadList[i].isdir;
+	var dirname = imageToLoadList[i].dirname;
 
-	if(isdir && dontShowDirImgWhenOffScreenBy >= 0) {
+	if(scrollDirGoto<0 && dirImgGoto==null &&
+	   isdir && dontShowDirImgWhenOffScreenBy >= 0) {
 		var scroll = document.getElementById("scrollDir");
-	//	console.log("elt.offsetTop:"+elt.offsetTop+" scroll top:"+scroll.scrollTop+" height:"+scroll.clientHeight+" totalheight:"+scroll.scrollHeight ); 
 		if(elt.offsetTop > scroll.scrollTop+scroll.clientHeight+dontShowDirImgWhenOffScreenBy) {
 			return;
 		}
@@ -630,12 +678,8 @@ function beginOneImageLoad() {
 			img.style.height = height;
 		}
 	}
-	img.onload = function() {
-		oneMoreImageLoaded();
-		removeImageToLoad(url);
-		beginOneImageLoad();
-	};
-	img.onerror = function() {
+	img.onerror = img.onload = function() {
+		oneMoreImageLoaded(img, dirname);
 		removeImageToLoad(url);
 		beginOneImageLoad();
 	};
@@ -653,6 +697,7 @@ function showImageList() {
 
 function showImageDirOne(dirName, dirDescription, dirCover) {
 	var tableDir = document.getElementById("tableDir");
+	var dirNameCanonical = dirName.replace(/\/\//g, "/");
 	
 	var tr = null;
 	if(tableDir.childNodes == null ||
@@ -695,7 +740,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 	
 	imageToLoadList.push( {
 		"elt":stackDiv,
-		"url":"mesvignettes/vignettes_dir.php?dir="+dirName+
+		"url":"mesvignettes/vignettes_dir.php?dir="+dirNameCanonical+
 				"&largeur="+imageDirRawWidth+
 				"&hauteur="+imageDirRawHeight+
 				(dirCover==null||dirCover.length==0?"":"&cover="+dirCover[0]),
@@ -703,7 +748,8 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 		"className":null,
 		"status":null,
 		"style": "-webkit-border-radius:20px;border-radius:20px;display:block",
-		"isdir":true
+		"isdir":true,
+		"dirname":dirNameCanonical
 	} );
 	
 	if(dirCover!=null && dirCover.length>1) {
@@ -711,15 +757,17 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 		for(var i=1; i<dirCover.length; i++) {
 			imageToLoadList.push( {
 				"elt":stackDiv,
-				"url":"mesvignettes/vignettes_dir.php?dir="+dirName+
+				"url":"mesvignettes/vignettes_dir.php?dir="+dirNameCanonical+
 						"&largeur="+imageDirRawWidth+
 						"&hauteur="+imageDirRawHeight+
 						"&cover="+dirCover[i],
 				"height":null,
 				"className":null,
 				"status":null,
-				"style": "border-radius:20px;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;" 
-			} );
+				"style": "border-radius:20px;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;", 
+				"isdir":true,
+				"dirname":dirNameCanonical
+				} );
 		}
 	}
 		
