@@ -38,7 +38,7 @@ var exifIdPrefix = "image_exif_all_";
 var imageRawHeight = 1100;
 
 /* nombre d'images à charger en parrallèle */
-var nbImageToLoadAtTheSameTime = 2;
+var nbImageToLoadAtTheSameTime = 4;
 
 /* redimensionne les images cote serveur */
 /* en local ça va un peu plus vite sans redimensionner, par contre le  */
@@ -544,7 +544,8 @@ function showImageOne(imgName, imgDescription) {
 		"height":"window",
 		"className":"myImage",
 		"status":null,
-		"style":null
+		"style":null,
+		"isdir":false
 	} );
 	
 
@@ -577,8 +578,9 @@ function beginOneImageLoad() {
 	var height = imageToLoadList[i].height;
 	var className = imageToLoadList[i].className;
 	var style = imageToLoadList[i].style;
+	var isdir = imageToLoadList[i].isdir;
 
-	if(dontShowDirImgWhenOffScreenBy >= 0) {
+	if(isdir && dontShowDirImgWhenOffScreenBy >= 0) {
 		var scroll = document.getElementById("scrollDir");
 	//	console.log("elt.offsetTop:"+elt.offsetTop+" scroll top:"+scroll.scrollTop+" height:"+scroll.clientHeight+" totalheight:"+scroll.scrollHeight ); 
 		if(elt.offsetTop > scroll.scrollTop+scroll.clientHeight+dontShowDirImgWhenOffScreenBy) {
@@ -674,7 +676,8 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 		"height":null,
 		"className":null,
 		"status":null,
-		"style": "-webkit-border-radius:20px;border-radius:20px;display:block" 
+		"style": "-webkit-border-radius:20px;border-radius:20px;display:block",
+		"isdir":true
 	} );
 	
 	if(dirCover!=null && dirCover.length>1) {
