@@ -10,6 +10,7 @@ $filterFileNameRegex = getWithDefault($message, "filterFileNameRegex", null);
 $filterFileNameRegexList = getWithDefault($message, "filterFileNameRegexList", null);
 $filterDescription = getWithDefault($message, "filterDescription", null);
 $filterExif = getWithDefault($message, "filterExif", null);
+$joinSubDir = getWithDefault($message, "joinSubDir", null);
 
 $filterExif = strtolower($filterExif);
 
@@ -170,6 +171,56 @@ function computeExifTitle($exif) {
 	return $title;
 }
 
+function listDirOnly($dirFullName, $dir) {
+	global $dont_show_dir, $filterDescription, $filterExif;
+	// TODO : à mutualiser avec la suite, il y a un gros copier coller ici
+	
+	$dir_list = array();
+	
+	if ($handle = opendir($dirFullName)) {
+		while (false !== ($entry = readdir($handle))) {
+			if($entry == "." ||
+				$entry == "..") {
+				continue;
+			}
+			
+			$entryLC = strtolower($entry);
+
+			$entryFullName = $dirFullName.'/'.$entry;
+			$description = $entry;
+			
+			if ( is_dir($entryFullName) ) {
+				if($dont_show_dir == $entry) {
+					continue;
+				}
+				
+				$subDirDescr = new DirDescription($entryFullName);
+				$cover = null;
+				if($subDirDescr->exists()) {
+					$subDirDescr->read();
+					$description = $description . "\n\n" . $subDirDescr->getGlobalDescription();
+					$cover = $subDirDescr->getCover();
+				}
+				else {
+					$subDirDescr = null;
+				}
+
+				
+				if( ( $filterDescription != null && $filterDescription != "") ||
+					( $filterExif != null && $filterExif != "") ) {
+					if( ! filterDirContainingFiles($entryFullName, $filterDescription, $filterExif, 1, $subDirDescr) ) {
+						continue;
+					}
+				}
+				
+				array_push($dir_list,  array("name" => $dir."/".$entry, "description" => $description, "cover" => $cover));
+			}
+		}
+	}
+	
+	return $dir_list;
+}
+
 
 $all_dir_entries = array();
 $all_file_entries = array();
@@ -226,6 +277,9 @@ if ($handle = opendir($dirFullName)) {
 				}
 			}
 			
+			if($joinSubDir === "1") {
+				$all_dir_entries = array_merge($all_dir_entries, listDirOnly($entryFullName, $entry));
+			}
 			array_push($all_dir_entries,  array("name" => $entry, "description" => $description, "cover" => $cover));
 		}
 		else {

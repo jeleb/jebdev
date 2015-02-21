@@ -3,8 +3,10 @@ include "mesvignettes/common.php";
 
 $initDir = getWithDefault($_GET, "dir", "");
 $initFilter = getWithDefault($_GET, "filter", "");
+$joinSubDir = getWithDefault($_GET, "joinSubDir", "0");
 
 $initDir = parameterReplace($initDir);
+
 
 ?><!DOCTYPE html>
 <html style="height:100%">
@@ -36,7 +38,7 @@ var exifIdPrefix = "image_exif_all_";
 var imageRawHeight = 1100;
 
 /* nombre d'images à charger en parrallèle */
-var nbImageToLoadAtTheSameTime = 4;
+var nbImageToLoadAtTheSameTime = 2;
 
 /* redimensionne les images cote serveur */
 /* en local ça va un peu plus vite sans redimensionner, par contre le  */
@@ -54,6 +56,12 @@ var exifFilterPrefix = "exif:";
 var rollingDivTimeout = 5000; // en millisecondes
 var rollingDivTransitionDelay = 50; // en millisecondes
 var rollingDivTransitionNbSteps = 10;
+
+/* offset à partir duquel on attend avant d'afficher les vignettes de répertoire */
+var dontShowDirImgWhenOffScreenBy = 1000;
+
+/* offset à partir duquel recommence à charger les images de répertoires quand on scroll vers le bas */
+var restartDirImgLoadWhenBottomNear = 500;
 
 
 function opacityOnMouseOver(e) {
@@ -308,6 +316,7 @@ function toggleFullScreen(id) {
 }
 
 var currentDir = "<? echo $initDir; ?>";
+var joinSubDir = "<? echo $joinSubDir; ?>";
 
 function backCurrentDir() {
 	var i = currentDir.lastIndexOf("/");
@@ -322,15 +331,21 @@ function backCurrentDir() {
 function changeCurrentDir(dir) {
 	currentDir = dir;
 	
-	var stateObj = { thedir: dir };
-	history.pushState(stateObj, "photos", "index.php?dir="+dir);
+	var stateObj = { thedir: dir,  thejoinsubdir: joinSubDir};
+	history.pushState(stateObj, "photos", "index.php?dir="+dir+(joinSubDir=="1"?"&joinSubDir=1":""));
 	
 	loadDirEntries();
 }
 
 window.onpopstate = function(event) {
-	currentDir = event.state.thedir;
-	loadDirEntries();
+	if(event.state == null) {
+		// todo : que faire ?
+	}
+	else {	
+		currentDir = event.state.thedir;
+		joinSubDir = event.state.thejoinsubdir;
+		loadDirEntries();
+	}
 };
 
 function showCurrentDir() {
@@ -396,7 +411,8 @@ function loadDirEntries() {
 	var message = { "dir":dir, 
 					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
 					"filterDescription":filterDescription,
-					"filterExif":filterExif
+					"filterExif":filterExif,
+					"joinSubDir":joinSubDir
 					};
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "mesvignettes/getDirEntries.php", true);
@@ -442,23 +458,39 @@ function sortImageList() {
 
 function sortDirList() {
 	dirList.sort( function (a, b) {
-	//var truc = a.name.substr(a.name.lastIndexOf("/")+1);
-		var aDigit = isNaN(a.name.substr(a.name.lastIndexOf("/")+1)) ? false : true;
-		var bDigit = isNaN(b.name.substr(b.name.lastIndexOf("/")+1)) ? false : true;
-		var ret = 0;
-		
-		if(aDigit && bDigit) {
-			ret = b.name.localeCompare(a.name);
+		var stra = a.name.split("/");
+		var strb = b.name.split("/");
+		for(var i=0; i<stra.length && i<strb.length; i++) {
+			var cmp = compareNaturalOne(stra[i], strb[i]);
+			if(cmp != 0) {
+				return cmp;
+			}
 		}
-		else if(!aDigit && !bDigit) {
-			ret = a.name.localeCompare(b.name);
+	
+		if(stra.length==strb.length) {
+			return 0;
 		}
 		else {
-			ret = aDigit ? -1 : 1;
+			return stra.length<strb.length?-1:+1;
 		}
-		
-		return ret;
 	});
+}
+
+function compareNaturalOne(a, b) {
+	var aDigit = isNaN(a) ? false : true;
+	var bDigit = isNaN(b) ? false : true;
+	var ret = 0;
+		
+	if(aDigit && bDigit) {
+		ret = b.localeCompare(a);
+	}
+	else if(!aDigit && !bDigit) {
+		ret = a.localeCompare(b);
+	}
+	else {
+		ret = aDigit ? -1 : 1;
+	}
+	return ret;
 }
 
 function ajusteDir() {
@@ -540,18 +572,27 @@ function beginOneImageLoad() {
 		return;
 	}
 	
-	imageToLoadList[i].status = "loading";
 	var elt    = imageToLoadList[i].elt;
 	var url    = imageToLoadList[i].url;
 	var height = imageToLoadList[i].height;
 	var className = imageToLoadList[i].className;
 	var style = imageToLoadList[i].style;
 
+	if(dontShowDirImgWhenOffScreenBy >= 0) {
+		var scroll = document.getElementById("scrollDir");
+	//	console.log("elt.offsetTop:"+elt.offsetTop+" scroll top:"+scroll.scrollTop+" height:"+scroll.clientHeight+" totalheight:"+scroll.scrollHeight ); 
+		if(elt.offsetTop > scroll.scrollTop+scroll.clientHeight+dontShowDirImgWhenOffScreenBy) {
+			return;
+		}
+	}
+	
+	imageToLoadList[i].status = "loading";
+
 	var img = document.createElement("IMG");
 	img.className = className;
 	img.src = url;
 	if(style != null) {
-		img.style = style;
+		img.setAttribute("style", style);
 	}
 	if(height != null) {
 		if(height == "window") {
@@ -622,6 +663,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 	var stackDiv = document.createElement("Div");
 	stackDiv.style.position = "relative";
 	stackDiv.style.verticalAlign = "top";
+	//stackDiv.setAttribute("style", "position:relative;vertical-align:top;-webkit-border-radius:20px;border-radius:20px;");
 	
 	imageToLoadList.push( {
 		"elt":stackDiv,
@@ -632,7 +674,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 		"height":null,
 		"className":null,
 		"status":null,
-		"style": "border-radius:20px;display:block" 
+		"style": "-webkit-border-radius:20px;border-radius:20px;display:block" 
 	} );
 	
 	if(dirCover!=null && dirCover.length>1) {
@@ -744,7 +786,27 @@ function refreshScreen() {
 	for(var i=0; i!=nbImageToLoadAtTheSameTime; i++) {
 		beginOneImageLoad();
 	}
+}
 
+function dirOnScroll() {
+	var scroll = document.getElementById("scrollDir");
+
+	if(scroll.scrollTop+scroll.clientHeight+restartDirImgLoadWhenBottomNear>=scroll.scrollHeight) {
+		var nbToCreate = nbImageToLoadAtTheSameTime;
+		
+		for(var i=0; i!=imageToLoadList.length; i++) {
+			if(imageToLoadList[i].status != null) {
+				nbToCreate --;
+				if(nbToCreate <= 0) {
+					return;
+				}
+			}
+		}
+		
+		for(var i=0; i!=nbToCreate; i++) {
+			beginOneImageLoad();
+		}
+	}
 }
 
 function clearScreen() {
@@ -913,7 +975,7 @@ window.onresize = function(event) {
 	<td>
 	
 	<!-- menu de navigation des dossiers -->
-	<div id="scrollDir" style="overflow-y:auto;overflow-x:hidden">
+	<div id="scrollDir" style="overflow-y:auto;overflow-x:hidden" onscroll="dirOnScroll();">
 	<table border="0" style="padding:0;border-spacing:0;background-color:#000000;">
 		<tbody id="tableDir" >
 		</tbody>
