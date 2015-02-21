@@ -335,23 +335,37 @@ function backCurrentDir() {
 		newdir = newdir.substring(0, i-1);
 	}
 	
-	changeCurrentDir(newdir);
+	changeCurrentDir(newdir, false);
 }
 
-function changeCurrentDir(dir) {
+function changeCurrentDir(dir, first) {
 	currentDir = dir;
+	var params = "dir="+dir+(joinSubDir=="1"?"&joinSubDir=1":"");
 	
-	var stateObj = { thedir: dir,  thejoinsubdir: joinSubDir};
-	history.pushState(stateObj, "photos", "index.php?dir="+dir+(joinSubDir=="1"?"&joinSubDir=1":""));
+	if(history.pushState) {
+		var stateObj = { thedir: dir,  thejoinsubdir: joinSubDir};
+		history.pushState(stateObj, "photos", "index.php?"+params);
+		loadDirEntries();
+	}
+	else {
+		if(first) {
+			loadDirEntries();
+			return;
+		}
 	
-	loadDirEntries();
+		var newhref = window.location.href;
+		var i = newhref.indexOf("?");
+		if(i>0) {
+			newhref = newhref.substr(0, i+1);
+		}
+		newhref = newhref + params;
+		window.location.href = newhref;
+	}
+	
 }
 
 window.onpopstate = function(event) {
-	if(event.state == null) {
-		// todo : que faire ?
-	}
-	else {	
+	if(event.state != null) {
 		currentDir = event.state.thedir;
 		joinSubDir = event.state.thejoinsubdir;
 		loadDirEntries();
@@ -362,7 +376,7 @@ function showCurrentDir() {
 	var divCurrentDir = document.getElementById("divCurrentDir");
 	var style = "text-decoration:none;font-family:Verdana;font-size:100%;font-weight:bold;color:white;opacity:"+opacityOut+";";
 	
-	var html = "<a href=\"\" onclick=\"changeCurrentDir('')\" style=\""+style+"\" onmouseover=\"this.style.backgroundColor='black';opacityOnMouseOver(this);\" onmouseout=\"this.style.backgroundColor='transparent';opacityOnMouseOut(this);\">/</a> ";
+	var html = "<a href=\"\" onclick=\"changeCurrentDir('', false)\" style=\""+style+"\" onmouseover=\"this.style.backgroundColor='black';opacityOnMouseOver(this);\" onmouseout=\"this.style.backgroundColor='transparent';opacityOnMouseOut(this);\">/</a> ";
 
 	var changeDirName = "";
 	var first = true;
@@ -377,7 +391,7 @@ function showCurrentDir() {
 		}
 		changeDirName = changeDirName+splt[i];
 		html = html 
-			+ "<a href=\"\" onclick=\"changeCurrentDir('"+changeDirName+"');return false;\" style=\""
+			+ "<a href=\"\" onclick=\"changeCurrentDir('"+changeDirName+"', false);return false;\" style=\""
 			+ style + "\" onmouseover=\"this.style.backgroundColor='black';opacityOnMouseOver(this);\" onmouseout=\"this.style.backgroundColor='transparent';opacityOnMouseOut(this);\">" 
 			+ splt[i]+"</a>";
 	}
@@ -671,7 +685,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 	a.href = "";
 	a.title = dirDescription;
 	a.onclick = function() {
-		changeCurrentDir(dirName);
+		changeCurrentDir(dirName, false);
 		return false;
 	}
 	var stackDiv = document.createElement("Div");
@@ -970,7 +984,7 @@ function bodyOnLoad() {
 	ajusteDir();
 	document.getElementById("filterInput").value = "<? echo $initFilter; ?>";
 	
-	changeCurrentDir(currentDir);
+	changeCurrentDir(currentDir, true);
 	rollingDivStart();
 }
 
