@@ -1,5 +1,6 @@
 <?
 include "mesvignettes/common.php";
+include "mesvignettes/config.php";
 
 $initDir = getWithDefault($_GET, "dir", "");
 $initFilter = getWithDefault($_GET, "filter", "");
@@ -347,6 +348,13 @@ function toggleFullScreen(id) {
 var currentDir = "<? echo $initDir; ?>";
 //var previousDir = null;
 var joinSubDir = "<? echo $joinSubDir; ?>";
+// <? echo count($join_sub_dir_list) ?>
+
+var joinSubDirList = [<? 
+ if(count($join_sub_dir_list)!=0) { 
+	echo "'".implode("','", $join_sub_dir_list)."'"; 
+}
+?>];
 var scrollDirGoto = -1;
 var dirImgGoto = null;
 
@@ -384,9 +392,11 @@ function changeCurrentDir(dir, first) {
 	if(history.pushState) {
 		var scroll = document.getElementById("scrollDir");
 	
-		history.state.thescrollv = scroll.scrollTop;
-		history.replaceState({ thedir: history.state.thedir,  thejoinsubdir: history.state.thejoinsubdir, thescrollv:scroll.scrollTop},
-			"photos", "index.php?"+getUrlParams(history.state.thedir, history.state.thejoinsubdir));
+		//history.state.thescrollv = scroll.scrollTop;
+		if(history.state) {
+			history.replaceState({ thedir: history.state.thedir,  thejoinsubdir: history.state.thejoinsubdir, thescrollv:scroll.scrollTop},
+				"photos", "index.php?"+getUrlParams(history.state.thedir, history.state.thejoinsubdir));
+		}
 		history.pushState({ thedir: dir,  thejoinsubdir: joinSubDir, thescrollv:-1},
 			"photos", "index.php?"+getUrlParams(dir, joinSubDir));
 		loadDirEntries();
@@ -458,7 +468,12 @@ var imageToLoadList = [
 
 function loadDirEntries() {
 	var dir = currentDir;
+	var dirCanonical = dir.replace(/\/\//g, "/");
 	var currentFilter =	document.getElementById("filterInput").value;
+	var localJoinSubDir = joinSubDir;
+	if(localJoinSubDir !== "1" && joinSubDirList.indexOf(dirCanonical)>=0) {
+		localJoinSubDir = "1";
+	}
 	
 	var splt = currentFilter.split(" ");
 	var filterDescription = "";
@@ -477,11 +492,11 @@ function loadDirEntries() {
 	filterDescription = filterDescription.trim();
 	filterExif = filterExif.trim();
 	
-	var message = { "dir":dir.replace(/\/\//g, "/"), 
+	var message = { "dir":dirCanonical, 
 					"filterFileNameRegex":".*\\.(jpg|jpeg|png|gif)", 
 					"filterDescription":filterDescription,
 					"filterExif":filterExif,
-					"joinSubDir":joinSubDir
+					"joinSubDir":localJoinSubDir
 					};
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "mesvignettes/getDirEntries.php", true);
