@@ -55,7 +55,8 @@ else {
 }
 
 $img_cached_filename = cache_get_filename("dir_".$urlt.$sourceimg);
-$img_cached = cache_check($img_cached_filename);
+$img_date = filemtime($file_lookup_prefix."/".$urlt.$sourceimg);
+$img_cached = cache_check($img_cached_filename, $img_date);
 if($img_cached !== FALSE) {
   echo $img_cached;
   exit(0);

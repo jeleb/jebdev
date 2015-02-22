@@ -20,12 +20,17 @@ function cache_get_filename($id) {
   return $myhash_filename;
 }
 
-function cache_check($filename) {
+function cache_check($filename, $last_modification_date) {
   if($filename == null) {
 	return FALSE;
   }
   if(file_exists($filename) === FALSE) {
 	return FALSE;
+  }
+  if($last_modification_date !== FALSE) {
+	if($last_modification_date > filemtime($filename)) {
+		return FALSE;
+	}
   }
   return file_get_contents($filename);
 }
