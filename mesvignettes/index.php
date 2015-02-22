@@ -1096,9 +1096,9 @@ window.onresize = function(event) {
 		<a href="" onclick="myScrollLeft();return false;" style="color:white;font-family:arial;size:12;"
 			><img id="imgLeft" src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);;"/></a>
 		<a href="" onclick="myScrollRight();return false;" style="color:white;font-family:arial;size:12;"
-			><img id="imgRight" src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
+			><img id="imgRight" src="mesvignettes/left.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);-ms-transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
 		<a href="" onclick="myScrollRightDouble();return false;" style="color:white;font-family:arial;size:12;"
-			><img id="imgRightDouble" src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
+			><img id="imgRightDouble" src="mesvignettes/left_double.png" style="height:30px;width:30px;opacity:0.3;transform:scaleX(-1);-ms-transform:scaleX(-1);" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);"/></a>
 	</div>
 
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
