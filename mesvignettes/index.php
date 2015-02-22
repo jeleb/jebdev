@@ -398,7 +398,7 @@ function changeCurrentDir(dir, first) {
 				"photos", "index.php?"+getUrlParams(history.state.thedir, history.state.thejoinsubdir));
 		}
 		history.pushState({ thedir: dir,  thejoinsubdir: joinSubDir, thescrollv:-1},
-			"photos", "index.php?"+getUrlParams(dir, joinSubDir));
+			"photos", "index.php?"+getUrlParams(dir, null));
 		loadDirEntries();
 	}
 	else {
@@ -410,9 +410,9 @@ function changeCurrentDir(dir, first) {
 		var newhref = window.location.href;
 		var i = newhref.indexOf("?");
 		if(i>0) {
-			newhref = newhref.substr(0, i+1);
+			newhref = newhref.substr(0, i);
 		}
-		newhref = newhref + params;
+		newhref = newhref + "?" + getUrlParams(dir, null);
 		window.location.href = newhref;
 	}
 	
@@ -762,7 +762,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 		"height":null,
 		"className":null,
 		"status":null,
-		"style": "-webkit-border-radius:20px;border-radius:20px;display:block",
+		"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;display:block;",
 		"isdir":true,
 		"dirname":dirNameCanonical
 	} );
@@ -779,7 +779,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 				"height":null,
 				"className":null,
 				"status":null,
-				"style": "border-radius:20px;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;", 
+				"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;", 
 				"isdir":true,
 				"dirname":dirNameCanonical
 				} );
@@ -1102,10 +1102,10 @@ window.onresize = function(event) {
 	</div>
 
 	<a href="" onclick="toggleFullScreen('globalFullScreen');return false;">
-		<img id="imgFullScreen" style="height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
+		<img id="imgFullScreen" style="border-width:0;height:30px;width:45px;middle;opacity:0.3" src="mesvignettes/fullscreen.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	<a href="" onclick="toggleSlideShow();return false;">
-		<img id="imgSlideShow" style="height:30px;width:30px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
+		<img id="imgSlideShow" style="border-width:0;height:30px;width:30px;middle;opacity:0.3" src="mesvignettes/slide.png" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" />
 	</a>
 	
 	<div id="divFilters" style="display:block;">
