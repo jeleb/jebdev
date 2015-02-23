@@ -17,6 +17,8 @@ function cache_get_filename($id) {
   
   $myhash_filename = $myhash_filename . "/" . $myhash;
   
+  //error_log("cache '$id' in $myhash_filename");
+  
   return $myhash_filename;
 }
 
@@ -32,6 +34,8 @@ function cache_check($filename, $last_modification_date) {
 		return FALSE;
 	}
   }
+  
+  //error_log("debug : using cache in file $filename");
   return file_get_contents($filename);
 }
 
@@ -46,6 +50,7 @@ function cache_save($filename, $im) {
      mkdir($mydir, null, TRUE);
   }
 
+  //error_log("debug : saving cache in file $filename");
   imagejpeg($im, $filename);
 }
 

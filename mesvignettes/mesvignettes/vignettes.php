@@ -54,15 +54,15 @@ else {
 /* ### Type d'image ### */
 if($extensaj=='.JPG' || $extensaj=='.JPEG'){
 	header("Content-Type: image/JPEG");
-	$imxz=@imagecreatefromjpeg($file_lookup_prefix."/".$sourceimg);
+	$imxz=imagecreatefromjpeg($file_lookup_prefix."/".$sourceimg);
 }
 if($extensaj=='.GIF'){
 	header("Content-Type: image/PNG");
-	$imxz=@imagecreatefromgif($file_lookup_prefix."/".$sourceimg);
+	$imxz=imagecreatefromgif($file_lookup_prefix."/".$sourceimg);
 }
 if($extensaj=='.PNG'){
 	header("Content-Type: image/PNG");
-	$imxz=@imagecreatefrompng($file_lookup_prefix."/".$sourceimg);
+	$imxz=imagecreatefrompng($file_lookup_prefix."/".$sourceimg);
 }
 header('Pragma: public');
 header('Cache-Control: max-age=86400');

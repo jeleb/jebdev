@@ -66,15 +66,15 @@ $imxz = NULL;
 if($sourceimg != NULL) {
 	if($extensaj=='.JPG' || $extensaj=='.JPEG'){
 		header("Content-Type: image/JPEG");
-		$imxz=@imagecreatefromjpeg($file_lookup_prefix."/".$urlt.$sourceimg);
+		$imxz=imagecreatefromjpeg($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	if($extensaj=='.GIF'){
 		header("Content-Type: image/PNG");
-		$imxz=@imagecreatefromgif($file_lookup_prefix."/".$urlt.$sourceimg);
+		$imxz=imagecreatefromgif($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	if($extensaj=='.PNG'){
 		header("Content-Type: image/PNG");
-		$imxz=@imagecreatefrompng($file_lookup_prefix."/".$urlt.$sourceimg);
+		$imxz=imagecreatefrompng($file_lookup_prefix."/".$urlt.$sourceimg);
 	}
 	
 	$sizeimgo=getimagesize($file_lookup_prefix."/".$urlt.$sourceimg);
