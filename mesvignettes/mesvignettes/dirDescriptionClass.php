@@ -152,6 +152,10 @@ class DirDescription {
 	function getCover() {
 		return $this->cover;
 	}
+	
+	function getFileDate() {
+		return filemtime($this->fileName);
+	}
 }
 
 ?>

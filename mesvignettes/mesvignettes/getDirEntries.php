@@ -1,6 +1,8 @@
 <?
 include "common.php";
+include "config.php";
 include "dirDescriptionClass.php";
+include "fts.php";
 
 $myjson = file_get_contents('php://input');
 $message = json_decode($myjson, true);
@@ -221,6 +223,140 @@ function listDirOnly($dirFullName, $dir) {
 	return $dir_list;
 }
 
+function getFromSqlite() {
+global $dir, $dirFullName, $all_dir_entries, $all_file_entries,
+	   $joinSubDir, $filterDescription, $filterExif, $filterFileNameRegex;
+
+	$results = null;
+	if($joinSubDir === "1") {
+		$results = fts_query_depth_2($dir, $filterDescription."*");
+	}
+	else {
+		$results = fts_query_depth_1($dir, $filterDescription."*");
+	}
+	while ($row = $results->fetchArray()) {
+		if($row["type"] === "d") {
+			// TODO : description/cover
+			array_push($all_dir_entries,
+				array("name"        => $row["name"],
+					  "description" => "",
+					  "cover"       => null));
+		}
+		else {
+			// TODO : description
+			array_push($all_file_entries,
+				array("name"        => $row["name"],
+					  "description" => ""));
+		}
+	}	
+}
+
+function getFromFilesystem() {
+global $dir, $dirFullName, $all_dir_entries, $all_file_entries,
+	   $joinSubDir, $filterDescription, $filterExif, $filterFileNameRegex;
+
+	$dirDescr = new DirDescription($dirFullName);
+	if($dirDescr->exists()) {
+		$dirDescr->read();
+	}
+	else {
+		$dirDescr = null;
+	}
+
+
+	if ($handle = opendir($dirFullName)) {
+		while (false !== ($entry = readdir($handle))) {
+			if($entry == "." ||
+				$entry == "..") {
+				continue;
+			}
+			
+			$entryLC = strtolower($entry);
+
+			$entryFullName = $dirFullName.'/'.$entry;
+			$description = $entry;
+			
+			if ( is_dir($entryFullName) ) {
+				if($dont_show_dir == $entry) {
+					continue;
+				}
+				
+				$subDirDescr = new DirDescription($entryFullName);
+				$cover = null;
+				if($subDirDescr->exists()) {
+					$subDirDescr->read();
+					$description = $description . "\n\n" . $subDirDescr->getGlobalDescription();
+					$cover = $subDirDescr->getCover();
+				}
+				else {
+					$subDirDescr = null;
+				}
+
+				
+				if( ( $filterDescription != null && $filterDescription != "") ||
+					( $filterExif != null && $filterExif != "") ) {
+					if( ! filterDirContainingFiles($entryFullName, $filterDescription, $filterExif, 1, $subDirDescr) ) {
+						continue;
+					}
+				}
+				
+				if($joinSubDir === "1") {
+					$all_dir_entries = array_merge($all_dir_entries, listDirOnly($entryFullName, $entry));
+				}
+				array_push($all_dir_entries,  array("name" => $entry, "description" => $description, "cover" => $cover));
+			}
+			else {
+				if($entry == $descriptionFileName ||
+					preg_match("/^".$dont_show_image_prefix.".*$/", $entryLC)) {
+					continue;
+				}
+				
+				if($filterFileNameRegex != null &&
+					! preg_match("/^".$filterFileNameRegex."$/", $entryLC)) {
+					continue;
+				}
+
+				if($filterFileNameRegexList != null) {
+					foreach($filterFileNameRegexList as $filterRegex) {
+						if( ! preg_match("/^".$filterRegex."$/", $entryLC)) {
+							continue;
+						}
+					}
+				}
+				
+				if($dirDescr != null) {
+					if($filterDescription != null && $filterDescription != "") {
+						if( ! $dirDescr->containsForImg($entryLC, $filterDescription)) {
+							continue;
+						}
+					}
+					
+					$description = $description . "\n\n" . $dirDescr->getDescriptionForImg($entry);
+				}
+			
+				if(preg_match("/^.*\\.(jpg|jpeg|png|gif)$/", $entryLC)) {
+					$exif = exif_read_data($entryFullName, 0, true);
+					if($exif !== false) {
+						$description = $description . "\n\n" . computeExifTitle($exif);
+					}
+
+					if($filterExif != null  && $filterExif != "") {
+						if($exif === false) {
+							continue;
+						}
+
+						if( ! exifMatch($filterExif, $exif)) {
+							continue;
+						}
+					}
+				}
+
+				array_push($all_file_entries, array("name" => $entry, "description" => $description));
+			}
+		}
+		closedir($handle);
+	}
+}
 
 $all_dir_entries = array();
 $all_file_entries = array();
@@ -232,106 +368,12 @@ else {
 	$dirFullName = $file_lookup_prefix."/".$dir;
 }
 
-$dirDescr = new DirDescription($dirFullName);
-if($dirDescr->exists()) {
-	$dirDescr->read();
+// TODO : faire des fonctions pour simplifier cet embrouillamini
+if($filterDescription != null && $fts_sqlite_enabled == TRUE) {
+	getFromSqlite($dir, $dirFullName, $all_dir_entries, $all_file_entries);
 }
 else {
-	$dirDescr = null;
-}
-
-
-if ($handle = opendir($dirFullName)) {
-	while (false !== ($entry = readdir($handle))) {
-		if($entry == "." ||
-			$entry == "..") {
-			continue;
-		}
-		
-		$entryLC = strtolower($entry);
-
-		$entryFullName = $dirFullName.'/'.$entry;
-		$description = $entry;
-		
-		if ( is_dir($entryFullName) ) {
-			if($dont_show_dir == $entry) {
-				continue;
-			}
-			
-			$subDirDescr = new DirDescription($entryFullName);
-			$cover = null;
-			if($subDirDescr->exists()) {
-				$subDirDescr->read();
-				$description = $description . "\n\n" . $subDirDescr->getGlobalDescription();
-				$cover = $subDirDescr->getCover();
-			}
-			else {
-				$subDirDescr = null;
-			}
-
-			
-			if( ( $filterDescription != null && $filterDescription != "") ||
-				( $filterExif != null && $filterExif != "") ) {
-				if( ! filterDirContainingFiles($entryFullName, $filterDescription, $filterExif, 1, $subDirDescr) ) {
-					continue;
-				}
-			}
-			
-			if($joinSubDir === "1") {
-				$all_dir_entries = array_merge($all_dir_entries, listDirOnly($entryFullName, $entry));
-			}
-			array_push($all_dir_entries,  array("name" => $entry, "description" => $description, "cover" => $cover));
-		}
-		else {
-			if($entry == $descriptionFileName ||
-				preg_match("/^".$dont_show_image_prefix.".*$/", $entryLC)) {
-				continue;
-			}
-			
-			if($filterFileNameRegex != null &&
-				! preg_match("/^".$filterFileNameRegex."$/", $entryLC)) {
-				continue;
-			}
-
-			if($filterFileNameRegexList != null) {
-				foreach($filterFileNameRegexList as $filterRegex) {
-					if( ! preg_match("/^".$filterRegex."$/", $entryLC)) {
-						continue;
-					}
-				}
-			}
-			
-			if($dirDescr != null) {
-				if($filterDescription != null && $filterDescription != "") {
-					if( ! $dirDescr->containsForImg($entryLC, $filterDescription)) {
-						continue;
-					}
-				}
-				
-				$description = $description . "\n\n" . $dirDescr->getDescriptionForImg($entry);
-			}
-		
-			if(preg_match("/^.*\\.(jpg|jpeg|png|gif)$/", $entryLC)) {
-				$exif = exif_read_data($entryFullName, 0, true);
-				if($exif !== false) {
-					$description = $description . "\n\n" . computeExifTitle($exif);
-				}
-
-				if($filterExif != null  && $filterExif != "") {
-					if($exif === false) {
-						continue;
-					}
-
-					if( ! exifMatch($filterExif, $exif)) {
-						continue;
-					}
-				}
-			}
-
-			array_push($all_file_entries, array("name" => $entry, "description" => $description));
-		}
-	}
-	closedir($handle);
+	getFromFilesystem($dir, $dirFullName, $all_dir_entries, $all_file_entries);
 }
 
 $return_message = array("fileEntries" => $all_file_entries, "dirEntries" => $all_dir_entries);
