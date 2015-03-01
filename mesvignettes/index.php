@@ -136,6 +136,9 @@ function onFilterKeyPress(evt) {
 	if(evt.keyCode == 13) {
 		loadDirEntries();
 	}
+	/* todo : if(evt.keyCode != 9) {
+		loadDirEntries();
+	}*/
 }
 
 function onFilterCancel() {
@@ -146,7 +149,7 @@ function onFilterCancel() {
 
 function loadDescription() {
 	
-	var message = { "dir":currentDir };
+	var message = { "dir":currentDir.replace(/\/\//g, "/") };
 	var json = JSON.stringify(message);
 	
 	// exceptionnellement on travaille en synchrone
@@ -193,7 +196,7 @@ function cancelDescription(event) {
 function saveDescription() {
 	var textArea = document.getElementById("descriptionTextArea");
 
-	var message = { "dir":currentDir, "newDescription": textArea.value };
+	var message = { "dir":currentDir.replace(/\/\//g, "/"), "newDescription": textArea.value };
 	var json = JSON.stringify(message);
 	
 	// exceptionnellement on travaille en synchrone
