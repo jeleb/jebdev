@@ -29,7 +29,7 @@ $initDir = parameterReplace($initDir);
 var imageDirRawWidth  = 270;
 var imageDirRawHeight = 270;
 
-/* nombre de colonnes pour les vignettes de répertoire */
+/* nombre de colonnes pour les vignettes de répertoire quand on arrive pas à la calculer en fonction de la taille de l'écran*/
 var nbDirColumns='3';
 
 /* prefix de l'id des div qui contiennent les exifs complets */
@@ -79,6 +79,10 @@ function getNbDirColumns() {
 	else {
 		return nbDirColumns;
 	}
+}
+
+function getCanonicalPath(path) {
+	return path.replace(/\/\//g, "/");
 }
 
 function oneMoreImageLoaded(img, dirImgName) {
@@ -149,7 +153,7 @@ function onFilterCancel() {
 
 function loadDescription() {
 	
-	var message = { "dir":currentDir.replace(/\/\//g, "/") };
+	var message = { "dir":getCanonicalPath(currentDir) };
 	var json = JSON.stringify(message);
 	
 	// exceptionnellement on travaille en synchrone
@@ -196,7 +200,7 @@ function cancelDescription(event) {
 function saveDescription() {
 	var textArea = document.getElementById("descriptionTextArea");
 
-	var message = { "dir":currentDir.replace(/\/\//g, "/"), "newDescription": textArea.value };
+	var message = { "dir":getCanonicalPath(currentDir), "newDescription": textArea.value };
 	var json = JSON.stringify(message);
 	
 	// exceptionnellement on travaille en synchrone
@@ -378,7 +382,7 @@ function backCurrentDir() {
 		newdir = newdir.substring(0, i-1);
 	}
 	
-	var thePreviousDir = currentDir.replace(/\/\//g, "/");
+	var thePreviousDir = getCanonicalPath(currentDir);
 	changeCurrentDir(newdir, false);
 	dirImgGoto = thePreviousDir;
 }
@@ -438,7 +442,7 @@ function showCurrentDir() {
 
 	var changeDirName = "";
 	var first = true;
-	var splt = currentDir.replace(/\/\//g, "/").split("/");
+	var splt = getCanonicalPath(currentDir).split("/");
 	for(var i=0; i!=splt.length; i++) {
 		if(first) {	
 			first = false;
@@ -471,7 +475,7 @@ var imageToLoadList = [
 
 function loadDirEntries() {
 	var dir = currentDir;
-	var dirCanonical = dir.replace(/\/\//g, "/");
+	var dirCanonical = getCanonicalPath(dir);
 	var currentFilter =	document.getElementById("filterInput").value;
 	var localJoinSubDir = joinSubDir;
 	if(localJoinSubDir !== "1" && joinSubDirList.indexOf(dirCanonical)>=0) {
@@ -624,7 +628,8 @@ function showImageOne(imgName, imgDescription) {
 		url = getSdImageUrl(imgName);
 	}
 	else {
-		url = imgName;
+		// TODO : variabiliser
+		url = "mesvignettes/image.php?sourceimg="+imgName;
 	}
 	
 	imageToLoadList.push( {
@@ -684,7 +689,7 @@ function beginOneImageLoad() {
 
 	var img = document.createElement("IMG");
 	img.className = className;
-	img.src = url.replace(/\/\//g, "/");
+	img.src = getCanonicalPath(url);
 	if(style != null) {
 		img.setAttribute("style", style);
 	}
@@ -715,7 +720,7 @@ function showImageList() {
 
 function showImageDirOne(dirName, dirDescription, dirCover) {
 	var tableDir = document.getElementById("tableDir");
-	var dirNameCanonical = dirName.replace(/\/\//g, "/");
+	var dirNameCanonical = getCanonicalPath(dirName);
 	
 	var tr = null;
 	if(tableDir.childNodes == null ||
@@ -839,7 +844,13 @@ function toggleImageMenu(imgName, x, y, hideOnly) {
 			menu.style.top = (y+1)+"px";
 			menu.style.display = "block";
 			menuCurrentImage = imgName;
-			document.getElementById("imageMenuHdDownload").href = imgName;
+			document.getElementById("imageMenuHdDownload").href = "mesvignettes/image.php?sourceimg="+imgName; // TODO : variabiliser + trouver un nom pour remplacer lors du download
+			var dlLastSlash = imgName.lastIndexOf("/");
+			var dlName = imgName;
+			if(dlLastSlash > 0) {
+				dlName = imgName.substr(dlLastSlash+1);
+			}
+			document.getElementById("imageMenuHdDownload").download = dlName; 
 			document.getElementById("imageMenuSdDownload").href = getSdImageUrl(imgName);
 			document.getElementById("imageMenuSdDownload").download = getSdImageName(imgName);
 			
@@ -1043,7 +1054,8 @@ function myScrollRightDouble() {
 }
 
 function zoomImage(imgName) {
-	window.open(imgName);
+// TODO : variabiliser
+	window.open("mesvignettes/image.php?sourceimg="+imgName);
 }
 
 function bodyOnLoad() {

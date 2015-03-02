@@ -18,6 +18,7 @@ $cmd = $_GET["cmd"];
 <body>
 
 <?
+var_dump($_SERVER);
 
 echo("cmd : $cmd <br/>");
 
