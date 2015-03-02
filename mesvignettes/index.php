@@ -64,6 +64,8 @@ var dontShowDirImgWhenOffScreenBy = 1000;
 /* offset à partir duquel recommence à charger les images de répertoires quand on scroll vers le bas */
 var restartDirImgLoadWhenBottomNear = 500;
 
+/* prefixe pour afficher les images directement */
+var imageRedirectPrefix = "mesvignettes/image.php?sourceimg=";
 
 function opacityOnMouseOver(e) {
 	e.style.opacity = opacityOver;
@@ -628,8 +630,7 @@ function showImageOne(imgName, imgDescription) {
 		url = getSdImageUrl(imgName);
 	}
 	else {
-		// TODO : variabiliser
-		url = "mesvignettes/image.php?sourceimg="+imgName;
+		url = imageRedirectPrefix+imgName;
 	}
 	
 	imageToLoadList.push( {
@@ -844,7 +845,7 @@ function toggleImageMenu(imgName, x, y, hideOnly) {
 			menu.style.top = (y+1)+"px";
 			menu.style.display = "block";
 			menuCurrentImage = imgName;
-			document.getElementById("imageMenuHdDownload").href = "mesvignettes/image.php?sourceimg="+imgName; // TODO : variabiliser + trouver un nom pour remplacer lors du download
+			document.getElementById("imageMenuHdDownload").href = imageRedirectPrefix+imgName; 
 			var dlLastSlash = imgName.lastIndexOf("/");
 			var dlName = imgName;
 			if(dlLastSlash > 0) {
@@ -1054,8 +1055,7 @@ function myScrollRightDouble() {
 }
 
 function zoomImage(imgName) {
-// TODO : variabiliser
-	window.open("mesvignettes/image.php?sourceimg="+imgName);
+	window.open(imageRedirectPrefix+imgName);
 }
 
 function bodyOnLoad() {
