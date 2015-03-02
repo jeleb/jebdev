@@ -253,7 +253,9 @@ global $dir, $dirFullName, $all_dir_entries, $all_file_entries,
 
 function getFromFilesystem() {
 global $dir, $dirFullName, $all_dir_entries, $all_file_entries,
-	   $joinSubDir, $filterDescription, $filterExif, $filterFileNameRegex;
+	   $joinSubDir, $filterDescription, $filterExif, $filterFileNameRegex,
+	   $dont_show_dir, $descriptionFileName, $dont_show_image_prefix,
+	   $filterFileNameRegexList;
 
 	$dirDescr = new DirDescription($dirFullName);
 	if($dirDescr->exists()) {

@@ -1,7 +1,7 @@
 <?
 /* ailleurs que dans index.php, les fichiers sont à rechercher dans .. car ces fichiers sont dans un sous-répertorie "mesvignettes"*/ 
 // TODO : à déplacer dans config.php
-$file_lookup_prefix = "..";
+$file_lookup_prefix = "D:/petit_externe/photos/public_html/perso";
 
 /* nom des fichiers de description */
 $descriptionFileName = "_description.txt";
@@ -57,7 +57,6 @@ function securityCheckPath($path) {
 //    DD   : jour du mois sur deux chiffres
 function parameterReplace($str) {
 	$matches = array();
-	error_log(preg_match ( "/\\$\\{now\:.*\\}/" , $str));
 	if( 1 === preg_match ( "/\\$\\{now\:.*\\}/" , $str , $matches ) ) {
 		foreach($matches as $m) {
 			$m2 = substr($m, 6, strlen($m)-7);
