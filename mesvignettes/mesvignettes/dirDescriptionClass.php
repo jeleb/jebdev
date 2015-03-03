@@ -64,7 +64,9 @@ class DirDescription {
 			}
 			else if($perImageCurrent == null &&
 					substr($line, 0, 1) == "!") {
+				//error_log("found cover in ".$this->fileName." : $line");
 				$this->cover = explode(",", substr($line, 1));
+				//error_log("cover count : ".count($this->cover));
 			}
 			else {
 				if($perImageCurrent != null) {

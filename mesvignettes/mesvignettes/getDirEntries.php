@@ -236,17 +236,16 @@ global $dir, $dirFullName, $all_dir_entries, $all_file_entries,
 	}
 	while ($row = $results->fetchArray()) {
 		if($row["type"] === "d") {
-			// TODO : description/cover
+			$cover = $row["cover"] == null ? null : explode(",", $row["cover"]);
 			array_push($all_dir_entries,
 				array("name"        => $row["name"],
-					  "description" => "",
-					  "cover"       => null));
+					  "description" => $row["description"],
+					  "cover"       => $cover));
 		}
 		else {
-			// TODO : description
 			array_push($all_file_entries,
 				array("name"        => $row["name"],
-					  "description" => ""));
+					  "description" => $row["description"]));
 		}
 	}	
 }

@@ -4,7 +4,7 @@ $db = null;
 $stmtInsert = null;
 $stmtUpdate = null;
 $stmtDelete = null;
-$stmtCheckUpdate = null;
+$updateMode = false;
 
 $fileDateCache = array();
 
@@ -16,8 +16,9 @@ global $db, $fts_sqlite_db_filname, $file_lookup_prefix;
 
 	$db->exec("DROP TABLE IF EXISTS entry");
 	$db->exec("VACUUM");
-	$db->exec("CREATE VIRTUAL TABLE entry USING fts4(name UNIQUE, type, description, filedate INTEGER)");
-	fts_prepare_statements(true, false, false, false);
+	$db->exec("CREATE VIRTUAL TABLE entry USING fts4(name UNIQUE, type, description, cover, filedate INTEGER)");
+	$updateMode = false;
+	fts_prepare_statements(true, false, false);
 
 	$db->exec("BEGIN TRANSACTION");
 	fts_index_dir($file_lookup_prefix, "", null);
@@ -31,7 +32,8 @@ global $db, $fts_sqlite_db_filname, $file_lookup_prefix;
 
 	$db = new SQLite3($fts_sqlite_db_filname);
 	loadFileDateCache();
-	fts_prepare_statements(true, true, true, true);
+	$updateMode = true;
+	fts_prepare_statements(true, true, true);
 
 	$db->exec("BEGIN TRANSACTION");
 	fts_index_dir($file_lookup_prefix, "");
@@ -52,11 +54,16 @@ global $db, $fts_sqlite_db_filname;
 function fts_query_depth_1($dir, $q) {
 global $db, $fts_sqlite_db_filname;
 	$db = new SQLite3($fts_sqlite_db_filname);
-	$statement = $db->prepare("SELECT distinct ".
+	$statement = $db->prepare("select name2 name, ".
+							  " type type, ".
+							  "  (select e1.description from entry e1 where e1.name=:dirSlash || name2) description, ".
+							  "  (select e2.cover from entry e2 where e2.name=:dirSlash || name2) cover ".
+							  "from ( ".
+							  "SELECT distinct ".
 							  "case instr(n,'/') ".
 							  " when 0 then n ".
 							  " else substr(n, 1, instr(n,'/')-1) ".
-							  " end name, ".
+							  " end name2, ".
 							  "case instr(n,'/') ".
 							  " when 0 then t ".
 							  " else 'd' ".
@@ -66,9 +73,11 @@ global $db, $fts_sqlite_db_filname;
 							  "WHERE description MATCH :q ".
 							  "and name like :dirlike "
 							  .") "
+							  .") "
 							  );
 
 	$statement->bindValue(":q", $q);
+	$statement->bindValue(":dirSlash", $dir==""?"":$dir."/");
 	$statement->bindValue(":dirlike", $dir.($dir==""?"":"/")."%");
 	$statement->bindValue(":dirlength", $dir==""?1:strlen($dir)+2);
 	$results = $statement->execute();
@@ -78,7 +87,12 @@ global $db, $fts_sqlite_db_filname;
 function fts_query_depth_2($dir, $q) {
 global $fts_sqlite_db_filname;
 	$db = new SQLite3($fts_sqlite_db_filname);
-	$statement = $db->prepare("SELECT distinct ".
+	$statement = $db->prepare("select name2 name, ".
+							  " type type, ".
+							  "  (select e1.description from entry e1 where e1.name=:dirSlash || name2) description, ".
+							  "  (select e2.cover from entry e2 where e2.name=:dirSlash || name2) cover ".
+							  "from ( ".
+							  "SELECT distinct ".
 							  "case instr(n,'/') ".
 							  " when 0 then n ".
 							  " else case instr(substr(n,instr(n,'/')+1),'/') ".
@@ -88,7 +102,7 @@ global $fts_sqlite_db_filname;
 							  "                  end ".
 							  "      else substr(n,1, instr(n,'/')+instr(substr(n,instr(n,'/')+1),'/')-1) ".
 							  "      end ".
-							  " end name , ".
+							  " end name2 , ".
 							  "case instr(n,'/') ".
 							  " when 0 then t ".
 							  " else 'd' ".
@@ -98,8 +112,10 @@ global $fts_sqlite_db_filname;
 							  "WHERE description MATCH :q ".
 							  "and name like :dirlike"
 							  .") "
+							  .") "
 							  );
 	$statement->bindValue(":q", $q);
+	$statement->bindValue(":dirSlash", $dir==""?"":$dir."/");
 	$statement->bindValue(":dirlike", $dir.($dir==""?"":"/")."%");
 	$statement->bindValue(":dirlength", $dir==""?1:strlen($dir)+2);
 	$results = $statement->execute();
@@ -110,21 +126,17 @@ global $fts_sqlite_db_filname;
 // other functions
 //////
 
-function fts_prepare_statements($insert, $update, $delete, $checkUpdate) {
-global $db, $stmtInsert, $stmtUpdate, $stmtDelete, $stmtCheckUpdate;
+function fts_prepare_statements($insert, $update, $delete) {
+global $db, $stmtInsert, $stmtUpdate, $stmtDelete;
 	if($insert) {
-		$stmtInsert = $db->prepare("INSERT INTO entry(name, type, description, filedate) VALUES(:name, :type, :description, :filedate)");
+		$stmtInsert = $db->prepare("INSERT INTO entry(name, type, description, cover, filedate) VALUES(:name, :type, :description, :cover, :filedate)");
 	}
 	if($update) {
-		$stmtUpdate = $db->prepare("UPDATE entry set type=:type, description=:description, filedate=:filedate WHERE name=:name ");
+		$stmtUpdate = $db->prepare("UPDATE entry set type=:type, description=:description, cover=:cover, filedate=:filedate WHERE name=:name ");
 	}
 	if($delete) {
 		$stmtDelete = $db->prepare("DELETE FROM entry WHERE name=:name ");
 	}
-	if($checkUpdate) {
-		$stmtCheckUpdate = $db->prepare("SELECT filedate fd FROM entry WHERE name = :name");
-	}
-
 }
 
 function loadFileDateCache() {
@@ -140,7 +152,7 @@ global $db, $fileDateCache;
 
 }
 
-function insert($name, $type, $description, $fileDate) {
+function insert($name, $type, $description, $cover, $fileDate) {
 global $stmtInsert;
 
 	//error_log("insert $name $type");
@@ -148,6 +160,7 @@ global $stmtInsert;
 	$stmtInsert->bindValue(':name', $name);
 	$stmtInsert->bindValue(':type', $type);
 	$stmtInsert->bindValue(':description', $description);
+	$stmtInsert->bindValue(':cover', $cover);
 	$stmtInsert->bindValue(':filedate', $fileDate);
 	$stmtInsert->execute();
 	commitSometime();
@@ -203,7 +216,7 @@ function getDescriptionExif($fullFileName) {
 }
 
 function fts_index_img($fullFileName, $fileName, $description, $hasExif, $forceUpdate) {
-global $fileDateCache, $stmtCheckUpdate;
+global $fileDateCache;
 
 	//set_time_limit(30) ;
 	$descriptionExif = "";
@@ -215,45 +228,37 @@ global $fileDateCache, $stmtCheckUpdate;
 	}
 	
 	
-	//$fileDateDb = null;
 	// quand on recrée l'index pas d'accès à la base ci-dessous car le statement est null
-	//$fileDateDb = getDbFileDate($fileName);
+	$fileDateCache = getFileDateFromCacheAndUnset($fileName);
 	
-	$fileDateDb = null;
-	if($stmtCheckUpdate != null) { // todo on a plus besoin de $stmtCheckUpdate
-		if(isset($fileDateCache[$fileName])) {
-			$fileDateDb = $fileDateCache[$fileName];
-			unset($fileDateCache[$fileName]);
-		}
-	}
 		
-	if($fileDateDb != null) {
+	if($fileDateCache != null) {
 		if($forceUpdate == TRUE) {
 		    error_log("update because forceUpdate==TRUE");
 			if($hasExif) {
 				$description = $description."\n".getDescriptionExif($fullFileName);
 			}
-			update($fileName, "f", $description, $fileDate);
+			update($fileName, "f", $description, null, $fileDate);
 		}
-		else if($fileDateDb < $fileDate) {
-		    error_log("update because $fileDateDb < $fileDate");
+		else if($fileDateCache < $fileDate) {
+		    error_log("update because $fileDateCache < $fileDate");
 			if($hasExif) {
 				$description = $description."\n".getDescriptionExif($fullFileName);
 			}
-			update($fileName, "f", $description, $fileDate);
+			update($fileName, "f", $description, null, $fileDate);
 	    }
 	}
 	else {
-		//error_log("insert because $forceUpdate $fileDateDb $fileDate");
+		//error_log("insert because $forceUpdate $fileDateCache $fileDate");
 		if($hasExif) {
 			$description = $description."\n".getDescriptionExif($fullFileName);
 		}
-		insert($fileName, "f", $description, $fileDate);
+		insert($fileName, "f", $description, null, $fileDate);
 	}
 }
 
 function fts_index_dir($fullDirName, $dir) {
-global $dont_show_dir, $stmtCheckUpdate, $fileDateCache;
+global $dont_show_dir, $fileDateCache;
 	//echo ("fts_index_dir $fullDirName <br/>");
 	if($dir == $dont_show_dir) {
 		return;
@@ -268,27 +273,22 @@ global $dont_show_dir, $stmtCheckUpdate, $fileDateCache;
 		if($fileDate === FALSE) {
 			$fileDate = null;
 		}
-		//$fileDateDb = getDbFileDate($dir);
-		$fileDateDb = null;
-		if($stmtCheckUpdate != null) { // todo on a plus besoin de $stmtCheckUpdate
-			if(array_key_exists($dir, $fileDateCache)) {
-				$fileDateDb = $fileDateCache[$dir];
-				unset($fileDateCache[$dir]);
-			}
-		}
+		
+		$fileDateCache = getFileDateFromCacheAndUnset($dir);
 
-
-		if($fileDateDb != null) {
-			if($fileDateDb < $fileDate) {
-				echo("update necessary for $dir (fs:$fileDate db:$fileDateDb<br/>");
+		if($fileDateCache != null) {
+			if($fileDateCache < $fileDate) {
+				echo("update necessary for $dir (fs:$fileDate db:$fileDateCache<br/>");
 				$dirUpdated = TRUE;
 				$dirDescr->read();
 				$description = $dir . "\n\n" . $dirDescr->getGlobalDescription();
+				$coverList = $dirDescr->getCover();
+				$cover = ($coverList==null ? null : join(",", $coverList));
 				
-				update($dir, "d", $description, $fileDate);
+				update($dir, "d", $description, $cover, $fileDate);
 			}
 			//else {
-			//	echo("update NOT necessary for $dir (fs:$fileDate db:$fileDateDb<br/>");
+			//	echo("update NOT necessary for $dir (fs:$fileDate db:$fileDateCache<br/>");
 				// nothing
 			//}
 		}
@@ -296,7 +296,9 @@ global $dont_show_dir, $stmtCheckUpdate, $fileDateCache;
 			$dirUpdated = TRUE;
 			$dirDescr->read();
 			$description = $dir . "\n\n" . $dirDescr->getGlobalDescription();
-			insert($dir, "d", $description, $fileDate);
+			$coverList = $dirDescr->getCover();
+			$cover = ($coverList==null ? null : join(",", $coverList));
+			insert($dir, "d", $description, $cover, $fileDate);
 		}
 	}
 	else {
@@ -343,23 +345,20 @@ global $fileDateCache;
 	}
 }
 
-function getDbFileDate($name) {
-global $stmtCheckUpdate;
+function getFileDateFromCacheAndUnset($name) {
+global $updateMode, $fileDateCache;
 
-	if($stmtCheckUpdate == null) {
+	if($updateMode == false) {
 		return null;
 	}
 
-	$stmtCheckUpdate->bindValue(':name', $name);
-	$results = $stmtCheckUpdate->execute();
-	$fileDateDb = null;
-	//error_log("checking date of $name");
-	if ($row = $results->fetchArray()) {
-		$fileDateDb = $row["fd"];
-		//error_log("found $fileDateDb");
+	$fileDate = null;
+	if(isset($fileDateCache[$fileName])) {
+		$fileDate = $fileDateCache[$fileName];
+		unset($fileDateCache[$fileName]);
 	}
-	//error_log("fileDateDb=$fileDateDb");
-	return $fileDateDb;
+	
+	return $fileDate;
 }
 
 $nbInsert = 0;
