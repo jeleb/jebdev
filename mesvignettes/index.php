@@ -67,6 +67,12 @@ var restartDirImgLoadWhenBottomNear = 500;
 /* prefixe pour afficher les images directement */
 var imageRedirectPrefix = "mesvignettes/image.php?sourceimg=";
 
+/* filtre les répertoires et les images directement quand on appuie sur une touche */
+var dynamicallyFilterAnyKeyPress = true;
+
+/* delai minimum entre deux filtres, en millisecondes */
+var minimumDelaiBetweenFilter = 200;
+
 function opacityOnMouseOver(e) {
 	e.style.opacity = opacityOver;
 }
@@ -138,13 +144,41 @@ function initImageLoadedCount() {
 
 }
 
-function onFilterKeyPress(evt) {
-	if(evt.keyCode == 13) {
+var lastFilterDate = null;
+var lastFilter = null;
+function onFilterKeyUp(evt) {
+	if((dynamicallyFilterAnyKeyPress && evt.keyCode != 9) || evt.keyCode == 13) {
+		var f1 = document.getElementById("filterInput").value;
+		if(lastFilter == f1) {
+			//console.log("defait fait '"+f1+"'");
+			return;
+		}
+	
+		var d = Date.now();
+		if(lastFilterDate != null && lastFilterDate+minimumDelaiBetweenFilter > d) {
+			//console.log("skip '"+document.getElementById("filterInput").value+"' last='"+lastFilter+"' d="+d+" lastFilterDate="+lastFilterDate+" dd="+(lastFilterDate+minimumDelaiBetweenFilter));
+			setTimeout(function() {
+				 var f2 = document.getElementById("filterInput").value;
+				 if(lastFilter != null && lastFilter!=f2) {
+					
+					 //console.log("finish '"+f2+"' d="+d+" lastFilterDate="+lastFilterDate+" dd="+(lastFilterDate+minimumDelaiBetweenFilter));
+					 lastFilter = f2;
+					 lastFilterDate = d;
+					 loadDirEntries();	
+				 }
+				 else {
+					 //console.log("finish canceled lastFilter='"+lastFilter+"' f2='"+f2+"' d="+d+" lastFilterDate="+lastFilterDate+" dd="+(lastFilterDate+minimumDelaiBetweenFilter));
+				 }
+			  }, minimumDelaiBetweenFilter);
+			  
+			return;
+		}
+	
+		//console.log("go '"+document.getElementById("filterInput").value+"' d="+d+" lastFilterDate="+lastFilterDate+" dd="+(lastFilterDate+minimumDelaiBetweenFilter));
+		lastFilter = f1;
+		lastFilterDate = d;
 		loadDirEntries();
 	}
-	/* todo : if(evt.keyCode != 9) {
-		loadDirEntries();
-	}*/
 }
 
 function onFilterCancel() {
@@ -1129,7 +1163,7 @@ window.onresize = function(event) {
 		<a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a>
 		<br/>
 
-		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" onkeypress="onFilterKeyPress(event);" onkeydown="event.stopPropagation();"/>
+		<input id="filterInput" type="text" style="vertical-align: middle;width:100px;font-size:12px;background-color:white;opacity:0.3" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" onkeyup="onFilterKeyUp(event);" onkeydown="event.stopPropagation();"/>
 		<img src="mesvignettes/close.png" style="vertical-align: middle;opacity:0.3" onmouseover="opacityOnMouseOver(this);" onmouseout="opacityOnMouseOut(this);" onclick="onFilterCancel();return false;"/>
 		<br/>
 
