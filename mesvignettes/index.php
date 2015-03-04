@@ -758,10 +758,12 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 	var dirNameCanonical = getCanonicalPath(dirName);
 	
 	var tr = null;
+	var topLeftCorner = false;
 	if(tableDir.childNodes == null ||
 		tableDir.childNodes.length==0) {
 		tr = document.createElement("TR");
 		tableDir.appendChild(tr);
+	    var topLeftCorner = true;
 	}
 	else {
 		var lastTr = tableDir.childNodes[tableDir.childNodes.length-1];
@@ -794,6 +796,7 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 	var stackDiv = document.createElement("Div");
 	stackDiv.style.position = "relative";
 	stackDiv.style.verticalAlign = "top";
+	stackDiv.style.width = (imageDirRawHeight)+"px";
 	//stackDiv.setAttribute("style", "position:relative;vertical-align:top;-webkit-border-radius:20px;border-radius:20px;");
 	
 	imageToLoadList.push( {
@@ -822,7 +825,9 @@ function showImageDirOne(dirName, dirDescription, dirCover) {
 				"height":null,
 				"className":null,
 				"status":null,
-				"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;", 
+				"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;"+(topLeftCorner?"":"top:-"+(imageDirRawHeight/2)+"px")+";left:0px;position:absolute;display:none;", 
+//				"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;top:-"+(imageDirRawHeight/2)+"px;left:0px;position:absolute;display:none;", 
+//				"style": "-webkit-border-radius:20px;border-radius:20px;border-width:0;left:0px;position:absolute;display:none;", 
 				"isdir":true,
 				"dirname":dirNameCanonical
 				} );
