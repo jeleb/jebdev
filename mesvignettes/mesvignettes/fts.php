@@ -169,14 +169,15 @@ global $stmtInsert, $nbInsert;
 }
 
 $nbUpdate = 0;
-function update($name, $type, $description, $fileDate) {
+function update($name, $type, $description, $cover, $fileDate) {
 global $stmtUpdate, $nbUpdate;
 	$nbUpdate++;
 
 	//error_log("update $name");
 
 	$stmtUpdate->bindValue(':name', $name);
-	$stmtUpdate->bindValue(':type', "d");
+	$stmtUpdate->bindValue(':type', $type);
+	$stmtUpdate->bindValue(':cover', $cover);
 	$stmtUpdate->bindValue(':description', $description);
 	$stmtUpdate->bindValue(':filedate', $fileDate);
 	$stmtUpdate->execute();

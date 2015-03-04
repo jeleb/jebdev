@@ -61,7 +61,6 @@ error_log("$img_cached_filename=$img_cached_filename");
 $img_date = filemtime($file_lookup_prefix."/".$urlt.$sourceimg);
 $img_cached = cache_check($img_cached_filename, $img_date);
 if($img_cached !== FALSE) {
-error_log("cache hit!");
   echo $img_cached;
   exit(0);
 }
@@ -129,14 +128,12 @@ $grey = imagecolorallocate($im, 128, 128, 128);
 $black = imagecolorallocate($im, 0, 0, 0);
 //imagefilledrectangle($im, 0, 0, 399, 29, $white);
 if($imxz == NULL) {
-	error_log("1");
 	$fontsize = 16;
 	$y = ($hauteur-$fontsize)/2;
 	imagettftext($im, $fontsize, 0, 10, $y, $white, $font, $dirname);
 	imagettftext($im, $fontsize, 0, 11, $y+1, $grey, $font, $dirname);
 }
 else {
-	error_log("1");
 	$fontsize = 16;
 	imagettftext($im, $fontsize, 0, 10, 10+$fontsize, $white, $font, $dirname);
 	imagettftext($im, $fontsize, 0, 11, 11+$fontsize, $black, $font, $dirname);
