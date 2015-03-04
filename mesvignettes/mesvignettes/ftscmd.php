@@ -25,14 +25,22 @@ echo("cmd : $cmd <br/>");
 switch($cmd) {
 	case "recreate" :
 		echo("recreating index ...<br/>");
+		//flush();
+		//ob_flush();
+		ob_implicit_flush(true);
+		ob_end_flush();
 		fts_recreate_index();
 		echo("index recreated<br/>");
+		displayDbStatus();
 		break;
 		
 	case "update" :
 		echo("updating index ...<br/>");
+		ob_implicit_flush(true);
+		ob_end_flush();
 		fts_update_index();
 		echo("index updated ...<br/>");
+		displayDbStatus();
 		break;
 		
 	case "rq": 

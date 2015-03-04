@@ -9,7 +9,7 @@ $updateMode = false;
 $fileDateCache = array();
 
 function fts_recreate_index() {
-global $db, $fts_sqlite_db_filname, $file_lookup_prefix;
+global $db, $fts_sqlite_db_filname, $file_lookup_prefix, $updateMode;
 	set_time_limit(600) ; // todo trouver une autre solution pour le timeout
 
 	$db = new SQLite3($fts_sqlite_db_filname);
@@ -146,14 +146,16 @@ global $db, $fileDateCache;
 	$results = $db->query("SELECT name n, fileDate fd FROM entry");
 	while ($row = $results->fetchArray()) {
 		//var_dump($row);
-		//echo("load  ".$row["n"]." ".$row["fd"]." <br/>");
+		//error_log("load  ".$row["n"]." ".$row["fd"]." <br/>");
 		$fileDateCache[$row["n"]] = $row["fd"];
 	}
 
 }
 
+$nbInsert = 0;
 function insert($name, $type, $description, $cover, $fileDate) {
-global $stmtInsert;
+global $stmtInsert, $nbInsert;
+	$nbInsert++;
 
 	//error_log("insert $name $type");
 
@@ -166,8 +168,10 @@ global $stmtInsert;
 	commitSometime();
 }
 
+$nbUpdate = 0;
 function update($name, $type, $description, $fileDate) {
-global $stmtUpdate;
+global $stmtUpdate, $nbUpdate;
+	$nbUpdate++;
 
 	//error_log("update $name");
 
@@ -179,14 +183,24 @@ global $stmtUpdate;
 	commitSometime();
 }
 
+$nbDelete = 0;
 function delete($name) {
-global $stmtDelete;
+global $stmtDelete, $nbDelete;
+	$nbDelete++;
 
 	//error_log("delete $name");
 
 	$stmtDelete->bindValue(':name', $name);
 	$stmtDelete->execute();
 	commitSometime();
+}
+
+function displayDbStatus() {
+global $nbInsert, $nbUpdate, $nbDelete;
+
+	echo("$nbInsert insert(s) <br/>");
+	echo("$nbUpdate udpate(s) <br/>");
+	echo("$nbDelete delete(s) <br/>");
 }
 
 function getDescriptionExif($fullFileName) {
@@ -216,7 +230,6 @@ function getDescriptionExif($fullFileName) {
 }
 
 function fts_index_img($fullFileName, $fileName, $description, $hasExif, $forceUpdate) {
-global $fileDateCache;
 
 	//set_time_limit(30) ;
 	$descriptionExif = "";
@@ -229,19 +242,19 @@ global $fileDateCache;
 	
 	
 	// quand on recrée l'index pas d'accès à la base ci-dessous car le statement est null
-	$fileDateCache = getFileDateFromCacheAndUnset($fileName);
+	$fileDateCached = getFileDateFromCacheAndUnset($fileName);
 	
 		
-	if($fileDateCache != null) {
+	if($fileDateCached != null) {
 		if($forceUpdate == TRUE) {
-		    error_log("update because forceUpdate==TRUE");
+		    //error_log("update because forceUpdate==TRUE");
 			if($hasExif) {
 				$description = $description."\n".getDescriptionExif($fullFileName);
 			}
 			update($fileName, "f", $description, null, $fileDate);
 		}
-		else if($fileDateCache < $fileDate) {
-		    error_log("update because $fileDateCache < $fileDate");
+		else if($fileDateCached < $fileDate) {
+		    //error_log("update because fileDateCached=$fileDateCached < fileDate$fileDate");
 			if($hasExif) {
 				$description = $description."\n".getDescriptionExif($fullFileName);
 			}
@@ -249,7 +262,7 @@ global $fileDateCache;
 	    }
 	}
 	else {
-		//error_log("insert because $forceUpdate $fileDateCache $fileDate");
+		error_log("insert because forceUpdate=$forceUpdate fileDateCached=$fileDateCached fileDate=$fileDate");
 		if($hasExif) {
 			$description = $description."\n".getDescriptionExif($fullFileName);
 		}
@@ -258,7 +271,7 @@ global $fileDateCache;
 }
 
 function fts_index_dir($fullDirName, $dir) {
-global $dont_show_dir, $fileDateCache;
+global $dont_show_dir;
 	//echo ("fts_index_dir $fullDirName <br/>");
 	if($dir == $dont_show_dir) {
 		return;
@@ -274,11 +287,11 @@ global $dont_show_dir, $fileDateCache;
 			$fileDate = null;
 		}
 		
-		$fileDateCache = getFileDateFromCacheAndUnset($dir);
+		$fileDateCached = getFileDateFromCacheAndUnset($dir);
 
-		if($fileDateCache != null) {
-			if($fileDateCache < $fileDate) {
-				echo("update necessary for $dir (fs:$fileDate db:$fileDateCache<br/>");
+		if($fileDateCached != null) {
+			if($fileDateCached < $fileDate) {
+				echo("update necessary for $dir (fs:$fileDate cache:$fileDateCached<br/>");
 				$dirUpdated = TRUE;
 				$dirDescr->read();
 				$description = $dir . "\n\n" . $dirDescr->getGlobalDescription();
@@ -288,7 +301,7 @@ global $dont_show_dir, $fileDateCache;
 				update($dir, "d", $description, $cover, $fileDate);
 			}
 			//else {
-			//	echo("update NOT necessary for $dir (fs:$fileDate db:$fileDateCache<br/>");
+			//	echo("update NOT necessary for $dir (fs:$fileDate cache:$fileDateCaches<br/>");
 				// nothing
 			//}
 		}
@@ -345,10 +358,12 @@ global $fileDateCache;
 	}
 }
 
-function getFileDateFromCacheAndUnset($name) {
+function getFileDateFromCacheAndUnset($fileName) {
 global $updateMode, $fileDateCache;
+	
 
-	if($updateMode == false) {
+	if($updateMode) {
+		//error_log("not update mode");
 		return null;
 	}
 
@@ -361,11 +376,14 @@ global $updateMode, $fileDateCache;
 	return $fileDate;
 }
 
-$nbInsert = 0;
+$nbToCommit = 0;
 function commitSometime() {
-	global $db, $nbInsert;
-	$nbInsert ++;
-	if($nbInsert%1000 == 0) {
+	global $db, $nbToCommit;
+	$nbToCommit ++;
+	if($nbToCommit%4000 == 0) {
+		echo("commit $nbToCommit <br/>");
+		//flush();
+		//ob_flush();
 		$db->exec("COMMIT");
 		$db->exec("BEGIN TRANSACTION");
 	}
