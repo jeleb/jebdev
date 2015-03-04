@@ -2,11 +2,13 @@
 include "common.php";
 include "cache.php";
 
-$dir=strtoupper($_GET["dir"]);
-$largeur=strtoupper($_GET["largeur"]);
-$hauteur=strtoupper($_GET["hauteur"]);
-$cadrak = "0";
+$dir=$_GET["dir"];
+$largeur=$_GET["largeur"];
+$hauteur=$_GET["hauteur"];
 $cover = getWithDefault($_GET, "cover", null);
+
+$font = "fonts/LiberationMono-Bold.ttf";
+//$font = "arialbd.ttf";
 
 // taille des bord arrondis (pour l'instant, ils sont juste coupés)
 //$border_rounded_radius = 15;
@@ -55,9 +57,11 @@ else {
 }
 
 $img_cached_filename = cache_get_filename("dir_".$urlt.$sourceimg);
+error_log("$img_cached_filename=$img_cached_filename");
 $img_date = filemtime($file_lookup_prefix."/".$urlt.$sourceimg);
 $img_cached = cache_check($img_cached_filename, $img_date);
 if($img_cached !== FALSE) {
+error_log("cache hit!");
   echo $img_cached;
   exit(0);
 }
@@ -102,14 +106,10 @@ $pos_src_x=0;
 $pos_src_y=0;
 $posixe=0;
 $posigrek=0;
-if($cadrak=='1'){
-	$largeur=$largeur-2;
-	$hauteur=$hauteur-2;
-	$posixe='1';
-	$posigrek='1';
-}
-else{
 	
+
+/* ### On colle et on redimensionne l'image sur la vignette ### */
+if($imxz != NULL) {
 	if($largeuro*$hauteur > $largeur*$hauteuro) {
 		$pos_src_x = ($largeuro - $largeur*$hauteuro/$hauteur)/2;
 		$largeuro = $largeur*$hauteuro/$hauteur;
@@ -118,10 +118,6 @@ else{
 		$pos_src_y = ($hauteuro - $largeuro*$hauteur/$largeur)/2;
 		$hauteuro = $largeuro*$hauteur/$largeur;
 	}
-}
-
-/* ### On colle et on redimensionne l'image sur la vignette ### */
-if($imxz != NULL) {
 	ImageCopyResampled($im,$imxz,$posixe,$posigrek,$pos_src_x,$pos_src_y,$largeur,$hauteur,$largeuro,$hauteuro);
 }
 
@@ -133,15 +129,17 @@ $grey = imagecolorallocate($im, 128, 128, 128);
 $black = imagecolorallocate($im, 0, 0, 0);
 //imagefilledrectangle($im, 0, 0, 399, 29, $white);
 if($imxz == NULL) {
+	error_log("1");
 	$fontsize = 16;
 	$y = ($hauteur-$fontsize)/2;
-	imagettftext($im, $fontsize, 0, 10, $y, $white, 'arialbd.ttf', $dirname);
-	imagettftext($im, $fontsize, 0, 11, $y+1, $grey, 'arialbd.ttf', $dirname);
+	imagettftext($im, $fontsize, 0, 10, $y, $white, $font, $dirname);
+	imagettftext($im, $fontsize, 0, 11, $y+1, $grey, $font, $dirname);
 }
 else {
+	error_log("1");
 	$fontsize = 16;
-	imagettftext($im, $fontsize, 0, 10, 10+$fontsize, $white, 'arialbd.ttf', $dirname);
-	imagettftext($im, $fontsize, 0, 11, 11+$fontsize, $black, 'arialbd.ttf', $dirname);
+	imagettftext($im, $fontsize, 0, 10, 10+$fontsize, $white, $font, $dirname);
+	imagettftext($im, $fontsize, 0, 11, 11+$fontsize, $black, $font, $dirname);
 }
 
 
