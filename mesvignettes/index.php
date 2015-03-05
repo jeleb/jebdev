@@ -33,7 +33,7 @@ var imageDirRawHeight = 270;
 var nbDirColumns='3';
 
 /* prefix de l'id des div qui contiennent les exifs complets */
-var exifIdPrefix = "image_exif_all_";
+//var exifIdPrefix = "image_exif_all_";
 
 /* taille des images telechargées (resizée en php) */
 var imageRawHeight = 1100;
@@ -474,7 +474,7 @@ function showCurrentDir() {
 	var divCurrentDir = document.getElementById("divCurrentDir");
 	var style = "text-decoration:none;font-family:Verdana;font-size:100%;font-weight:bold;color:white;opacity:"+opacityOut+";";
 	
-	var html = "<a href=\"\" onclick=\"changeCurrentDir('', false)\" style=\""+style+"\" onmouseover=\"this.style.backgroundColor='black';opacityOnMouseOver(this);\" onmouseout=\"this.style.backgroundColor='transparent';opacityOnMouseOut(this);\">/</a> ";
+	var html = "<a href=\"\" onclick=\"changeCurrentDir('', false);return false;\" style=\""+style+"\" onmouseover=\"this.style.backgroundColor='black';opacityOnMouseOver(this);\" onmouseout=\"this.style.backgroundColor='transparent';opacityOnMouseOut(this);\">/</a> ";
 
 	var changeDirName = "";
 	var first = true;
@@ -1163,7 +1163,7 @@ window.onresize = function(event) {
 	</a>
 	
 	<div id="divFilters" style="display:block;">
-		<a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a>
+		<!--a href="" onclick="toggleExifAll();return false;" style="font:Arial;color:grey;font-size:8px;">EXIF</a-->
 		&nbsp;
 		<a href="" onclick="toggleDescription();return false;" style="font:Arial;color:grey;font-size:8px;" title="">DESCR.</a>
 		<br/>
